@@ -1,51 +1,66 @@
 #include<bits/stdc++.h>
 #include"../include/tile.h"
+#include"../include/map.h"
 #include"../include/character.h"
-#include <typeinfo>
+#include "../include/player.h" 
+#include "../include/items.h" 
+#include "../include/game.h" 
 
 using namespace std;
 
-void fabricateMap(const std::string& filename, vector<vector<Tile>>& map) {
-    // 1. Create an input file stream object
-    std::ifstream inputFile(filename);
-
-    // 2. Check if the file was successfully opened
-    if (!inputFile.is_open()) {
-        std::cerr << "Error: Could not open the file " << filename << std::endl;
-        return;
-    }
-
-    string line;
-    int row = 0;
-
-    while (std::getline(inputFile, line) && row < map.size()) {
-        int col = 0; // Reset the column for each new line
-        for (int i = 0; i < line.length() && col < map[row].size(); i++) {
-            if (line[i] == '{') {
-                string tileChar = "";
-                i++; // Move past the '{'
-                while (i < line.length() && line[i] != '}') {
-                    tileChar += line[i];
-                    i++;
-                }
-                map[row][col] = Tile(tileChar);
-            } else {
-                string tileChar = "";
-                tileChar += line[i];
-                map[row][col] = Tile(tileChar);
-            }
-            col++; // Move to the next column in our map
-        }
-        row++; // Move to the next row after the line is processed
-    }
-
-    // 4. The file is automatically closed when 'inputFile' goes out of scope.
-}
-
 int main() {
-    // Assume you have a file named "story.txt" in the same directory.
-    vector<vector<Tile>> map(40, vector<Tile>(156));
-    fabricateMap("data/map.txt",map);
+    Game world;
+    world.display_welcome_message();
+
+    string player_name;
+    cout << "Enter your character's name: ";
+    getline(cin, player_name); 
+
+    int choice = 0;
+    PlayerType selected_type;
+
+    while (true) {
+        cout << "\nChoose your class:\n";
+        cout << "  1. Swordsman\n";
+        cout << "  2. Archer\n";
+        cout << "  3. Mage\n";
+        cout << "Enter your choice (1-3): ";
+        
+        cin >> choice;
+
+        if (cin.fail()) {
+            cout << "\nInvalid input. Please enter a number (1, 2, or 3).\n";
+            cin.clear(); 
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+            continue; // Ask again
+        }
+        
+        if (choice >= 1 && choice <= 3) {
+            break; 
+        } else {
+            cout << "\nInvalid choice. Please select 1, 2, or 3.\n";
+        }
+    }
+
+    switch (choice) {
+        case 1:
+            selected_type = PlayerType::Swordsman;
+            break;
+        case 2:
+            selected_type = PlayerType::Archer;
+            break;
+        case 3:
+            selected_type = PlayerType::Mage;
+            break;
+    }
+
+    Player player(player_name, selected_type);
     
+    cout << "\nYour character has been created!\n";
+    player.show_details();
+
+    world.game_loop(player);
+
+    cout << "\nThank you for playing!\n";
     return 0;
 }

@@ -99,20 +99,20 @@ void Tile::setIsWalkable() {
     m_isWalkable = true;
 }
 
-// void Player::move(int x, int y, Tile** map) {
+// void Player::move(int x, int y, Map& map) {
 //     int newx=curx+x;
 //     int newy=cury+y;
-//     if(map[newy][newx].getCharacter() != nullptr) {
-//         int k=startCombat(myPlayer, map[newy][newx].getCharacter());
+//     if(map->getTileAt(newy,newx)->getCharacter() != nullptr) {
+//         int k=startCombat(myPlayer, map->getTileAt(newy,newx)->getCharacter());
 //         if(k==0){
 //             //end game
 //             cout << "You have been defeated!"<<endl;
 //         }
 //         else if(k==1){
 //             cout<<"You defeated the enemy!"<<endl;
-//             map[newy][newx].setisWalkable();
-//             map[cury][curx].setCharacter(nullptr);
-//             map[newy][newx].setCharacter(this);
+//             map->getTileAt(newy,newx)->setisWalkable();
+//             map->getTileAt(cury,curx)->setCharacter(nullptr);
+//             map->getTileAt(newy,newx)->setCharacter(this);
 //             curx=newx;
 //             cury=newy;
 //         }
@@ -120,26 +120,26 @@ void Tile::setIsWalkable() {
 //             cout<<"You fled the battle!"<<endl;
 //         }
 //     } 
-//     else if(map[newy][newx].getItem()) {
+//     else if(map->getTileAt(newy,newx)->getItem()) {
 //         cout << "You found an item!" << endl;
-//         int k=pickItem(myPlayer, map[newy][newx].getItem());
+//         int k=pickItem(myPlayer, map->getTileAt(newy,newx)->getItem());
 //         if(k==1){
 //             cout << "You picked up the item!" << endl;
-//             map[newy][newx].setItem(nullptr);
-//             map[cury][curx].setCharacter(nullptr);
-//             map[newy][newx].setCharacter(this);
+//             map->getTileAt(newy,newx)->setItem(nullptr);
+//             map->getTileAt(cury,curx)->setCharacter(nullptr);
+//             map->getTileAt(newy,newx)->setCharacter(this);
 //             curx=newx;
 //             cury=newy;
 //         } else {
 //             cout << "You didn't pick up the item!" << endl;
 //         }
 //     } 
-//     else if(!map[newy][newx].getBounds()) {
+//     else if(!map->getTileAt(newy,newx)->getBounds()) {
 //         cout << "You must not venture outside the forest, the devourer is always looking!" << endl;
 //     } 
-//     else if(map[newy][newx].getIsWalkable() && map[newy][newx].getBounds()) {
-//         map[cury][curx].setCharacter(nullptr);
-//         map[newy][newx].setCharacter(this);
+//     else if(map->getTileAt(newy,newx)->getIsWalkable() && map->getTileAt(newy,newx)->getBounds()) {
+//         map->getTileAt(cury,curx)->setCharacter(nullptr);
+//         map->getTileAt(newy,newx)->setCharacter(this);
 //         curx=newx;
 //         cury=newy;
 //     }

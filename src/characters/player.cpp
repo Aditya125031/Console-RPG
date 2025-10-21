@@ -29,7 +29,10 @@ Player::Player(std::string name, PlayerType type)
 
     std::cout << "A new " << get_type_string() << " named " << this->name << " has arrived!" << std::endl;
 }
-
+void Player::move(int dx, int dy) {
+    this->coord_x += dx;
+    this->coord_y += dy;
+}
 std::string Player::get_type_string() const {
     switch (this->type) {
         case PlayerType::Swordsman: return "Swordsman";
@@ -50,20 +53,50 @@ void Player::show_details() const {
               << "---------------------\n";
 }
 
-void Player::special_move() {
+// Note: 'Character' with a capital 'C'
+void Player::special_move(Character& enemy) 
+{
     std::cout << this->name << " uses their special move: ";
+    int damage = 0;
     switch (this->type) {
         case PlayerType::Swordsman:
-            std::cout << "'Whirlwind Slash'!" << std::endl;
-            this->stamina -= 25;
+            if (this->stamina >= 25) {
+                std::cout << "'Whirlwind Slash'!" << std::endl;
+                damage = this->attackPower * 2.5; // Example: 2.5x damage
+                this->stamina -= 25;
+            } else {
+                std::cout << "Not enough stamina!" << std::endl;
+            }
             break;
+
         case PlayerType::Archer:
-            std::cout << "'Piercing Arrow'!" << std::endl;
-            this->stamina -= 20;
+            if (this->stamina >= 20) {
+                std::cout << "'Piercing Arrow'!" << std::endl;
+                damage = this->attackPower * 3; 
+                this->stamina -= 20;
+            } else {
+                std::cout << "Not enough stamina!" << std::endl;
+            }
             break;
+
         case PlayerType::Mage:
-            std::cout << "'Fireball'!" << std::endl;
-            this->mana -= 30;
+            if (this->mana >= 30) {
+                std::cout << "'Fireball'!" << std::endl;
+                damage = 40;
+                this->mana -= 30;
+            } else {
+                std::cout << "Not enough mana!" << std::endl;
+            }
             break;
     }
+    if (damage > 0) {
+        enemy.take_damage(damage);
+    }
+}
+int Player::get_x() const {
+    return this->coord_x;
+}
+
+int Player::get_y() const {
+    return this->coord_y;
 }

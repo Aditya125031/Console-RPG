@@ -6,14 +6,6 @@ Character::Character(std::string name, int health, int attackPower)
     : name(name), health(health), maxHealth(health), attackPower(attackPower) {
 }
 
-void Character::take_damage(int damage) {
-    this->health -= damage;
-    if (this->health < 0) {
-        this->health = 0;
-    }
-    std::cout << this->name << " takes " << damage << " damage! Health is now " << this->health << ".\n";
-}
-
 bool Character::isAlive() const {
     return this->health > 0;
 }
@@ -23,7 +15,18 @@ void Character::attack(Character& target) {
     target.take_damage(this->attackPower);
 }
 
-
+void Character::take_damage(int damage) {
+    this->health -= damage;
+    std::cout << this->name << " takes " << damage << " damage!" << std::endl;
+    
+    if (this->health < 0) {
+        this->health = 0;
+    }
+    
+    if (!isAlive()) {
+        std::cout << this->name << " has been defeated!" << std::endl;
+    }
+}
 std::string Character::get_name() const {
     return this->name;
 }

@@ -3,7 +3,8 @@
 #define MAP_H
 
 #include <bits/stdc++.h>
-#include "Tile.h" // Include your Tile class definition
+#include "tile.h" // Include your Tile class definition
+#include "player.h"
 using namespace std;
 
 class Map {
@@ -17,7 +18,7 @@ public:
 
     // Renders the current map state to the console.
     void render() const;
-
+    std::vector<std::string> get_minimap_view(Player& player, int view_width, int view_height);
     // ## Getters ##
     // Safely gets a pointer to the tile at a specific coordinate.
     Tile* getTileAt(int x, int y);

@@ -1,6 +1,7 @@
 
-#include "character.h" 
+#include "../include/character.h" 
 #include <iostream>
+using namespace std;
 
 Character::Character(std::string name, int health, int attackPower) 
     : name(name), health(health), maxHealth(health), attackPower(attackPower) {

@@ -192,7 +192,7 @@ void Game::explore_forest(Player& player, Map& map) {
 }
 
 void Game::game_loop(Player& player) {
-    Map stage1(156, 40, "data/map.txt");
+    Map stage1(156, 40, "../data/map.txt");
 
     std::cout << "\n--- You find your way to a nearby village to rest. ---\n";
     bool isGameRunning = true;

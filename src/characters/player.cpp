@@ -1,5 +1,5 @@
 // Player.cpp
-#include "player.h"
+#include "../include/player.h"
 #include <iostream> 
 Player::Player(std::string name, PlayerType type)
     : Character(name, 100, 10), type(type) {

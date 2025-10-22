@@ -35,7 +35,7 @@ class Tile{
         bool getBounds();
 
     private:
-        // ## Attributes ##
+        // ## Attributes #
         // These are kept private to enforce encapsulation. They can only be
         // accessed or modified through the public getter and setter methods.
         char m_displayChar;          // The character for rendering (e.g., '.', '#')

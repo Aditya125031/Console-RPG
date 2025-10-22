@@ -1,10 +1,15 @@
-#pragma once
-#include "enemy.h"
+#ifndef GOBLIN_H
+#define GOBLIN_H
+#include "enemy.h" 
+#include <string>
+#include <vector>
 
 class Goblin : public Enemy {
 public:
-    Goblin(); 
+    Goblin(std::string name, int health, int attackPower);
 
-    void specialAbility(Character& target) override;
-    void triggerDialogue() const override;
+    // We MUST provide implementations for the pure virtual functions
+    virtual void specialAbility(Character& target) override;
+    virtual void triggerDialogue() const override;
 };
+#endif

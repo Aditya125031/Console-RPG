@@ -13,6 +13,7 @@ enum class PlayerType {
 class Player : public Character {
 private:
     PlayerType type;
+protected:
     int mana;
     int stamina;
 

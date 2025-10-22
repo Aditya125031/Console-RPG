@@ -15,6 +15,7 @@
 #include "../include/character.h"
 #include "../include/tile.h"
 #include "../include/items.h"
+#include "../include/goblin.h"
 #include "../include/colors.h" // You included this, which is great!
 
 // --- CONSTANTS ---
@@ -35,7 +36,7 @@ void clear_screen() {
 
 // Handles a single combat encounter
 // CORRECTED: Changed the parameter name from 'enemy' to 'target' for clarity
-void run_combat(Player& hero, enemy& target) {
+void run_combat(Player& hero, Enemy& target) {
     clear_screen(); // Clear the map screen for combat
     std::cout << "\n--- A wild " << target.get_name() << " appears! ---\n";
 
@@ -136,8 +137,8 @@ void Game::explore_forest(Player& player, Map& map) {
     add_log_message("You entered the forest.");
     
     // NOTE: In a real game, you would have a list of enemies loaded from the map
-    enemy goblin("Goblin", 50, 8, 7, 7);
-
+    Goblin goblin("Grug", 50, 8);
+    
     bool inForest = true;
     while (inForest) {
         display_dashboard(player, map);
@@ -186,15 +187,6 @@ void Game::explore_forest(Player& player, Map& map) {
                 break;
             default:
                 add_log_message("Invalid key pressed.");
-        }
-
-        // Check for combat after moving
-        if (player.get_x() == goblin.get_x() && player.get_y() == goblin.get_y() && goblin.isAlive()) {
-             add_log_message("A Goblin attacks!");
-             run_combat(player, goblin);
-             if (!player.isAlive()) {
-                 inForest = false; // Player died, leave the forest
-             }
         }
     }
 }

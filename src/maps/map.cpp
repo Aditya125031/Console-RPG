@@ -249,7 +249,7 @@ void Map::render() {
     }
 
     // --- 4. Add the Bottom Border ---
-    map_output += "  ╚" + h_line + "╝\n";
+    map_output += "  ╚" + h_line + "╝\n" ;
 
     // --- 5. Print the complete map ---
     std::cout << map_output;

@@ -1,66 +1,106 @@
 #include <bits/stdc++.h>
 #include "../include/tile.h"
-#include "../include/character.h" // Include the full definitions here
-#include "../include/items.h"
+#include "../include/player.h"
+#include "../include/colors.h"
 using namespace std;
 
+
+Tile::Tile() {}
+
 // Constructor implementation
-Tile::Tile(string displayChar)
+Tile::Tile(Player& player, string displayChar, int x, int y)
     : m_isWalkable(true), m_tileCode(0),
-      m_characterOnTile(nullptr) // Always initialize pointers to nullptr
+      m_characterOnTile(nullptr), outOfBounds(false) // Always initialize pointers to nullptr
     //   ,m_itemOnTile(nullptr), m_reqQuest(nullptr) 
-    {
+    { 
         if(displayChar=="."){
-            m_displayChar = '.';
+            //m_miniMapDisplayChar+=Color::BG_GRAY;
+            //m_mapDisplayChar+=Color::BG_GRAY;
+            m_mapDisplayChar += ".";
+            m_miniMapDisplayChar += ".";
+            //m_miniMapDisplayChar+=Color::RESET;
+            //m_mapDisplayChar+=Color::RESET;
             m_isWalkable = true;
         }
-        else if(displayChar=="L"){
-            m_displayChar = 'L';
+        else if(displayChar=="W"){
+            m_miniMapDisplayChar+=Color::FG_BRIGHT_BLUE;
+            m_mapDisplayChar+=Color::FG_BRIGHT_BLUE;
+            m_mapDisplayChar += "≈";
+            m_miniMapDisplayChar += "≈";
+            m_miniMapDisplayChar+=Color::RESET;
+            m_mapDisplayChar+=Color::RESET;
+            m_isWalkable = false;
+        }
+        else if(displayChar=="T"){
+            m_miniMapDisplayChar+=Color::FG_GREEN;
+            m_mapDisplayChar+=Color::FG_GREEN;
+            m_mapDisplayChar += "♣";
+            m_miniMapDisplayChar += "♣";
+            m_miniMapDisplayChar+=Color::RESET;
+            m_mapDisplayChar+=Color::RESET;
             m_isWalkable = false;
         }
         else if(displayChar=="P"){
             m_isWalkable = true;
-            m_displayChar = 'P';
-            //m_characterOnTile = new Player();
+            m_miniMapDisplayChar+=Color::FG_YELLOW;
+            m_mapDisplayChar+=Color::FG_YELLOW;
+            m_mapDisplayChar += "♞";
+            m_miniMapDisplayChar += "♞";
+            m_miniMapDisplayChar+=Color::RESET;
+            m_mapDisplayChar+=Color::RESET;
+            Character* playerPtr = &player;
+            m_characterOnTile = playerPtr;
+            player.set_x(x);
+            player.set_y(y);
         }
         else if(displayChar=="G"){
-            m_displayChar = 'G';
-            //m_characterOnTile = new Goblin();
+            m_miniMapDisplayChar+=Color::FG_RED;
+            m_mapDisplayChar = ".";
+            m_miniMapDisplayChar += "§";
+            m_miniMapDisplayChar+=Color::RESET;
+            Character* goblin = new Goblin("Goblin", 50, 5);
+            m_characterOnTile = goblin;
             m_isWalkable = false;
         }
         // else if(displayChar=="QB1"){
         //     m_tileCode = 111;
         //     m_characterOnTile = new Boss();
-        //     m_displayChar = '.';
+        //     m_displayChar = 'Ö';
         //     m_reqQuest = new q2();
         //     m_isWalkable = true;
         // }
         else{
-            m_displayChar = '#';
-            m_isWalkable = true;
+            m_mapDisplayChar = "X";
+            m_miniMapDisplayChar = "X";
+            m_isWalkable = false;
         }
 
       }
 
 // Getter for the display character
-char Tile::getDisplayChar() const {
+string Tile::getMiniMapDisplayChar() {
     // if(m_reqQuest == nullptr || m_reqQuest->isCompleted()){
-    //     return m_displayChar;
+    //     return m_miniMapDisplayChar;
     // }
     // else{
     //     return '.';
     // }
-    return m_displayChar;
+    return m_miniMapDisplayChar;
 }
 
+string Tile::getMapDisplayChar() {
+    return m_mapDisplayChar;
+}
+
+
 // Getter for walkability
-bool Tile::getIsWalkable() const {
+bool Tile::getIsWalkable() {
     // A tile is not walkable if it's inherently a wall OR if a character is on it.
     return m_isWalkable;
 }
 
 // Getter for the character pointer
-Character* Tile::getCharacter() const {
+Character* Tile::getCharacter() {
     return m_characterOnTile;
 }
 
@@ -91,59 +131,22 @@ void Tile::setBounds(bool status) {
     outOfBounds = status;
 }
 
-void Tile::setDisplayChar() {
-    m_displayChar = '.';
+void Tile::setMiniMapDisplayChar(string displayChar) {
+    m_miniMapDisplayChar = displayChar;
 }
 
-void Tile::setIsWalkable() {
-    m_isWalkable = true;
+void Tile::setMapDisplayChar(string displayChar) {
+    m_mapDisplayChar = displayChar;
 }
 
-// void Player::move(int x, int y, Map& map) {
-//     int newx=curx+x;
-//     int newy=cury+y;
-//     if(map->getTileAt(newy,newx)->getCharacter() != nullptr) {
-//         int k=startCombat(myPlayer, map->getTileAt(newy,newx)->getCharacter());
-//         if(k==0){
-//             //end game
-//             cout << "You have been defeated!"<<endl;
-//         }
-//         else if(k==1){
-//             cout<<"You defeated the enemy!"<<endl;
-//             map->getTileAt(newy,newx)->setisWalkable();
-//             map->getTileAt(cury,curx)->setCharacter(nullptr);
-//             map->getTileAt(newy,newx)->setCharacter(this);
-//             curx=newx;
-//             cury=newy;
-//         }
-//         else if(k==2){
-//             cout<<"You fled the battle!"<<endl;
-//         }
-//     } 
-//     else if(map->getTileAt(newy,newx)->getItem()) {
-//         cout << "You found an item!" << endl;
-//         int k=pickItem(myPlayer, map->getTileAt(newy,newx)->getItem());
-//         if(k==1){
-//             cout << "You picked up the item!" << endl;
-//             map->getTileAt(newy,newx)->setItem(nullptr);
-//             map->getTileAt(cury,curx)->setCharacter(nullptr);
-//             map->getTileAt(newy,newx)->setCharacter(this);
-//             curx=newx;
-//             cury=newy;
-//         } else {
-//             cout << "You didn't pick up the item!" << endl;
-//         }
-//     } 
-//     else if(!map->getTileAt(newy,newx)->getBounds()) {
-//         cout << "You must not venture outside the forest, the devourer is always looking!" << endl;
-//     } 
-//     else if(map->getTileAt(newy,newx)->getIsWalkable() && map->getTileAt(newy,newx)->getBounds()) {
-//         map->getTileAt(cury,curx)->setCharacter(nullptr);
-//         map->getTileAt(newy,newx)->setCharacter(this);
-//         curx=newx;
-//         cury=newy;
-//     }
-//     else {
-//         cout << "You can't move there!" << endl;
-//     }
-// }
+void Tile::setIsWalkable(bool status) {
+    m_isWalkable = status;
+}
+
+bool Tile::getBounds() {
+    return outOfBounds;
+}
+
+void Tile::setTileCode(int code) {
+    m_tileCode = code;
+}

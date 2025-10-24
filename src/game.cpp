@@ -6,6 +6,11 @@
 #include <limits>
 #include <cstdlib> // Required for std::system
 #include <conio.h> // Required for _getch()
+#include <thread>  // Add this header at the top of your file
+#include <chrono>  // Add this header at the top of your file
+#include <windows.h>
+
+using namespace std;
 
 // Your project headers
 #include "../include/game.h"
@@ -32,6 +37,13 @@ void clear_screen() {
 #else
     std::system("clear");
 #endif
+}
+
+void getTDimensions(int& width, int& height) {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 }
 
 // Handles a single combat encounter
@@ -83,45 +95,34 @@ void Game::add_log_message(std::string message) {
 
 void Game::display_dashboard(Player& player, Map& map) {
     clear_screen();
-
+    int term_width = 0;
+    int term_height = 0;
+    getTDimensions(term_width, term_height);
+    string text = "========================== The Defeated ==========================\n";
+    int text_length = text.length();
+    int left_padding = std::max(0, (term_width - text_length) / 2);
+    std::string pad_str(left_padding, ' ');
     // Header
-    std::cout << "========================== C++ RPG ==========================\n";
-    std::cout << " Name: " << Color::CYAN << player.get_name() << Color::RESET
+    std::cout << pad_str << "========================== The Defeated ==========================\n";
+    std::cout << " Name: " << Color::FG_CYAN << player.get_name() << Color::RESET
               << " [" << player.get_type_string() << "]"
-              << "\t HP: " << Color::GREEN << player.get_health()
+              << "\t HP: " << Color::FG_GREEN << player.get_health()
               << " / " << player.get_max_health() << Color::RESET << "\n";
-    std::cout << "------------------------------------------------------------\n";
+    std::cout << "────────────────────────────────────────────────────────\n";
 
     // Middle Section (Minimap + Log)
-    int minimap_height = 11;
-    int minimap_width = 20;
-    std::vector<std::string> minimap = map.get_minimap_view(player, minimap_width, minimap_height);
-
-    for (int i = 0; i < minimap_height; ++i) {
-        // Print the minimap line
-        if (i < minimap.size()) {
-            std::cout << minimap[i];
-        } else {
-            std::cout << std::string(minimap_width * 2, ' ');
-        }
-        
-        // Print the event log line
-        std::cout << "   | ";
-        if (i < event_log.size()) {
-            std::cout << Color::GRAY << event_log[i] << Color::RESET;
-        }
-        std::cout << "\n";
-    }
+    int minimap_height = 15;
+    int minimap_width = 25;
+    map.get_minimap_view(player, minimap_width, minimap_height, event_log);
 
     // Footer
-    std::cout << "------------------------------------------------------------\n";
-    std::cout << " CONTROLS: (W/A/S/D) Move | (M) Full Map | (Q) Quit to Village\n";
-    std::cout << " Your Location: (" << player.get_x() << ", " << player.get_y() << ")\n";
+    std::cout << "\n\n CONTROLS: (W/A/S/D) Move | (M) Full Map | (Q) Quit to Village\n";
+    std::cout << " Your Location: (" << player.get_y() << ", " << player.get_x() << ")\n";
 }
 
 void Game::show_full_map(Map& map) {
     clear_screen();
-    std::cout << "--- FULL MAP --- (Press 'M' or 'Esc' to close)\n";
+    std::cout << "--- FULL MAP ---\n";
     map.render();
     std::cout << "\n(Press 'M' or 'Esc' to close)";
     
@@ -142,49 +143,36 @@ void Game::explore_forest(Player& player, Map& map) {
     bool inForest = true;
     while (inForest) {
         display_dashboard(player, map);
+        //cout << player.get_x() << " " << player.get_y() << endl;
 
         char input = _getch(); // Get input without waiting for Enter
 
         switch(input) {
             case 'w':
-                if (player.get_y() > 0) { // TODO: Check for walls
-                    player.move(0, -1);
-                    add_log_message("You moved north.");
-                } else {
-                    add_log_message("You can't go further north!");
-                }
+                add_log_message(player.move(0, -1,map));
                 break;
+
             case 's':
-                if (player.get_y() < map.getHeight() - 1) { // Boundary check
-                    player.move(0, 1);
-                    add_log_message("You moved south.");
-                } else {
-                    add_log_message("You can't go further south!");
-                }
+                add_log_message(player.move(0, 1, map));
                 break;
+
             case 'a':
-                if (player.get_x() > 0) {
-                    player.move(-1, 0);
-                    add_log_message("You moved west.");
-                } else {
-                    add_log_message("You can't go further west!");
-                }
+                add_log_message(player.move(-1, 0, map));
                 break;
+
             case 'd':
-                if (player.get_x() < map.getWidth() - 1) { // Boundary check
-                    player.move(1, 0);
-                    add_log_message("You moved east.");
-                } else {
-                    add_log_message("You can't go further east!");
-                }
+                add_log_message(player.move(1, 0, map));
                 break;
+
             case 'm':
                 show_full_map(map);
                 break;
+
             case 'q':
                 add_log_message("You return to the village.");
                 inForest = false;
                 break;
+                
             default:
                 add_log_message("Invalid key pressed.");
         }
@@ -192,7 +180,7 @@ void Game::explore_forest(Player& player, Map& map) {
 }
 
 void Game::game_loop(Player& player) {
-    Map stage1(156, 40, "../data/map.txt");
+    Map stage1(player, 151, 39, "../data/map.txt");
 
     std::cout << "\n--- You find your way to a nearby village to rest. ---\n";
     bool isGameRunning = true;

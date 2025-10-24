@@ -1,6 +1,8 @@
-#include "../include/enemy.h"
-enemy::enemy(std::string name, int health, int attackPower, int x, int y)
-    : Character(name, health, attackPower), coord_x(x), coord_y(y) 
+#include "enemy.h"
+using namespace std;
+
+Enemy::Enemy(std::string name, int health, int attackPower)
+    : Character(name, health, attackPower)
     {
 }
 

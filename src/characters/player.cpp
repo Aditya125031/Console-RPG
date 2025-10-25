@@ -19,18 +19,23 @@ Player::Player(std::string name, PlayerType type)
         case PlayerType::Archer:
             this->health = 100;
             this->attackPower = 12;
-            this->mana = 40;
+            this->max_mana = 40;
             this->stamina = 120;
             break;
 
         case PlayerType::Mage:
             this->health = 80;
             this->attackPower = 8;
-            this->mana = 150;
+            this->max_mana = 150;
             this->stamina = 50;
             break;
     }
+    this->mana = this->max_mana;
     this->maxHealth = this->health;
+    auto now = std::chrono::steady_clock::now();
+    this->normal_attack_ready = now;
+    this->special_attack_ready = now;
+    this->next_mana_regen = now;
 
     std::cout << "A new " << get_type_string() << " named " << this->name << " has arrived!" << std::endl;
 }
@@ -89,6 +94,53 @@ string Player::move(int x, int y, Map& map) {
         return "You can't move there!";
     }
     return "Achievement Unlocked! The Void!";
+}
+
+void Player::use_mana(int amount) {
+    this->max_mana -= amount;
+    if (this->mana < 0) {
+        this->mana = 0;
+    }
+}
+void Player::add_mana(int amount) {
+    this->mana += amount;
+    if (this->mana > this->max_mana) {
+        this->mana = this->max_mana;
+    }
+}
+void Player::modify_mana(int amount)
+{
+    this->max_mana+=amount;
+}
+
+void Player::update_mana_regen(std::chrono::steady_clock::time_point current_time) {
+    if (current_time >= this->next_mana_regen) {
+        add_mana(5); 
+        this->next_mana_regen = current_time + std::chrono::seconds(1);
+    }
+}
+
+int Player::get_mana() const {
+    return this->mana;
+}
+
+int Player::get_max_mana() const {
+    return this->max_mana;
+}
+
+void Player::modify_max_health(int amount) {
+    this->maxHealth += amount;
+    if (this->health > this->maxHealth) {
+        this->health = this->maxHealth;
+    }
+}
+
+// This is for potions, to add to CURRENT health
+void Player::add_health(int amount) {
+    this->health += amount;
+    if (this->health > this->maxHealth) {
+        this->health = this->maxHealth;
+    }
 }
 
 std::string Player::get_type_string() const {
@@ -157,6 +209,23 @@ int Player::get_x() const {
 
 int Player::get_y() const {
     return this->coord_y;
+}
+std::chrono::steady_clock::time_point Player::getNormalAttackReady() const {
+    return this->normal_attack_ready;
+}
+
+std::chrono::steady_clock::time_point Player::getSpecialAttackReady() const {
+    return this->special_attack_ready;
+}
+
+void Player::set_normal_attack_cooldown(float seconds) {
+    this->normal_attack_ready = std::chrono::steady_clock::now() + 
+        std::chrono::microseconds(static_cast<int>(seconds * 1000000));
+}
+
+void Player::set_special_attack_cooldown(float seconds) {
+    this->special_attack_ready = std::chrono::steady_clock::now() + 
+        std::chrono::microseconds(static_cast<int>(seconds * 2500000));
 }
 
 void Player::set_x(int a) {

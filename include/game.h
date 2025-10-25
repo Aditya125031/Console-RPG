@@ -12,6 +12,8 @@
 #include <conio.h>
 #include "player.h" 
 #include "map.h"
+#include <thread> 
+#include <chrono>
 using namespace std;
 
 class Game

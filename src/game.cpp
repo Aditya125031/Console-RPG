@@ -4,6 +4,7 @@
 #include <deque>
 #include<cmath>
 #include <limits>
+#include <chrono>
 #include <cstdlib> // Required for std::system
 #include <conio.h> // Required for _getch()
 #include <thread>  // Add this header at the top of your file
@@ -38,7 +39,35 @@ void clear_screen() {
     std::system("clear");
 #endif
 }
+void display_combat_ui(const Player& player, const Enemy& enemy) {
+    clear_screen();
+    auto now = std::chrono::steady_clock::now();
+    float normal_cd = std::chrono::duration<float>(player.getNormalAttackReady() - now).count();
+    float special_cd = std::chrono::duration<float>(player.getSpecialAttackReady() - now).count();
+    if (normal_cd < 0) normal_cd = 0.0f;
+    if (special_cd < 0) special_cd = 0.0f;
 
+    std::cout << "===================== BATTLE =====================\n";
+    
+    std::cout << " " << player.get_name() << " [" << player.get_type_string() << "]\n";
+    std::cout << " " << Color::GREEN << "HP:  " << player.get_health() << " / " << player.get_max_health() << Color::RESET << "\n";
+    std::cout << " " << Color::BLUE << "MANA:" << player.getMana() << " / " << player.getMaxMana() << Color::RESET << "\n";
+
+    std::cout << "\n " << Color::RED << enemy.get_name() << Color::RESET << "\n";
+    std::cout << " " << Color::RED << "HP:  " << enemy.get_health() << " / " << enemy.get_max_health() << Color::RESET << "\n";
+    
+    std::cout << "===================== ACTIONS ====================\n";
+    
+    std::cout << " (1) Normal Attack (10 Mana) | Ready in: ";
+    if (normal_cd == 0.0f) std::cout << Color::GREEN << "READY" << Color::RESET << "\n";
+    else std::cout << std::fixed << std::setprecision(1) << normal_cd << "s\n";
+    
+    std::cout << " (2) Special Move  (25 Mana) | Ready in: ";
+    if (special_cd == 0.0f) std::cout << Color::GREEN << "READY" << Color::RESET << "\n";
+    else std::cout << std::fixed << std::setprecision(1) << special_cd << "s\n";
+
+    std::cout << "==================================================\n";
+}
 void getTDimensions(int& width, int& height) {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -48,42 +77,80 @@ void getTDimensions(int& width, int& height) {
 
 // Handles a single combat encounter
 // CORRECTED: Changed the parameter name from 'enemy' to 'target' for clarity
-void run_combat(Player& hero, Enemy& target) {
-    clear_screen(); // Clear the map screen for combat
-    std::cout << "\n--- A wild " << target.get_name() << " appears! ---\n";
+void run_combat(Player& player, Enemy& enemy) {
+    std::cout << "\n--- You've encountered a " << enemy.get_name() << "! ---\n";
+    enemy.triggerDialogue();
+    std::cout << "(Press any key to begin...)";
+    _getch();
 
-    while (hero.isAlive() && target.isAlive()) {
-        std::cout << "\n" << hero.get_name() << " HP: " << hero.get_health() << " | "
-                  << target.get_name() << " HP: " << target.get_health() << "\n";
-        std::cout << "Choose your action:\n";
-        std::cout << "1. Attack\n";
-        std::cout << "2. Special Move\n";
-        std::cout << "Your choice: ";
-        int choice;
-        std::cin >> choice;
+    // Initialize attack times to be ready now
+    player.set_normal_attack_cooldown(0);
+    player.set_special_attack_cooldown(0);
+    enemy.setNormalAttackCooldown(0); // Enemy can attack immediately
 
-        if (choice == 1) {
-            hero.attack(target);
-        } else if (choice == 2) {
-            hero.special_move(target);
-        } else {
-            std::cout << "Invalid choice, you hesitate!\n";
+    while (player.isAlive() && enemy.isAlive()) {
+        auto current_time = std::chrono::steady_clock::now();
+
+        // 1. --- Handle Player Input ---
+        if (_kbhit()) { // Check if a key is pressed
+            char input = _getch(); // Get the key without waiting
+
+            if (input == '1') { // --- Normal Attack ---
+                if (current_time >= player.getNormalAttackReady()) {
+                    if (player.get_mana() >= 10) {
+                        player.attack(enemy);
+                        player.use_mana(10);
+                        player.set_normal_attack_cooldown(1.0f); // 1 second cooldown
+                    } else {
+                        // Not enough mana (log this later)
+                    }
+                } else {
+                    // Not ready (log this later)
+                }
+            } else if (input == '2') { // --- Special Attack ---
+                if (current_time >= player.getSpecialAttackReady()) {
+                    if (player.get_mana() >= 25) {
+                        player.special_move(enemy);
+                        player.use_mana(25);
+                        player.set_special_attack_cooldown(2.5f); // 2.5 second cooldown
+                    } else {
+                        // Not enough mana
+                    }
+                } else {
+                    // Not ready
+                }
+            }
+        }
+        
+        // 2. --- Handle Enemy AI ---
+        if (current_time >= enemy.getNormalAttackReady()) {
+            // Simple AI: 30% chance to use special, 70% normal
+            if (rand() % 10 < 3) {
+                // enemy.specialAbility(player); // (You'll need to add cooldowns for this too)
+                enemy.attack(player); // For now, just a normal attack
+            } else {
+                enemy.attack(player);
+            }
+            enemy.setNormalAttackCooldown(2.0f); // Enemy attacks every 2 seconds
         }
 
-        if (!target.isAlive()) break;
+        // 3. --- Handle Regenerat
+        player.update_mana_regen(current_time);
 
-        std::cout << "\nThe " << target.get_name() << " attacks you!\n";
-        target.attack(hero);
+        // 4. --- Draw the UI ---
+        display_combat_ui(player, enemy);
     }
 
-    if (hero.isAlive()) {
-        std::cout << "\nYou defeated the " << target.get_name() << "! Victory!\n";
-        // Pause to let the player see the result before returning to map
-        std::cout << "Press any key to continue...";
-        _getch();
+    // 6. --- End of Combat ---
+    clear_screen();
+    std::cout << "--------------------------------\n";
+    if (player.isAlive()) {
+        std::cout << "You defeated the " << enemy.get_name() << "! Victory!\n";
     } else {
-        std::cout << "\nYou have been defeated. Game Over.\n";
+        std::cout << "You have been defeated. Game Over.\n";
     }
+    std::cout << "(Press any key to continue...)\n";
+    _getch(); // Wait for user
 }
 
 void Game::add_log_message(std::string message) {

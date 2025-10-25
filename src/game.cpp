@@ -13,6 +13,7 @@
 using namespace std;
 
 // Your project headers
+#include"../include/inventory.hpp"
 #include "../include/game.h"
 #include "../include/player.h"
 #include "../include/enemy.h"
@@ -85,7 +86,30 @@ void run_combat(Player& hero, Enemy& target) {
         std::cout << "\nYou have been defeated. Game Over.\n";
     }
 }
-
+    void open_inventory(Player& player)
+    {
+         char x;
+        player.inventory.display();
+        cout<<"Press 1 to pick items.       Press 2 to drop items.          Press 3 to return to game."<<endl;
+        cin >>x;
+        while(x!='3')
+        {
+            switch(x){
+            case '1':
+            player.inventory.pickup("Healing Potion",2);
+            break;
+            case '2':
+            player.inventory.drop("Healing Potion");
+            break;
+            case '3':
+            x='3';
+            }
+            if(x=='3')
+            break;
+            player.inventory.display();
+             cin>>x;
+        }
+    }
 void Game::add_log_message(std::string message) {
     event_log.push_front(message);
     while (event_log.size() > MAX_LOG_LINES) {
@@ -172,7 +196,8 @@ void Game::explore_forest(Player& player, Map& map) {
                 add_log_message("You return to the village.");
                 inForest = false;
                 break;
-                
+                case 'i':
+                open_inventory(player);
             default:
                 add_log_message("Invalid key pressed.");
         }

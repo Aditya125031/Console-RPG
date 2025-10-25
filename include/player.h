@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include "../include/character.h"  
+#include "inventory.hpp"
 #include <string>
 using namespace std;
 
@@ -22,6 +23,7 @@ protected:
     int coord_x=15, coord_y=45;
 
 public:
+    Inventory inventory;
     std::string get_type_string() const;
     Player(std::string name, PlayerType type);
     string move(int , int , Map&); 

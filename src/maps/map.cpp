@@ -1,5 +1,14 @@
 // In your src/core/ directory
-#include <bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <deque>
+#include<cmath>
+#include <limits>
+#include <fstream>
+#include <chrono>
+#include <cstdlib> // Required for std::system
+#include <conio.h>
 #include "../include/map.h"
 #include "../include/tile.h"
 #include "../include/player.h"

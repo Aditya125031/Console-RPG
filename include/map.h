@@ -2,7 +2,15 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <deque>
+#include<cmath>
+#include <limits>
+#include <chrono>
+#include <cstdlib> // Required for std::system
+#include <conio.h>
 #include "tile.h" // Include your Tile class definition
 using namespace std;
 

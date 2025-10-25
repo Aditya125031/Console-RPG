@@ -3,23 +3,36 @@
 #include<iostream>
 #include <map>
 #include<set>
+<<<<<<< HEAD
 #include<vector>
 #include<string>
+=======
+>>>>>>> f7cb41a (wip inventory.attempting to rebase)
 using namespace std;
 class Inventory
 {
     public:
+<<<<<<< HEAD
     const int c=20;
     int t=0;
      map<string, int> hash;
      vector<string> itemq{21};
      vector<int>quantity{21};
      vector<string>eq{2};
+=======
+    int c=20;
+    int t=0;
+     map<string, int> hash;
+     map<string,int> itemq;
+>>>>>>> f7cb41a (wip inventory.attempting to rebase)
      set<string> sub1={"Leather Armour","Iron Armour","Legendary Armour"};
      set<string> sub2={"Sword","Katana","Legendary Sword"};
     Inventory()
     {
+<<<<<<< HEAD
 
+=======
+>>>>>>> f7cb41a (wip inventory.attempting to rebase)
         hash["Healing Potion"]=10;
         hash["Mana Potion"]=10;
         hash["Leather Armour"]=1;
@@ -29,6 +42,7 @@ class Inventory
         hash["Katana"]=1;
         hash["Legendary Sword"]=1;
     }
+<<<<<<< HEAD
     int pickup(string,int);
     void drop(int);
     int find(string);
@@ -42,5 +56,11 @@ class Inventory
     void unequipsword();
     void unequiparmour();
     void displayequip();
+=======
+    void pickup(string,int);
+    void drop(string);
+  //  map equip();
+    void display();
+>>>>>>> f7cb41a (wip inventory.attempting to rebase)
 };
 #endif

@@ -27,6 +27,7 @@ protected:
     std::chrono::steady_clock::time_point next_mana_regen;
 
 public:
+    Inventory inventory;
     Player(std::string name, PlayerType type); 
     int get_x() override;
     int get_y() override;

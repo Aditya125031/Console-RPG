@@ -10,9 +10,9 @@ protected:
     int health;
     int maxHealth;
     int attackPower;
+    int coord_x, coord_y;
 
 public:
-    int x, y;
     Character(std::string name, int health, int attackPower);
     
     virtual ~Character() = default;
@@ -25,4 +25,8 @@ public:
     std::string get_name() const;
     int get_health() const;
     int get_max_health() const;
+    virtual int get_x(){};
+    virtual int get_y(){};
+    virtual void set_x(int){};
+    virtual void set_y(int){};
 };

@@ -19,16 +19,14 @@ private:
 protected:
     int mana;
     int stamina;
-    int coord_x=15, coord_y=45;
 
 public:
     std::string get_type_string() const;
-    Player(std::string name, PlayerType type);
-    string move(int , int , Map&); 
-    int get_x() const;
-    int get_y() const;
-    void set_x(int);
-    void set_y(int);
+    Player(std::string name, PlayerType type); 
+    int get_x() override;
+    int get_y() override;
+    void set_x(int) override;
+    void set_y(int) override;
     void show_details() const; 
     void special_move(Character& enemy); 
 };

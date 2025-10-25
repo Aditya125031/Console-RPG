@@ -48,7 +48,7 @@ void getTDimensions(int& width, int& height) {
 
 // Handles a single combat encounter
 // CORRECTED: Changed the parameter name from 'enemy' to 'target' for clarity
-void run_combat(Player& hero, Enemy& target) {
+int run_combat(Player& hero, Enemy& target) {
     clear_screen(); // Clear the map screen for combat
     std::cout << "\n--- A wild " << target.get_name() << " appears! ---\n";
 
@@ -58,6 +58,7 @@ void run_combat(Player& hero, Enemy& target) {
         std::cout << "Choose your action:\n";
         std::cout << "1. Attack\n";
         std::cout << "2. Special Move\n";
+        std::cout << "3.Flee\n";
         std::cout << "Your choice: ";
         int choice;
         std::cin >> choice;
@@ -66,7 +67,12 @@ void run_combat(Player& hero, Enemy& target) {
             hero.attack(target);
         } else if (choice == 2) {
             hero.special_move(target);
-        } else {
+        }
+        else if(choice==3)
+        {
+            return 2;
+        }
+        else {
             std::cout << "Invalid choice, you hesitate!\n";
         }
 
@@ -77,12 +83,9 @@ void run_combat(Player& hero, Enemy& target) {
     }
 
     if (hero.isAlive()) {
-        std::cout << "\nYou defeated the " << target.get_name() << "! Victory!\n";
-        // Pause to let the player see the result before returning to map
-        std::cout << "Press any key to continue...";
-        _getch();
+        return 1;
     } else {
-        std::cout << "\nYou have been defeated. Game Over.\n";
+        return 0;
     }
 }
 
@@ -143,25 +146,23 @@ void Game::explore_forest(Player& player, Map& map) {
     bool inForest = true;
     while (inForest) {
         display_dashboard(player, map);
-        //cout << player.get_x() << " " << player.get_y() << endl;
-
         char input = _getch(); // Get input without waiting for Enter
 
         switch(input) {
             case 'w':
-                add_log_message(player.move(0, -1,map));
+                move_character(player, 0, -1, map);
                 break;
 
             case 's':
-                add_log_message(player.move(0, 1, map));
+                move_character(player, 0, 1, map);
                 break;
 
             case 'a':
-                add_log_message(player.move(-1, 0, map));
+                move_character(player, -1, 0, map);
                 break;
 
             case 'd':
-                add_log_message(player.move(1, 0, map));
+                move_character(player, 1, 0, map);
                 break;
 
             case 'm':
@@ -216,4 +217,73 @@ void Game::game_loop(Player& player) {
                 break;
         }
     }
+}
+
+void Game::move_character(Character& entity, int x, int y, Map& map){
+    int newx=entity.get_x()+y;
+    int newy=entity.get_y()+x;
+    if(map.getTileAt(newx,newy)->getCharacter() != nullptr) {
+        Player& player = static_cast<Player&>(entity);
+        Character* target_ptr = map.getTileAt(newx,newy)->getCharacter();
+        Enemy& target = static_cast<Enemy&>(*target_ptr);
+        add_log_message("Combat Triggered!");
+        int k = run_combat(player, target);
+        if(k==0){
+            //end game
+            cout << "You have been defeated!"<<endl;
+        }
+        else if(k==1){
+            add_log_message("You defeated the enemy");
+            map.getTileAt(newy,newx)->setIsWalkable(true);
+            map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
+            map.getTileAt(newy,newx)->setCharacter(&entity);
+            map.getTileAt(newx,newy)->setMiniMapDisplayChar(Color::FG_YELLOW + "♞" + Color::RESET);
+            map.getTileAt(entity.get_x(),entity.get_y())->setMiniMapDisplayChar(".");
+            map.getTileAt(newx,newy)->setMapDisplayChar(Color::FG_YELLOW + "♞" + Color::RESET);
+            map.getTileAt(entity.get_x(),entity.get_y())->setMapDisplayChar(".");
+            entity.set_x(newx);
+            entity.set_y(newy);
+        }
+        else if(k==2){
+            add_log_message("You fled the battle!");
+        }
+        return;
+    } 
+    // else if(map->getTileAt(newy,newx)->getItem()) {
+    //     cout << "You found an item!" << endl;
+    //     int k=pickItem(myPlayer, map->getTileAt(newy,newx)->getItem());
+    //     if(k==1){
+    //         cout << "You picked up the item!" << endl;
+    //         map->getTileAt(newy,newx)->setItem(nullptr);
+    //         map->getTileAt(coord_y,coord_x)->setCharacter(nullptr);
+    //         map->getTileAt(newy,newx)->setCharacter(this);
+    //         coord_x=newx;
+    //         coord_y=newy;
+    //     } else {
+    //         cout << "You didn't pick up the item!" << endl;
+    //     }
+    //     return;
+    // } 
+    else if(map.getTileAt(newx,newy)->getBounds()) {
+        add_log_message("Do not venture outside the forest!");
+        return;
+    } 
+    else if(map.getTileAt(newx,newy)->getIsWalkable()) {
+        map.getTileAt(entity.get_x(),entity.get_y())->setCharacter(nullptr);
+        map.getTileAt(newx,newy)->setCharacter(&entity);
+        map.getTileAt(newx,newy)->setMiniMapDisplayChar(Color::FG_YELLOW + "♞" + Color::RESET);
+        map.getTileAt(entity.get_x(),entity.get_y())->setMiniMapDisplayChar(".");
+        map.getTileAt(newx,newy)->setMapDisplayChar(Color::FG_YELLOW + "♞" + Color::RESET);
+        map.getTileAt(entity.get_x(),entity.get_y())->setMapDisplayChar(".");
+        entity.set_x(newx);
+        entity.set_y(newy);
+        add_log_message("You moved to (" + to_string(entity.get_y()) + ", " + to_string(entity.get_x()) + ").");
+        return;
+    }
+    else {
+        add_log_message("You can't move there!");
+        return;
+    }
+    add_log_message("Achievement Unlocked! The Void!");
+
 }

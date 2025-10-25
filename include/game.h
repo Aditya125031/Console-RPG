@@ -26,6 +26,7 @@ class Game
         void add_log_message(std::string message);
         void display_dashboard(Player& player, Map& map); // New render function
         void show_full_map(Map& map);
+        void move_character(Character&, int, int, Map&);
 };
 
 #endif

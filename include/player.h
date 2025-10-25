@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include "Character.h" 
+#include "inventory.hpp"
 #include <string>
 
 enum class PlayerType {
@@ -16,8 +17,8 @@ private:
 protected:
     int mana;
     int stamina;
-
 public:
+    Inventory inventory;
     int coord_x=45, coord_y=45;
     std::string get_type_string() const;
     Player(std::string name, PlayerType type);

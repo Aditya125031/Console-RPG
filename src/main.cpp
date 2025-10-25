@@ -6,6 +6,7 @@
 #include "../include/items.h" 
 #include "../include/game.h" 
 #include "../include/enemy.h"
+#include <windows.h>
 // It's good practice to put the player creation in its own function
 Player create_player() {
     std::cout << "Welcome to Text RPG!\n";
@@ -36,6 +37,7 @@ Player create_player() {
 
 int main() 
 {
+    SetConsoleOutputCP(CP_UTF8);
     Game world;
     Player hero = create_player();
     world.game_loop(hero);

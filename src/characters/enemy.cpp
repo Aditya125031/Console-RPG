@@ -1,4 +1,6 @@
 #include "enemy.h"
+using namespace std;
+
 Enemy::Enemy(std::string name, int health, int attackPower)
     : Character(name, health, attackPower)
     {

@@ -4,21 +4,23 @@
 
 #include <bits/stdc++.h>
 #include "tile.h" // Include your Tile class definition
-#include "player.h"
 using namespace std;
+
+class Player;
 
 class Map {
 public:
+    Map();
     // ## Constructor ##
-    Map(int width = 0, int height = 0, string filename = "");
+    Map(Player& player, int width = 0, int height = 0, string filename = "");
 
     // ## Core Functionality ##
     // Loads a map layout from a specified text file. Returns false if it fails.
-    bool loadFromFile(const string& filename);
+    bool loadFromFile(const string& filename, Player& player);
 
     // Renders the current map state to the console.
-    void render() const;
-    std::vector<std::string> get_minimap_view(Player& player, int view_width, int view_height);
+    void render();
+    void get_minimap_view(Player& player, int view_width, int view_height, deque<string>&);
     // ## Getters ##
     // Safely gets a pointer to the tile at a specific coordinate.
     Tile* getTileAt(int x, int y);

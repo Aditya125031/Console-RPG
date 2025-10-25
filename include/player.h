@@ -1,8 +1,11 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "Character.h" 
+#include "../include/character.h"  
 #include <string>
+using namespace std;
+
+class Map;
 
 enum class PlayerType {
     Swordsman,
@@ -16,14 +19,16 @@ private:
 protected:
     int mana;
     int stamina;
+    int coord_x=15, coord_y=45;
 
 public:
-    int coord_x=45, coord_y=45;
     std::string get_type_string() const;
     Player(std::string name, PlayerType type);
-    void move(int dx, int dy); 
+    string move(int , int , Map&); 
     int get_x() const;
     int get_y() const;
+    void set_x(int);
+    void set_y(int);
     void show_details() const; 
     void special_move(Character& enemy); 
 };

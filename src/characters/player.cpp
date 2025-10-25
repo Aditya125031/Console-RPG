@@ -19,128 +19,20 @@ Player::Player(std::string name, PlayerType type)
         case PlayerType::Archer:
             this->health = 100;
             this->attackPower = 12;
-            this->max_mana = 40;
+            this->mana = 40;
             this->stamina = 120;
             break;
 
         case PlayerType::Mage:
             this->health = 80;
             this->attackPower = 8;
-            this->max_mana = 150;
+            this->mana = 150;
             this->stamina = 50;
             break;
     }
-    this->mana = this->max_mana;
     this->maxHealth = this->health;
-    auto now = std::chrono::steady_clock::now();
-    this->normal_attack_ready = now;
-    this->special_attack_ready = now;
-    this->next_mana_regen = now;
 
     std::cout << "A new " << get_type_string() << " named " << this->name << " has arrived!" << std::endl;
-}
-
-string Player::move(int x, int y, Map& map) {
-    int newx=coord_x+y;
-    int newy=coord_y+x;
-    if(map.getTileAt(newx,newy)->getCharacter() != nullptr) {
-        return "Combat Triggered!";
-        // int k=startCombat(myPlayer, map->getTileAt(newy,newx)->getCharacter());
-        // if(k==0){
-        //     //end game
-        //     cout << "You have been defeated!"<<endl;
-        // }
-        // else if(k==1){
-        //     cout<<"You defeated the enemy!"<<endl;
-        //     map->getTileAt(newy,newx)->setisWalkable();
-        //     map->getTileAt(coord_y,coord_x)->setCharacter(nullptr);
-        //     map->getTileAt(newy,newx)->setCharacter(this);
-        //     coord_x=newx;
-        //     coord_y=newy;
-        // }
-        // else if(k==2){
-        //     cout<<"You fled the battle!"<<endl;
-        // }
-    } 
-    // else if(map->getTileAt(newy,newx)->getItem()) {
-    //     cout << "You found an item!" << endl;
-    //     int k=pickItem(myPlayer, map->getTileAt(newy,newx)->getItem());
-    //     if(k==1){
-    //         cout << "You picked up the item!" << endl;
-    //         map->getTileAt(newy,newx)->setItem(nullptr);
-    //         map->getTileAt(coord_y,coord_x)->setCharacter(nullptr);
-    //         map->getTileAt(newy,newx)->setCharacter(this);
-    //         coord_x=newx;
-    //         coord_y=newy;
-    //     } else {
-    //         cout << "You didn't pick up the item!" << endl;
-    //     }
-    // } 
-    else if(map.getTileAt(newx,newy)->getBounds()) {
-        return "Do not venture outside the forest!";
-    } 
-    else if(map.getTileAt(newx,newy)->getIsWalkable()) {
-        map.getTileAt(coord_x,coord_y)->setCharacter(nullptr);
-        map.getTileAt(newx,newy)->setCharacter(this);
-        map.getTileAt(newx,newy)->setMiniMapDisplayChar(Color::FG_YELLOW + "♞" + Color::RESET);
-        map.getTileAt(coord_x,coord_y)->setMiniMapDisplayChar(".");
-        map.getTileAt(newx,newy)->setMapDisplayChar(Color::FG_YELLOW + "♞" + Color::RESET);
-        map.getTileAt(coord_x,coord_y)->setMapDisplayChar(".");
-        this->coord_x=newx;
-        this->coord_y=newy;
-        return "You moved to (" + to_string(coord_y) + ", " + to_string(coord_x) + ").";
-    }
-    else {
-        return "You can't move there!";
-    }
-    return "Achievement Unlocked! The Void!";
-}
-
-void Player::use_mana(int amount) {
-    this->max_mana -= amount;
-    if (this->mana < 0) {
-        this->mana = 0;
-    }
-}
-void Player::add_mana(int amount) {
-    this->mana += amount;
-    if (this->mana > this->max_mana) {
-        this->mana = this->max_mana;
-    }
-}
-void Player::modify_mana(int amount)
-{
-    this->max_mana+=amount;
-}
-
-void Player::update_mana_regen(std::chrono::steady_clock::time_point current_time) {
-    if (current_time >= this->next_mana_regen) {
-        add_mana(5); 
-        this->next_mana_regen = current_time + std::chrono::seconds(1);
-    }
-}
-
-int Player::get_mana() const {
-    return this->mana;
-}
-
-int Player::get_max_mana() const {
-    return this->max_mana;
-}
-
-void Player::modify_max_health(int amount) {
-    this->maxHealth += amount;
-    if (this->health > this->maxHealth) {
-        this->health = this->maxHealth;
-    }
-}
-
-// This is for potions, to add to CURRENT health
-void Player::add_health(int amount) {
-    this->health += amount;
-    if (this->health > this->maxHealth) {
-        this->health = this->maxHealth;
-    }
 }
 
 std::string Player::get_type_string() const {
@@ -203,18 +95,27 @@ void Player::special_move(Character& enemy)
         enemy.take_damage(damage);
     }
 }
-int Player::get_x() const {
+int Player::get_x() {
     return this->coord_x;
 }
 
-int Player::get_y() const {
+int Player::get_y() {
     return this->coord_y;
 }
-std::chrono::steady_clock::time_point Player::getNormalAttackReady() const {
+
+void Player::set_x(int a) {
+    this->coord_x=a;
+}
+
+void Player::set_y(int a){
+    this->coord_y=a;
+}
+
+std::chrono::steady_clock::time_point Player::get_normal_attack_ready() const {
     return this->normal_attack_ready;
 }
 
-std::chrono::steady_clock::time_point Player::getSpecialAttackReady() const {
+std::chrono::steady_clock::time_point Player::get_special_attack_ready() const {
     return this->special_attack_ready;
 }
 
@@ -227,11 +128,38 @@ void Player::set_special_attack_cooldown(float seconds) {
     this->special_attack_ready = std::chrono::steady_clock::now() + 
         std::chrono::microseconds(static_cast<int>(seconds * 2500000));
 }
+void Player::modify_max_health(int amount) {
+    this->maxHealth += amount;
 
-void Player::set_x(int a) {
-    this->coord_x=a;
+    // If a debuff lowers max health, cap the current health
+    if (this->health > this->maxHealth) {
+        this->health = this->maxHealth;
+    }
 }
 
-void Player::set_y(int a){
-    this->coord_y=a;
+// This is for potions, to add to CURRENT health
+void Player::add_health(int amount) {
+    this->health += amount;
+    
+    // Don't let health go over the max
+    if (this->health > this->maxHealth) {
+        this->health = this->maxHealth;
+    }
+}
+
+// I recommend renaming 'modify_mana' to 'modify_max_mana' for clarity
+// This is for equippable items
+void Player::modify_max_mana(int amount) {
+    this->max_mana += amount;
+    
+    // Cap current mana if max is reduced
+    if (this->mana > this->max_mana) {
+        this->mana = this->max_mana;
+    }
+}
+void Player::use_mana(int amount) {
+    this->mana -= amount; // <-- Corrected: use 'mana'
+    if (this->mana < 0) {
+        this->mana = 0;
+    }
 }

@@ -7,6 +7,7 @@
 #include <limits>
 #include <fstream>
 #include <chrono>
+#include<algorithm>
 #include <cstdlib> // Required for std::system
 #include <conio.h>
 #include "../include/map.h"

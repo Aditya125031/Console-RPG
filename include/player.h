@@ -41,7 +41,11 @@ public:
     void modify_max_health(int amount);
     void modify_max_mana(int amount);
     std::string get_type_string() const;
-    string move(int , int , Map& map); 
+    Player(std::string name, PlayerType type); 
+    int get_x() override;
+    int get_y() override;
+    void set_x(int) override;
+    void set_y(int) override;
     void show_details() const; 
     void special_move(Character& enemy); 
     std::chrono::steady_clock::time_point get_normal_attack_ready() const;

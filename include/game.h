@@ -1,7 +1,15 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <deque>
+#include<cmath>
+#include <limits>
+#include <chrono>
+#include <cstdlib> // Required for std::system
+#include <conio.h>
 #include "player.h" 
 #include "map.h"
 using namespace std;

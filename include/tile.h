@@ -3,7 +3,15 @@
 #ifndef TILE_H
 #define TILE_H
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <deque>
+#include<cmath>
+#include <limits>
+#include <chrono>
+#include <cstdlib> // Required for std::system
+#include <conio.h>
 #include "../include/character.h"
 #include "../include/enemy.h"
 #include "../include/goblin.h"

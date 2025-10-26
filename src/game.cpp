@@ -234,9 +234,9 @@ void Game::move_character(Character& entity, int x, int y, Map& map){
         }
         else if(k==1){
             add_log_message("You defeated the enemy");
-            map.getTileAt(newy,newx)->setIsWalkable(true);
+            map.getTileAt(newx,newy)->setIsWalkable(true);
             map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
-            map.getTileAt(newy,newx)->setCharacter(&entity);
+            map.getTileAt(newx,newy)->setCharacter(&entity);
             map.getTileAt(newx,newy)->setMiniMapDisplayChar(Color::FG_YELLOW + "♞" + Color::RESET);
             map.getTileAt(entity.get_x(),entity.get_y())->setMiniMapDisplayChar(".");
             map.getTileAt(newx,newy)->setMapDisplayChar(Color::FG_YELLOW + "♞" + Color::RESET);

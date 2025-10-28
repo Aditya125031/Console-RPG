@@ -10,6 +10,7 @@ protected:
     int health;
     int maxHealth;
     int attackPower;
+    double attackInterval;
     int coord_x, coord_y;
 
 public:
@@ -21,7 +22,6 @@ public:
     bool isAlive() const; 
     void move(int dx, int dy);
     virtual void attack(Character& target);
-    void takeDamage(int damage);
     std::string get_name() const;
     int get_health() const;
     int get_max_health() const;
@@ -29,4 +29,5 @@ public:
     virtual int get_y(){};
     virtual void set_x(int){};
     virtual void set_y(int){};
+    unsigned getAttackInterval() const;
 };

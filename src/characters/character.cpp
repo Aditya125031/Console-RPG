@@ -39,3 +39,6 @@ int Character::get_health() const {
 int Character::get_max_health() const {
     return this->maxHealth;
 }
+unsigned Character::getAttackInterval() const{
+    return this->attackInterval;
+}

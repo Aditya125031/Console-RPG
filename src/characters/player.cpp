@@ -6,6 +6,7 @@
 #include <iostream> 
 using namespace std;
 
+
 Player::Player(std::string name, PlayerType type)
     : Character(name, 100, 10), type(type) {
     switch (type) {
@@ -162,4 +163,18 @@ void Player::use_mana(int amount) {
     if (this->mana < 0) {
         this->mana = 0;
     }
+}
+void Player::setSpecialAttackInterval(float seconds) {
+    specialAttackInverval = seconds;
+    return;
+}
+double Player::getSpecialAttackInterval() {
+    return specialAttackInverval;
+}
+int Player::get_mana() const{
+    return mana;
+}
+void Player::setNormalAttackInterval(float seconds) {
+    attackInterval = seconds;
+    return;
 }

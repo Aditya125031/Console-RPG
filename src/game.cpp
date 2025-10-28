@@ -22,7 +22,7 @@ using namespace std;
 #include "../include/items.h"
 #include "../include/goblin.h"
 #include "../include/colors.h" // You included this, which is great!
-
+#include "../include/combat.hpp"
 // --- CONSTANTS ---
 // You should move this to a constants.h file later
 const unsigned int MAX_LOG_LINES = 10;
@@ -227,7 +227,8 @@ void Game::move_character(Character& entity, int x, int y, Map& map){
         Character* target_ptr = map.getTileAt(newx,newy)->getCharacter();
         Enemy& target = static_cast<Enemy&>(*target_ptr);
         add_log_message("Combat Triggered!");
-        int k = run_combat(player, target);
+        Combat c;
+        int k = c.fight(player, target);
         if(k==0){
             //end game
             cout << "You have been defeated!"<<endl;

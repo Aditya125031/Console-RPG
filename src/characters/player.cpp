@@ -3,7 +3,11 @@
 #include "../include/map.h"
 #include "../include/tile.h"
 #include "../include/colors.h"
-#include <iostream> 
+
+// ⭐️ Use the curses header instead of iostream
+// #include <iostream> 
+#include "../extern/pdcurses/curses.h" // Assuming this is your path
+
 using namespace std;
 
 Player::Player(std::string name, PlayerType type)
@@ -32,7 +36,8 @@ Player::Player(std::string name, PlayerType type)
     }
     this->maxHealth = this->health;
 
-    std::cout << "A new " << get_type_string() << " named " << this->name << " has arrived!" << std::endl;
+    // ⭐️ REPLACED std::cout with printw
+    printw("A new %s named %s has arrived!\n", get_type_string().c_str(), this->name.c_str());
 }
 
 std::string Player::get_type_string() const {
@@ -45,56 +50,72 @@ std::string Player::get_type_string() const {
 }
 
 void Player::show_details() const {
-    std::cout << "---------------------\n"
-              << "Name: " << this->name << "\n"
-              << "Type: " << get_type_string() << "\n"
-              << "Health: " << this->health << " / " << this->maxHealth << "\n" // Show max health too
-              << "Attack Power: " << this->attackPower << "\n"
-              << "Mana: " << this->mana << "\n"
-              << "Stamina: " << this->stamina << "\n"
-              << "---------------------\n";
+    int row = 0;
+    // We use mvprintw to display details neatly in the curses console
+    // Assuming the calling function (Game::game_loop) has already called clear() and will call refresh()
+    mvprintw(row++, 0, "---------------------");
+    mvprintw(row++, 0, "Name: %s", this->name.c_str());
+    mvprintw(row++, 0, "Type: %s", get_type_string().c_str());
+    mvprintw(row++, 0, "Health: %d / %d", this->health, this->maxHealth); // Show max health too
+    mvprintw(row++, 0, "Attack Power: %d", this->attackPower);
+    mvprintw(row++, 0, "Mana: %d", this->mana);
+    mvprintw(row++, 0, "Stamina: %d", this->stamina);
+    mvprintw(row++, 0, "---------------------");
 }
 
-// Note: 'Character' with a capital 'C'
 void Player::special_move(Character& enemy) 
 {
-    std::cout << this->name << " uses their special move: ";
+    // Get the current cursor row to print messages clearly
+    int row, col;
+    getyx(stdscr, row, col); 
+    
+    // ⭐️ REPLACED std::cout with mvprintw
+    mvprintw(row++, 0, "%s uses their special move: ", this->name.c_str());
     int damage = 0;
+    std::string message = "";
+    
     switch (this->type) {
         case PlayerType::Swordsman:
             if (this->stamina >= 25) {
-                std::cout << "'Whirlwind Slash'!" << std::endl;
+                message = "'Whirlwind Slash'!";
                 damage = this->attackPower * 2.5; // Example: 2.5x damage
                 this->stamina -= 25;
             } else {
-                std::cout << "Not enough stamina!" << std::endl;
+                message = "Not enough stamina!";
             }
             break;
 
         case PlayerType::Archer:
             if (this->stamina >= 20) {
-                std::cout << "'Piercing Arrow'!" << std::endl;
+                message = "'Piercing Arrow'!";
                 damage = this->attackPower * 3; 
                 this->stamina -= 20;
             } else {
-                std::cout << "Not enough stamina!" << std::endl;
+                message = "Not enough stamina!";
             }
             break;
 
         case PlayerType::Mage:
             if (this->mana >= 30) {
-                std::cout << "'Fireball'!" << std::endl;
+                message = "'Fireball'!";
                 damage = 40;
                 this->mana -= 30;
             } else {
-                std::cout << "Not enough mana!" << std::endl;
+                message = "Not enough mana!";
             }
             break;
     }
+    
+    // Print the move message
+    mvprintw(row++, 0, "%s", message.c_str());
+    
     if (damage > 0) {
         enemy.take_damage(damage);
     }
+    
+    // The calling function (run_combat) will handle refresh/pausing
 }
+
 int Player::get_x() {
     return this->coord_x;
 }
@@ -137,7 +158,6 @@ void Player::modify_max_health(int amount) {
     }
 }
 
-// This is for potions, to add to CURRENT health
 void Player::add_health(int amount) {
     this->health += amount;
     
@@ -147,8 +167,6 @@ void Player::add_health(int amount) {
     }
 }
 
-// I recommend renaming 'modify_mana' to 'modify_max_mana' for clarity
-// This is for equippable items
 void Player::modify_max_mana(int amount) {
     this->max_mana += amount;
     
@@ -158,7 +176,7 @@ void Player::modify_max_mana(int amount) {
     }
 }
 void Player::use_mana(int amount) {
-    this->mana -= amount; // <-- Corrected: use 'mana'
+    this->mana -= amount; 
     if (this->mana < 0) {
         this->mana = 0;
     }

@@ -11,7 +11,6 @@
 #include <limits>
 #include <chrono>
 #include <cstdlib> // Required for std::system
-#include <conio.h>
 #include "../include/character.h"
 #include "../include/enemy.h"
 #include "../include/goblin.h"
@@ -48,6 +47,11 @@ class Tile{
         void setTileCode(int);
         void setBounds(bool);
         bool getBounds();
+        int get_map_color_pair() ;
+        void set_map_color_pair(int) ;
+        int get_mini_map_color_pair() ;
+        void set_mini_map_color_pair(int) ;
+
 
     private:
         // ## Attributes #
@@ -61,7 +65,8 @@ class Tile{
         // Quest* m_reqQuest;
         int m_tileCode;
         bool outOfBounds;
-
+        int m_colorPairMiniMap;
+        int m_colorPairMap;
     };
 
 #endif // TILE_H

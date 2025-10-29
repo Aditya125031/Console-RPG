@@ -1,9 +1,13 @@
 # Ignore the binary/executable folder
 /bin
+/build
 
 # Ignore compiled object files
 *.o
+*.a
 *.obj
+*.dll
+*.lib
 
 # Ignore executables on Windows
 *.exe

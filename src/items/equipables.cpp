@@ -1,7 +1,9 @@
-#include "items.h"
-#include "character.h"
-#include "player.h"
-#include<bits/stdc++.h>
+#include "../include/items.h"
+#include "../include/character.h"
+#include "../include/player.h"
+#include <bits/stdc++.h>
+#include "../include/game.h"
+
 using namespace std;
 
 string Item::get_item_name()
@@ -24,14 +26,14 @@ int Item::get_extra_mana()
     return extra_mana;
 }
 
-bool Item::can_use(std::chrono::steady_clock::time_point last_use)
+bool Item::can_use()
 {
     auto now = std::chrono::steady_clock::now(); // used auto becuase Deduce the type of now automatically from whatever std::chrono::steady_clock::now() returns
     auto dif = std::chrono::duration_cast<std::chrono::duration<double>>(now-last_use);
     return dif.count() >= cooldown;
 }
 
-double Item::get_cooldown(std::chrono::steady_clock::time_point last_use)
+double Item::get_cooldown()
 {
     auto now = std::chrono::steady_clock::now();
     auto dif = std::chrono::duration_cast<std::chrono::duration<double>>(now-last_use);
@@ -55,44 +57,49 @@ bool Item::is_equipped() const
     return equipped;
 }
 
-// void Item::apply_effects(Player& player)
-// {
-//     player.modify_health(extra_health);
-//     cout<<"Health : "<<player.get_health()<<endl;
-//     cout<<"Max_Health : "<<player.get_max_health()<<endl;
-//     player.modify_attack(extra_attack);
-//     cout<<"Attack_Power : "<<player.get_attack_power()<<endl;
-//     player.modify_mana(extra_mana);
-//     cout<<"Mana : "<<player.get_mana()<<endl;
-//     cout<<"Max_Mana : "<<player.get_max_mana()<<endl;
-// }
+void Item::update_last_use()
+{
+    last_use = std::chrono::steady_clock::now();
+}
 
-// void Item::remove_effects(Player& player)
-// {
+void Item::apply_effects(Player& player, Game& world)
+{
+    player.modify_health(extra_health);
+    world.add_log_message("Current Health : " + to_string(player.get_health()));
+    world.add_log_message("Max Health : " + to_string(player.get_max_health()));
+    player.modify_attack(extra_attack);
+    world.add_log_message("Attack Power : "+to_string(player.get_attack_power()));
+    player.modify_mana(extra_mana);
+    world.add_log_message("Current Mana : "+to_string(player.get_mana()));
+    world.add_log_message("Max Mana : "+to_string(player.get_max_mana()));
+}
 
-//     player.modify_health(-extra_health);
-//     cout<<"Current Health : "<<player.get_health()<<endl;
-//     cout<<"Max Health : "<<player.get_max_health()<<endl;
-//     player.modify_attack(-extra_attack);
-//     cout<<"Attack Power : "<<player.get_attack_power()<<endl;
-//     player.modify_mana(-extra_mana);
-//     cout<<"Current Mana : "<<player.get_mana()<<endl;
-//     cout<<"Max Mana : "<<player.get_max_mana()<<endl;
-// }
+void Item::remove_effects(Player& player, Game& world)
+{
 
-// void Item::use_potion(Item& potion, Player& player, std::chrono::steady_clock::time_point& last_use)
-// {
-//     if(potion.can_use(last_use))
-//     {
-//         potion.apply_effects(player);
-//         last_use = std::chrono::steady_clock::now();
-//         cout << potion.get_item_name() << " used successfully!" << endl;
-//         cout << potion.get_mana() << " mana restored." << endl;
+    player.modify_health(-extra_health);
+    world.add_log_message("Current Health : " + to_string(player.get_health()));
+    world.add_log_message("Max Health : " + to_string(player.get_max_health()));
+    player.modify_attack(-extra_attack);
+    world.add_log_message("Attack Power : "+to_string(player.get_attack_power()));
+    player.modify_mana(-extra_mana);
+    world.add_log_message("Current Mana : "+to_string(player.get_mana()));
+    world.add_log_message("Max Mana : "+to_string(player.get_max_mana()));
+}
 
-//     }
-//     else
-//     {
-//         double remaining = potion.get_cooldown(last_use);
-//         cout << "Potion is on cooldown. Please wait " << remaining << " seconds." << endl;
-//     }
-// }
+void Item::use_potion(Item& potion, Player& player, Game& world)
+{
+    if(potion.can_use())
+    {
+        potion.apply_effects(player);
+        potion.update_last_use();
+        world.add_log_message(potion.get_item_name() + " used successfully!");
+        world.add_log_message(potion.get_mana()+" mana restored.");
+
+    }
+    else
+    {
+        double remaining = potion.get_cooldown();
+        world.add_log_message("Potion is on cooldown. Please wait " + to_string(remaining) + " seconds.");
+    }
+}

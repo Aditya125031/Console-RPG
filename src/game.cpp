@@ -32,11 +32,9 @@ const unsigned int MAX_LOG_LINES = 10;
 
 // Clears the console screen
 void clear_screen() {
-#ifdef _WIN32
-    std::system("cls");
-#else
-    std::system("clear");
-#endif
+    // "\033[2J" clears the entire screen
+    // "\033[H" moves the cursor to the home position (top-left)
+    std::cout << "\033[2J\033[H" << std::flush; 
 }
 
 void getTDimensions(int& width, int& height) {
@@ -177,6 +175,7 @@ void Game::explore_forest(Player& player, Map& map) {
             default:
                 add_log_message("Invalid key pressed.");
         }
+        Sleep(300);
     }
 }
 

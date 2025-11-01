@@ -7,10 +7,10 @@
 class Enemy : public Character {
 protected:
     std::vector<std::string> dialogue;
-    int speed;
     std::chrono::steady_clock::time_point normal_attack_ready;
+    int specialAttackPower;
 public:
-    Enemy(std::string name, int health, int attackPower); 
+    Enemy(std::string name, int health, int attackPower, int specialAttackPower); 
 
     virtual ~Enemy() = default;
     std::string get_name() const; 

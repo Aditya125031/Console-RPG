@@ -1,7 +1,8 @@
 #pragma once
-#include<bits/stdc++.h>
-#include"player.h"
-#include"character.h"
+#include <bits/stdc++.h>
+#include "../include/character.h"
+#include "../include/player.h"
+#include "../include/game.h"
 using namespace std;
 
 class Item
@@ -13,6 +14,8 @@ class Item
         int extra_mana=0;
         double  cooldown=0.0;
         bool equipped=false;
+        std::chrono::steady_clock::time_point last_use;
+
 
     public:
         void sword_stats()
@@ -34,19 +37,21 @@ class Item
             cout<<"Mana : "<<extra_mana<<endl;
         }
 
+        Item() : last_use(std::chrono::steady_clock::time_point()) {}
         string get_item_name();
         int get_extra_health();
         int get_extra_attack();
         int get_extra_mana();
-        bool can_use(std::chrono::steady_clock::time_point last_use);
-        double get_cooldown(std::chrono::steady_clock::time_point last_use);
+        bool can_use();
+        double get_cooldown();
         void equip();
         void unequip();
         bool is_equipped() const;
-        virtual void apply_effects(Player& player);
-        virtual void remove_effects(Player& player);
+        void update_last_use();
+        virtual void apply_effects(Player& player, Game& world);
+        virtual void remove_effects(Player& player, Game& world);
 
-        static void use_potion(Item& potion, Player& player, std::chrono::steady_clock::time_point& last_use);
+        static void use_potion(Item& potion, Player& player, Game& world);
 };
 
 class Shinketsu_Sword : public Item

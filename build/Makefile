@@ -1317,6 +1317,54 @@ src/characters/enemy.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/enemy.cpp.s
 .PHONY : src/characters/enemy.cpp.s
 
+src/characters/final_boss.obj: src/characters/final_boss.cpp.obj
+.PHONY : src/characters/final_boss.obj
+
+# target to build an object file
+src/characters/final_boss.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.obj
+.PHONY : src/characters/final_boss.cpp.obj
+
+src/characters/final_boss.i: src/characters/final_boss.cpp.i
+.PHONY : src/characters/final_boss.i
+
+# target to preprocess a source file
+src/characters/final_boss.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.i
+.PHONY : src/characters/final_boss.cpp.i
+
+src/characters/final_boss.s: src/characters/final_boss.cpp.s
+.PHONY : src/characters/final_boss.s
+
+# target to generate assembly for a file
+src/characters/final_boss.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.s
+.PHONY : src/characters/final_boss.cpp.s
+
+src/characters/giant.obj: src/characters/giant.cpp.obj
+.PHONY : src/characters/giant.obj
+
+# target to build an object file
+src/characters/giant.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.obj
+.PHONY : src/characters/giant.cpp.obj
+
+src/characters/giant.i: src/characters/giant.cpp.i
+.PHONY : src/characters/giant.i
+
+# target to preprocess a source file
+src/characters/giant.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.i
+.PHONY : src/characters/giant.cpp.i
+
+src/characters/giant.s: src/characters/giant.cpp.s
+.PHONY : src/characters/giant.s
+
+# target to generate assembly for a file
+src/characters/giant.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.s
+.PHONY : src/characters/giant.cpp.s
+
 src/characters/goblin.obj: src/characters/goblin.cpp.obj
 .PHONY : src/characters/goblin.obj
 
@@ -1341,6 +1389,126 @@ src/characters/goblin.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/goblin.cpp.s
 .PHONY : src/characters/goblin.cpp.s
 
+src/characters/golem.obj: src/characters/golem.cpp.obj
+.PHONY : src/characters/golem.obj
+
+# target to build an object file
+src/characters/golem.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.obj
+.PHONY : src/characters/golem.cpp.obj
+
+src/characters/golem.i: src/characters/golem.cpp.i
+.PHONY : src/characters/golem.i
+
+# target to preprocess a source file
+src/characters/golem.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.i
+.PHONY : src/characters/golem.cpp.i
+
+src/characters/golem.s: src/characters/golem.cpp.s
+.PHONY : src/characters/golem.s
+
+# target to generate assembly for a file
+src/characters/golem.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.s
+.PHONY : src/characters/golem.cpp.s
+
+src/characters/imp.obj: src/characters/imp.cpp.obj
+.PHONY : src/characters/imp.obj
+
+# target to build an object file
+src/characters/imp.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.obj
+.PHONY : src/characters/imp.cpp.obj
+
+src/characters/imp.i: src/characters/imp.cpp.i
+.PHONY : src/characters/imp.i
+
+# target to preprocess a source file
+src/characters/imp.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.i
+.PHONY : src/characters/imp.cpp.i
+
+src/characters/imp.s: src/characters/imp.cpp.s
+.PHONY : src/characters/imp.s
+
+# target to generate assembly for a file
+src/characters/imp.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.s
+.PHONY : src/characters/imp.cpp.s
+
+src/characters/infernalimp.obj: src/characters/infernalimp.cpp.obj
+.PHONY : src/characters/infernalimp.obj
+
+# target to build an object file
+src/characters/infernalimp.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.obj
+.PHONY : src/characters/infernalimp.cpp.obj
+
+src/characters/infernalimp.i: src/characters/infernalimp.cpp.i
+.PHONY : src/characters/infernalimp.i
+
+# target to preprocess a source file
+src/characters/infernalimp.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.i
+.PHONY : src/characters/infernalimp.cpp.i
+
+src/characters/infernalimp.s: src/characters/infernalimp.cpp.s
+.PHONY : src/characters/infernalimp.s
+
+# target to generate assembly for a file
+src/characters/infernalimp.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.s
+.PHONY : src/characters/infernalimp.cpp.s
+
+src/characters/necromancer.obj: src/characters/necromancer.cpp.obj
+.PHONY : src/characters/necromancer.obj
+
+# target to build an object file
+src/characters/necromancer.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.obj
+.PHONY : src/characters/necromancer.cpp.obj
+
+src/characters/necromancer.i: src/characters/necromancer.cpp.i
+.PHONY : src/characters/necromancer.i
+
+# target to preprocess a source file
+src/characters/necromancer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.i
+.PHONY : src/characters/necromancer.cpp.i
+
+src/characters/necromancer.s: src/characters/necromancer.cpp.s
+.PHONY : src/characters/necromancer.s
+
+# target to generate assembly for a file
+src/characters/necromancer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.s
+.PHONY : src/characters/necromancer.cpp.s
+
+src/characters/orc_raider.obj: src/characters/orc_raider.cpp.obj
+.PHONY : src/characters/orc_raider.obj
+
+# target to build an object file
+src/characters/orc_raider.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.obj
+.PHONY : src/characters/orc_raider.cpp.obj
+
+src/characters/orc_raider.i: src/characters/orc_raider.cpp.i
+.PHONY : src/characters/orc_raider.i
+
+# target to preprocess a source file
+src/characters/orc_raider.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.i
+.PHONY : src/characters/orc_raider.cpp.i
+
+src/characters/orc_raider.s: src/characters/orc_raider.cpp.s
+.PHONY : src/characters/orc_raider.s
+
+# target to generate assembly for a file
+src/characters/orc_raider.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.s
+.PHONY : src/characters/orc_raider.cpp.s
+
 src/characters/player.obj: src/characters/player.cpp.obj
 .PHONY : src/characters/player.obj
 
@@ -1364,6 +1532,54 @@ src/characters/player.s: src/characters/player.cpp.s
 src/characters/player.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/player.cpp.s
 .PHONY : src/characters/player.cpp.s
+
+src/characters/stoneimp.obj: src/characters/stoneimp.cpp.obj
+.PHONY : src/characters/stoneimp.obj
+
+# target to build an object file
+src/characters/stoneimp.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.obj
+.PHONY : src/characters/stoneimp.cpp.obj
+
+src/characters/stoneimp.i: src/characters/stoneimp.cpp.i
+.PHONY : src/characters/stoneimp.i
+
+# target to preprocess a source file
+src/characters/stoneimp.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.i
+.PHONY : src/characters/stoneimp.cpp.i
+
+src/characters/stoneimp.s: src/characters/stoneimp.cpp.s
+.PHONY : src/characters/stoneimp.s
+
+# target to generate assembly for a file
+src/characters/stoneimp.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.s
+.PHONY : src/characters/stoneimp.cpp.s
+
+src/characters/war_chief.obj: src/characters/war_chief.cpp.obj
+.PHONY : src/characters/war_chief.obj
+
+# target to build an object file
+src/characters/war_chief.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.obj
+.PHONY : src/characters/war_chief.cpp.obj
+
+src/characters/war_chief.i: src/characters/war_chief.cpp.i
+.PHONY : src/characters/war_chief.i
+
+# target to preprocess a source file
+src/characters/war_chief.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.i
+.PHONY : src/characters/war_chief.cpp.i
+
+src/characters/war_chief.s: src/characters/war_chief.cpp.s
+.PHONY : src/characters/war_chief.s
+
+# target to generate assembly for a file
+src/characters/war_chief.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Console-RPG.dir\build.make CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.s
+.PHONY : src/characters/war_chief.cpp.s
 
 src/game.obj: src/game.cpp.obj
 .PHONY : src/game.obj
@@ -1618,12 +1834,39 @@ help:
 	@echo ... src/characters/enemy.obj
 	@echo ... src/characters/enemy.i
 	@echo ... src/characters/enemy.s
+	@echo ... src/characters/final_boss.obj
+	@echo ... src/characters/final_boss.i
+	@echo ... src/characters/final_boss.s
+	@echo ... src/characters/giant.obj
+	@echo ... src/characters/giant.i
+	@echo ... src/characters/giant.s
 	@echo ... src/characters/goblin.obj
 	@echo ... src/characters/goblin.i
 	@echo ... src/characters/goblin.s
+	@echo ... src/characters/golem.obj
+	@echo ... src/characters/golem.i
+	@echo ... src/characters/golem.s
+	@echo ... src/characters/imp.obj
+	@echo ... src/characters/imp.i
+	@echo ... src/characters/imp.s
+	@echo ... src/characters/infernalimp.obj
+	@echo ... src/characters/infernalimp.i
+	@echo ... src/characters/infernalimp.s
+	@echo ... src/characters/necromancer.obj
+	@echo ... src/characters/necromancer.i
+	@echo ... src/characters/necromancer.s
+	@echo ... src/characters/orc_raider.obj
+	@echo ... src/characters/orc_raider.i
+	@echo ... src/characters/orc_raider.s
 	@echo ... src/characters/player.obj
 	@echo ... src/characters/player.i
 	@echo ... src/characters/player.s
+	@echo ... src/characters/stoneimp.obj
+	@echo ... src/characters/stoneimp.i
+	@echo ... src/characters/stoneimp.s
+	@echo ... src/characters/war_chief.obj
+	@echo ... src/characters/war_chief.i
+	@echo ... src/characters/war_chief.s
 	@echo ... src/game.obj
 	@echo ... src/game.i
 	@echo ... src/game.s

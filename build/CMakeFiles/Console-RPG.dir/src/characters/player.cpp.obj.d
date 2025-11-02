@@ -182,7 +182,6 @@ CMakeFiles/Console-RPG.dir/src/characters/player.cpp.obj: \
  C:/OOP-Project/Console-RPG/include/goblin.h \
  C:/OOP-Project/Console-RPG/include/items.h \
  C:/OOP-Project/Console-RPG/include/tile.h \
- C:/OOP-Project/Console-RPG/include/colors.h \
  C:/OOP-Project/Console-RPG/extern/pdcurses/curses.h \
  C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stdarg.h \
  C:/msys64/ucrt64/include/stdarg.h \

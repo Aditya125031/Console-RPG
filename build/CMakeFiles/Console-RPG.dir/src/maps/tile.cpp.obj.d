@@ -177,4 +177,12 @@ CMakeFiles/Console-RPG.dir/src/maps/tile.cpp.obj: \
  C:/OOP-Project/Console-RPG/include/goblin.h \
  C:/OOP-Project/Console-RPG/include/items.h \
  C:/OOP-Project/Console-RPG/include/player.h \
- C:/OOP-Project/Console-RPG/include/colors.h
+ C:/OOP-Project/Console-RPG/include/war_chief.h \
+ C:/OOP-Project/Console-RPG/include/orc_raider.h \
+ C:/OOP-Project/Console-RPG/include/golem.h \
+ C:/OOP-Project/Console-RPG/include/infernalimp.h \
+ C:/OOP-Project/Console-RPG/include/necromancer.h \
+ C:/OOP-Project/Console-RPG/include/imp.h \
+ C:/OOP-Project/Console-RPG/include/giant.h \
+ C:/OOP-Project/Console-RPG/include/stoneimp.h \
+ C:/OOP-Project/Console-RPG/include/final_boss.h

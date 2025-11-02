@@ -18,7 +18,6 @@
 #include "../include/map.h"
 #include "../include/tile.h"
 #include "../include/player.h"
-#include "../include/colors.h"
 
 using namespace std;
 

@@ -101,11 +101,41 @@ CMakeFiles/Console-RPG.dir/src/characters/enemy.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Console-RPG.dir/src/characters/enemy.cpp.s"
 	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\OOP-Project\Console-RPG\src\characters\enemy.cpp -o CMakeFiles\Console-RPG.dir\src\characters\enemy.cpp.s
 
+CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.obj: CMakeFiles/Console-RPG.dir/flags.make
+CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
+CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.obj: C:/OOP-Project/Console-RPG/src/characters/final_boss.cpp
+CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.obj"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\characters\final_boss.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\characters\final_boss.cpp.obj -c C:\OOP-Project\Console-RPG\src\characters\final_boss.cpp
+
+CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.i"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\OOP-Project\Console-RPG\src\characters\final_boss.cpp > CMakeFiles\Console-RPG.dir\src\characters\final_boss.cpp.i
+
+CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.s"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\OOP-Project\Console-RPG\src\characters\final_boss.cpp -o CMakeFiles\Console-RPG.dir\src\characters\final_boss.cpp.s
+
+CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.obj: CMakeFiles/Console-RPG.dir/flags.make
+CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
+CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.obj: C:/OOP-Project/Console-RPG/src/characters/giant.cpp
+CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.obj"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\characters\giant.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\characters\giant.cpp.obj -c C:\OOP-Project\Console-RPG\src\characters\giant.cpp
+
+CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.i"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\OOP-Project\Console-RPG\src\characters\giant.cpp > CMakeFiles\Console-RPG.dir\src\characters\giant.cpp.i
+
+CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.s"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\OOP-Project\Console-RPG\src\characters\giant.cpp -o CMakeFiles\Console-RPG.dir\src\characters\giant.cpp.s
+
 CMakeFiles/Console-RPG.dir/src/characters/goblin.cpp.obj: CMakeFiles/Console-RPG.dir/flags.make
 CMakeFiles/Console-RPG.dir/src/characters/goblin.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
 CMakeFiles/Console-RPG.dir/src/characters/goblin.cpp.obj: C:/OOP-Project/Console-RPG/src/characters/goblin.cpp
 CMakeFiles/Console-RPG.dir/src/characters/goblin.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/Console-RPG.dir/src/characters/goblin.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/Console-RPG.dir/src/characters/goblin.cpp.obj"
 	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/characters/goblin.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\characters\goblin.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\characters\goblin.cpp.obj -c C:\OOP-Project\Console-RPG\src\characters\goblin.cpp
 
 CMakeFiles/Console-RPG.dir/src/characters/goblin.cpp.i: cmake_force
@@ -116,11 +146,86 @@ CMakeFiles/Console-RPG.dir/src/characters/goblin.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Console-RPG.dir/src/characters/goblin.cpp.s"
 	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\OOP-Project\Console-RPG\src\characters\goblin.cpp -o CMakeFiles\Console-RPG.dir\src\characters\goblin.cpp.s
 
+CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.obj: CMakeFiles/Console-RPG.dir/flags.make
+CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
+CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.obj: C:/OOP-Project/Console-RPG/src/characters/golem.cpp
+CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.obj"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\characters\golem.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\characters\golem.cpp.obj -c C:\OOP-Project\Console-RPG\src\characters\golem.cpp
+
+CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.i"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\OOP-Project\Console-RPG\src\characters\golem.cpp > CMakeFiles\Console-RPG.dir\src\characters\golem.cpp.i
+
+CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.s"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\OOP-Project\Console-RPG\src\characters\golem.cpp -o CMakeFiles\Console-RPG.dir\src\characters\golem.cpp.s
+
+CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.obj: CMakeFiles/Console-RPG.dir/flags.make
+CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
+CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.obj: C:/OOP-Project/Console-RPG/src/characters/imp.cpp
+CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.obj"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\characters\imp.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\characters\imp.cpp.obj -c C:\OOP-Project\Console-RPG\src\characters\imp.cpp
+
+CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.i"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\OOP-Project\Console-RPG\src\characters\imp.cpp > CMakeFiles\Console-RPG.dir\src\characters\imp.cpp.i
+
+CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.s"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\OOP-Project\Console-RPG\src\characters\imp.cpp -o CMakeFiles\Console-RPG.dir\src\characters\imp.cpp.s
+
+CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.obj: CMakeFiles/Console-RPG.dir/flags.make
+CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
+CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.obj: C:/OOP-Project/Console-RPG/src/characters/infernalimp.cpp
+CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.obj"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\characters\infernalimp.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\characters\infernalimp.cpp.obj -c C:\OOP-Project\Console-RPG\src\characters\infernalimp.cpp
+
+CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.i"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\OOP-Project\Console-RPG\src\characters\infernalimp.cpp > CMakeFiles\Console-RPG.dir\src\characters\infernalimp.cpp.i
+
+CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.s"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\OOP-Project\Console-RPG\src\characters\infernalimp.cpp -o CMakeFiles\Console-RPG.dir\src\characters\infernalimp.cpp.s
+
+CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.obj: CMakeFiles/Console-RPG.dir/flags.make
+CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
+CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.obj: C:/OOP-Project/Console-RPG/src/characters/necromancer.cpp
+CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.obj"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\characters\necromancer.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\characters\necromancer.cpp.obj -c C:\OOP-Project\Console-RPG\src\characters\necromancer.cpp
+
+CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.i"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\OOP-Project\Console-RPG\src\characters\necromancer.cpp > CMakeFiles\Console-RPG.dir\src\characters\necromancer.cpp.i
+
+CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.s"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\OOP-Project\Console-RPG\src\characters\necromancer.cpp -o CMakeFiles\Console-RPG.dir\src\characters\necromancer.cpp.s
+
+CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.obj: CMakeFiles/Console-RPG.dir/flags.make
+CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
+CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.obj: C:/OOP-Project/Console-RPG/src/characters/orc_raider.cpp
+CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.obj"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\characters\orc_raider.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\characters\orc_raider.cpp.obj -c C:\OOP-Project\Console-RPG\src\characters\orc_raider.cpp
+
+CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.i"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\OOP-Project\Console-RPG\src\characters\orc_raider.cpp > CMakeFiles\Console-RPG.dir\src\characters\orc_raider.cpp.i
+
+CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.s"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\OOP-Project\Console-RPG\src\characters\orc_raider.cpp -o CMakeFiles\Console-RPG.dir\src\characters\orc_raider.cpp.s
+
 CMakeFiles/Console-RPG.dir/src/characters/player.cpp.obj: CMakeFiles/Console-RPG.dir/flags.make
 CMakeFiles/Console-RPG.dir/src/characters/player.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
 CMakeFiles/Console-RPG.dir/src/characters/player.cpp.obj: C:/OOP-Project/Console-RPG/src/characters/player.cpp
 CMakeFiles/Console-RPG.dir/src/characters/player.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/Console-RPG.dir/src/characters/player.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/Console-RPG.dir/src/characters/player.cpp.obj"
 	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/characters/player.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\characters\player.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\characters\player.cpp.obj -c C:\OOP-Project\Console-RPG\src\characters\player.cpp
 
 CMakeFiles/Console-RPG.dir/src/characters/player.cpp.i: cmake_force
@@ -131,11 +236,41 @@ CMakeFiles/Console-RPG.dir/src/characters/player.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Console-RPG.dir/src/characters/player.cpp.s"
 	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\OOP-Project\Console-RPG\src\characters\player.cpp -o CMakeFiles\Console-RPG.dir\src\characters\player.cpp.s
 
+CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.obj: CMakeFiles/Console-RPG.dir/flags.make
+CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
+CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.obj: C:/OOP-Project/Console-RPG/src/characters/stoneimp.cpp
+CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.obj"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\characters\stoneimp.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\characters\stoneimp.cpp.obj -c C:\OOP-Project\Console-RPG\src\characters\stoneimp.cpp
+
+CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.i"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\OOP-Project\Console-RPG\src\characters\stoneimp.cpp > CMakeFiles\Console-RPG.dir\src\characters\stoneimp.cpp.i
+
+CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.s"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\OOP-Project\Console-RPG\src\characters\stoneimp.cpp -o CMakeFiles\Console-RPG.dir\src\characters\stoneimp.cpp.s
+
+CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.obj: CMakeFiles/Console-RPG.dir/flags.make
+CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
+CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.obj: C:/OOP-Project/Console-RPG/src/characters/war_chief.cpp
+CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.obj"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\characters\war_chief.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\characters\war_chief.cpp.obj -c C:\OOP-Project\Console-RPG\src\characters\war_chief.cpp
+
+CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.i"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\OOP-Project\Console-RPG\src\characters\war_chief.cpp > CMakeFiles\Console-RPG.dir\src\characters\war_chief.cpp.i
+
+CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.s"
+	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\OOP-Project\Console-RPG\src\characters\war_chief.cpp -o CMakeFiles\Console-RPG.dir\src\characters\war_chief.cpp.s
+
 CMakeFiles/Console-RPG.dir/src/game.cpp.obj: CMakeFiles/Console-RPG.dir/flags.make
 CMakeFiles/Console-RPG.dir/src/game.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
 CMakeFiles/Console-RPG.dir/src/game.cpp.obj: C:/OOP-Project/Console-RPG/src/game.cpp
 CMakeFiles/Console-RPG.dir/src/game.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/Console-RPG.dir/src/game.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/Console-RPG.dir/src/game.cpp.obj"
 	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/game.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\game.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\game.cpp.obj -c C:\OOP-Project\Console-RPG\src\game.cpp
 
 CMakeFiles/Console-RPG.dir/src/game.cpp.i: cmake_force
@@ -150,7 +285,7 @@ CMakeFiles/Console-RPG.dir/src/main.cpp.obj: CMakeFiles/Console-RPG.dir/flags.ma
 CMakeFiles/Console-RPG.dir/src/main.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
 CMakeFiles/Console-RPG.dir/src/main.cpp.obj: C:/OOP-Project/Console-RPG/src/main.cpp
 CMakeFiles/Console-RPG.dir/src/main.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/Console-RPG.dir/src/main.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/Console-RPG.dir/src/main.cpp.obj"
 	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/main.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\main.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\main.cpp.obj -c C:\OOP-Project\Console-RPG\src\main.cpp
 
 CMakeFiles/Console-RPG.dir/src/main.cpp.i: cmake_force
@@ -165,7 +300,7 @@ CMakeFiles/Console-RPG.dir/src/maps/map.cpp.obj: CMakeFiles/Console-RPG.dir/flag
 CMakeFiles/Console-RPG.dir/src/maps/map.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
 CMakeFiles/Console-RPG.dir/src/maps/map.cpp.obj: C:/OOP-Project/Console-RPG/src/maps/map.cpp
 CMakeFiles/Console-RPG.dir/src/maps/map.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/Console-RPG.dir/src/maps/map.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/Console-RPG.dir/src/maps/map.cpp.obj"
 	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/maps/map.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\maps\map.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\maps\map.cpp.obj -c C:\OOP-Project\Console-RPG\src\maps\map.cpp
 
 CMakeFiles/Console-RPG.dir/src/maps/map.cpp.i: cmake_force
@@ -180,7 +315,7 @@ CMakeFiles/Console-RPG.dir/src/maps/tile.cpp.obj: CMakeFiles/Console-RPG.dir/fla
 CMakeFiles/Console-RPG.dir/src/maps/tile.cpp.obj: CMakeFiles/Console-RPG.dir/includes_CXX.rsp
 CMakeFiles/Console-RPG.dir/src/maps/tile.cpp.obj: C:/OOP-Project/Console-RPG/src/maps/tile.cpp
 CMakeFiles/Console-RPG.dir/src/maps/tile.cpp.obj: CMakeFiles/Console-RPG.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/Console-RPG.dir/src/maps/tile.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/Console-RPG.dir/src/maps/tile.cpp.obj"
 	C:\msys64\ucrt64\bin\c++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Console-RPG.dir/src/maps/tile.cpp.obj -MF CMakeFiles\Console-RPG.dir\src\maps\tile.cpp.obj.d -o CMakeFiles\Console-RPG.dir\src\maps\tile.cpp.obj -c C:\OOP-Project\Console-RPG\src\maps\tile.cpp
 
 CMakeFiles/Console-RPG.dir/src/maps/tile.cpp.i: cmake_force
@@ -195,8 +330,17 @@ CMakeFiles/Console-RPG.dir/src/maps/tile.cpp.s: cmake_force
 Console__RPG_OBJECTS = \
 "CMakeFiles/Console-RPG.dir/src/characters/character.cpp.obj" \
 "CMakeFiles/Console-RPG.dir/src/characters/enemy.cpp.obj" \
+"CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.obj" \
+"CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.obj" \
 "CMakeFiles/Console-RPG.dir/src/characters/goblin.cpp.obj" \
+"CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.obj" \
+"CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.obj" \
+"CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.obj" \
+"CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.obj" \
+"CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.obj" \
 "CMakeFiles/Console-RPG.dir/src/characters/player.cpp.obj" \
+"CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.obj" \
+"CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.obj" \
 "CMakeFiles/Console-RPG.dir/src/game.cpp.obj" \
 "CMakeFiles/Console-RPG.dir/src/main.cpp.obj" \
 "CMakeFiles/Console-RPG.dir/src/maps/map.cpp.obj" \
@@ -207,8 +351,17 @@ Console__RPG_EXTERNAL_OBJECTS =
 
 Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/characters/character.cpp.obj
 Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/characters/enemy.cpp.obj
+Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/characters/final_boss.cpp.obj
+Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/characters/giant.cpp.obj
 Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/characters/goblin.cpp.obj
+Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/characters/golem.cpp.obj
+Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/characters/imp.cpp.obj
+Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/characters/infernalimp.cpp.obj
+Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/characters/necromancer.cpp.obj
+Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/characters/orc_raider.cpp.obj
 Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/characters/player.cpp.obj
+Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/characters/stoneimp.cpp.obj
+Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/characters/war_chief.cpp.obj
 Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/game.cpp.obj
 Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/main.cpp.obj
 Console-RPG.exe: CMakeFiles/Console-RPG.dir/src/maps/map.cpp.obj
@@ -218,7 +371,7 @@ Console-RPG.exe: libpdcurses_lib.a
 Console-RPG.exe: CMakeFiles/Console-RPG.dir/linkLibs.rsp
 Console-RPG.exe: CMakeFiles/Console-RPG.dir/objects1.rsp
 Console-RPG.exe: CMakeFiles/Console-RPG.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable Console-RPG.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\OOP-Project\Console-RPG\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Linking CXX executable Console-RPG.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\Console-RPG.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

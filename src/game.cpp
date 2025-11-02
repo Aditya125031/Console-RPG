@@ -24,7 +24,6 @@ using namespace std;
 //#include "../include/tile.h"
 #include "../include/items.h"
 #include "../include/goblin.h"
-#include "../include/colors.h"
 
 // --- CONSTANTS ---
 const unsigned int MAX_LOG_LINES = 10;
@@ -240,7 +239,7 @@ void Game::explore_forest(Player& player, Map& map) {
             default:
                 add_log_message("Invalid key pressed.");
         }
-        this_thread::sleep_for(chrono::milliseconds(150));
+        //this_thread::sleep_for(chrono::milliseconds(150));
         flushinp();
     }
 }
@@ -312,7 +311,7 @@ void Game::move_character(Character& entity, int x, int y, Map& map){
     if(map.getTileAt(newx,newy)->getCharacter() != nullptr) {
         if(!map.getTileAt(newx,newy)->getQuestStatus()){
             add_log_message("You are not not powerful enough!");
-            add_log_message("Meet Hattori the Sage");
+            add_log_message("Meet Hattori at (X,X)");
             return;
         }
         Player& player = static_cast<Player&>(entity);

@@ -193,5 +193,4 @@ CMakeFiles/Console-RPG.dir/src/game.cpp.obj: \
  C:/OOP-Project/Console-RPG/include/player.h \
  C:/OOP-Project/Console-RPG/include/map.h \
  C:/OOP-Project/Console-RPG/include/items.h \
- C:/OOP-Project/Console-RPG/include/goblin.h \
- C:/OOP-Project/Console-RPG/include/colors.h
+ C:/OOP-Project/Console-RPG/include/goblin.h

@@ -6,7 +6,6 @@
 #include <limits>
 #include <chrono>
 #include <cstdlib> // Required for std::system
-#include <conio.h>
 #include "../include/tile.h"
 #include "../include/player.h"
 #include "../include/colors.h"
@@ -16,71 +15,83 @@ using namespace std;
 Tile::Tile() {}
 
 // Constructor implementation
-Tile::Tile(Player& player, string displayChar, int x, int y)
-    : m_isWalkable(true), m_tileCode(0),
-      m_characterOnTile(nullptr), outOfBounds(false) // Always initialize pointers to nullptr
-    //   ,m_itemOnTile(nullptr), m_reqQuest(nullptr) 
+Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y)
+    : m_isWalkable(true), m_characterOnTile(nullptr), outOfBounds(false), requiredQuestCompleted(true), // Always initialize pointers to nullptr
+        doQuest(-1)
+    //   ,m_itemOnTile(nullptr), 
     { 
         if(displayChar=="."){
-            //m_miniMapDisplayChar+=Color::BG_GRAY;
-            //m_mapDisplayChar+=Color::BG_GRAY;
-            m_mapDisplayChar += ".";
-            m_miniMapDisplayChar += ".";
-            //m_miniMapDisplayChar+=Color::RESET;
-            //m_mapDisplayChar+=Color::RESET;
+            m_mapDisplayChar = m_miniMapDisplayChar = ".";
             m_isWalkable = true;
+            m_colorPairMap = m_colorPairMiniMap = 6; // ⭐️ Assign the color pair ID
         }
         else if(displayChar=="W"){
-            m_miniMapDisplayChar+=Color::FG_BRIGHT_BLUE;
-            m_mapDisplayChar+=Color::FG_BRIGHT_BLUE;
-            m_mapDisplayChar += "≈";
-            m_miniMapDisplayChar += "≈";
-            m_miniMapDisplayChar+=Color::RESET;
-            m_mapDisplayChar+=Color::RESET;
+            m_mapDisplayChar = m_miniMapDisplayChar = "≈";
             m_isWalkable = false;
+            m_colorPairMap = m_colorPairMiniMap = 3; // ⭐️ Assign the color pair ID
         }
         else if(displayChar=="T"){
-            m_miniMapDisplayChar+=Color::FG_GREEN;
-            m_mapDisplayChar+=Color::FG_GREEN;
-            m_mapDisplayChar += "♣";
-            m_miniMapDisplayChar += "♣";
-            m_miniMapDisplayChar+=Color::RESET;
-            m_mapDisplayChar+=Color::RESET;
+            m_mapDisplayChar = m_miniMapDisplayChar = "♣";
             m_isWalkable = false;
+            m_colorPairMap = m_colorPairMiniMap = 2; // ⭐️ Assign the color pair ID
         }
         else if(displayChar=="P"){
             m_isWalkable = true;
-            m_miniMapDisplayChar+=Color::FG_YELLOW;
-            m_mapDisplayChar+=Color::FG_YELLOW;
-            m_mapDisplayChar += "♞";
-            m_miniMapDisplayChar += "♞";
-            m_miniMapDisplayChar+=Color::RESET;
-            m_mapDisplayChar+=Color::RESET;
+            m_mapDisplayChar = m_miniMapDisplayChar = "♞";
+            m_colorPairMap = m_colorPairMiniMap = 5; // ⭐️ Assign the color pair ID
+
             Character* playerPtr = &player;
             m_characterOnTile = playerPtr;
             player.set_x(x);
             player.set_y(y);
         }
         else if(displayChar=="G"){
-            m_miniMapDisplayChar+=Color::FG_RED;
-            m_mapDisplayChar = ".";
-            m_miniMapDisplayChar += "§";
-            m_miniMapDisplayChar+=Color::RESET;
+            m_mapDisplayChar = "."; // Goblin on ground
+            m_miniMapDisplayChar = "§"; // Goblin symbol
+            
+            m_colorPairMap = 6;
+            m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
+
             Character* goblin = new Goblin("Goblin", 50, 5);
             m_characterOnTile = goblin;
             m_isWalkable = false;
         }
-        // else if(displayChar=="QB1"){
-        //     m_tileCode = 111;
-        //     m_characterOnTile = new Boss();
-        //     m_displayChar = 'Ö';
-        //     m_reqQuest = new q2();
-        //     m_isWalkable = true;
+        // else if(displayChar=="QGW1"){
+            // m_mapDisplayChar = "."; 
+            // m_miniMapDisplayChar = "Ö";
+            // m_colorPairMap = 6;
+            // m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
+            // Character* goblin = new Goblin("Goblin", 50, 5);
+            // m_characterOnTile = goblin;
+            // m_isWalkable = false;
+            // doQuest=0;
+        // }
+        // else if(displayChar=="QGW1"){
+            // m_mapDisplayChar = "."; 
+            // m_miniMapDisplayChar = "Ö";
+            // m_colorPairMap = 6;
+            // m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
+            // Character* goblin = new Goblin("Goblin", 50, 5);
+            // m_characterOnTile = goblin;
+            // requiredQuestCompleted = quest[0];
+            // m_isWalkable = false;
+            // doQuest=1;
+        // }
+        // else if(displayChar=="QGW1"){
+            // m_mapDisplayChar = "."; 
+            // m_miniMapDisplayChar = "Ö";
+            // m_colorPairMap = 6;
+            // m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
+            // Character* goblin = new Goblin("Goblin", 50, 5);
+            // m_characterOnTile = goblin;
+            // requiredQuestCompleted = quest[1];
+            // m_isWalkable = false;
+            // doQuest=;
         // }
         else{
-            m_mapDisplayChar = "X";
-            m_miniMapDisplayChar = "X";
+            m_mapDisplayChar = m_miniMapDisplayChar = "X";
             m_isWalkable = false;
+            m_colorPairMap = m_colorPairMiniMap = 7; // ⭐️ Assign the default color pair
         }
 
       }
@@ -131,10 +142,6 @@ void Tile::setCharacter(Character* character) {
 //     m_reqQuest->isCompleted()=true;
 // }
 
-int Tile::getTileCode() {
-    return m_tileCode;
-}
-
 void Tile::setBounds(bool status) {
     outOfBounds = status;
 }
@@ -155,6 +162,33 @@ bool Tile::getBounds() {
     return outOfBounds;
 }
 
-void Tile::setTileCode(int code) {
-    m_tileCode = code;
+int Tile::get_map_color_pair() {
+    return m_colorPairMap;
+}
+int Tile::get_mini_map_color_pair() {
+    return m_colorPairMiniMap;
+}
+
+void Tile::set_mini_map_color_pair(int a){
+    m_colorPairMiniMap=a;
+}
+
+void Tile::set_map_color_pair(int a){
+    m_colorPairMap=a;
+}
+
+void Tile::seQuestStatus(bool status){
+    requiredQuestCompleted=status;
+}
+
+bool Tile::getQuestStatus(){
+    return requiredQuestCompleted;
+}
+
+int Tile::get_doQuest(){
+    return doQuest;
+}
+
+void Tile::set_doQuest(int a){
+    doQuest=a;
 }

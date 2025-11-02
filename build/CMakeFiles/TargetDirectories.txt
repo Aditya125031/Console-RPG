@@ -1,0 +1,4 @@
+C:/OOP-Project/Console-RPG/build/CMakeFiles/pdcurses_lib.dir
+C:/OOP-Project/Console-RPG/build/CMakeFiles/Console-RPG.dir
+C:/OOP-Project/Console-RPG/build/CMakeFiles/edit_cache.dir
+C:/OOP-Project/Console-RPG/build/CMakeFiles/rebuild_cache.dir

@@ -11,7 +11,6 @@
 #include <limits>
 #include <chrono>
 #include <cstdlib> // Required for std::system
-#include <conio.h>
 #include "../include/character.h"
 #include "../include/enemy.h"
 #include "../include/goblin.h"
@@ -25,7 +24,7 @@ class Tile{
         Tile();
         // ## Constructor ##
         // Initializes a tile with its visual representation and walkability.
-        Tile(Player& player, string displayChar = ".", int x=0, int y=0);
+        Tile(Player& player, vector<bool>& quest, string displayChar = ".", int x=0, int y=0);
 
         // ## Getters (Accessors) ##
         // These methods allow other parts of the code to safely read the tile's state.
@@ -44,10 +43,17 @@ class Tile{
         void setIsWalkable(bool);
         void setQuest();
         bool checkQuest();
-        int getTileCode();
-        void setTileCode(int);
         void setBounds(bool);
         bool getBounds();
+        bool getQuestStatus();
+        void seQuestStatus(bool);
+        int get_map_color_pair() ;
+        void set_map_color_pair(int) ;
+        int get_mini_map_color_pair() ;
+        void set_mini_map_color_pair(int) ;
+        int get_doQuest();
+        void set_doQuest(int);
+        
 
     private:
         // ## Attributes #
@@ -57,11 +63,12 @@ class Tile{
         string m_mapDisplayChar;  
         bool m_isWalkable;           // Can a character move onto this tile?
         Character* m_characterOnTile; // Pointer to a Character on this tile (nullptr if none)
+        bool requiredQuestCompleted;
         // Item* m_itemOnTile;          // Pointer to an Item on this tile (nullptr if none)
-        // Quest* m_reqQuest;
-        int m_tileCode;
         bool outOfBounds;
-
+        int m_colorPairMiniMap;
+        int m_colorPairMap;
+        int doQuest;
     };
 
 #endif // TILE_H

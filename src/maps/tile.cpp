@@ -220,3 +220,19 @@ void Tile::set_mini_map_color_pair(int a){
 void Tile::set_map_color_pair(int a){
     m_colorPairMap=a;
 }
+
+void Tile::seQuestStatus(bool status){
+    requiredQuestCompleted=status;
+}
+
+bool Tile::getQuestStatus(){
+    return requiredQuestCompleted;
+}
+
+int Tile::get_doQuest(){
+    return doQuest;
+}
+
+void Tile::set_doQuest(int a){
+    doQuest=a;
+}

@@ -192,3 +192,31 @@ int Tile::get_doQuest(){
 void Tile::set_doQuest(int a){
     doQuest=a;
 }
+int Tile::get_map_color_pair() {
+    return m_colorPairMap;
+}
+int Tile::get_mini_map_color_pair() {
+    return m_colorPairMiniMap;
+}
+
+void Tile::set_mini_map_color_pair(int a){
+    m_colorPairMiniMap=a;
+}
+
+void Tile::set_map_color_pair(int a){
+    m_colorPairMap=a;
+}
+int Tile::get_map_color_pair() {
+    return m_colorPairMap;
+}
+int Tile::get_mini_map_color_pair() {
+    return m_colorPairMiniMap;
+}
+
+void Tile::set_mini_map_color_pair(int a){
+    m_colorPairMiniMap=a;
+}
+
+void Tile::set_map_color_pair(int a){
+    m_colorPairMap=a;
+}

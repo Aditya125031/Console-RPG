@@ -320,8 +320,7 @@ void Game::move_character(Character& entity, int x, int y, Map& map){
         Character* target_ptr = map.getTileAt(newx,newy)->getCharacter();
         Enemy& target = static_cast<Enemy&>(*target_ptr);
         add_log_message("Combat Triggered!");
-        Combat c;
-        int k = c.fight(player, target);
+        int k = run_combat(player, target);
         if(k==0){
             // ⭐️ REPLACED: std::cout with mvprintw
             clear();

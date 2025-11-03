@@ -19,11 +19,11 @@ class Map {
 public:
     Map();
     // ## Constructor ##
-    Map(Player& player, vector<bool>& quest, int width = 0, int height = 0, string filename = "");
+    Map(Player& player, int width = 0, int height = 0, string filename = "");
 
     // ## Core Functionality ##
     // Loads a map layout from a specified text file. Returns false if it fails.
-    bool loadFromFile(const string& filename, vector<bool>& quest, Player& player);
+    bool loadFromFile(const string& filename, Player& player);
 
     // Renders the current map state to the console.
     void render();

@@ -18,6 +18,7 @@
 #include "../include/map.h"
 #include "../include/tile.h"
 #include "../include/player.h"
+#include "../include/colors.h"
 
 using namespace std;
 
@@ -25,12 +26,12 @@ Map::Map() {
     m_width = 0;
     m_height = 0;
 }
-Map::Map(Player& player,vector<bool>& quest, int width, int height, string filename) {
+Map::Map(Player& player, int width, int height, string filename) {
     m_width = width;
     m_height = height;
     // Note: Grid dimensions are typically [row][col], which corresponds to [height][width]
     m_grid.resize(height, vector<Tile>(width)); 
-    loadFromFile(filename, quest, player);
+    loadFromFile(filename, player);
 }
 
 void Map::get_minimap_view(Player& player, int view_width, int view_height, std::deque<string>& event_log) {
@@ -141,7 +142,7 @@ void Map::get_minimap_view(Player& player, int view_width, int view_height, std:
     mvprintw(current_row++, left_start_col, "%s", border_bottom.c_str());
 }
 
-bool Map::loadFromFile(const string& filename, vector<bool>& quest, Player& player) {
+bool Map::loadFromFile(const string& filename, Player& player) {
     ifstream inputFile(filename);
     if (!inputFile.is_open()) {
         // ⭐️ REPLACED: cerr with mvprintw
@@ -169,11 +170,11 @@ bool Map::loadFromFile(const string& filename, vector<bool>& quest, Player& play
                     i++;
                 }
                 // Your map is indexed as m_grid[row][col]
-                m_grid[row][col] = Tile(player, quest, tileChar, row, col); 
+                m_grid[row][col] = Tile(player, tileChar, row, col); 
             } else {
                 string tileChar = "";
                 tileChar += line[i];
-                m_grid[row][col] = Tile(player, quest, tileChar, row, col);
+                m_grid[row][col] = Tile(player, tileChar, row, col);
             }
             if(row==0 || row==m_height-1 || col==0 || col==m_width-1){
                 m_grid[row][col].setBounds(true);

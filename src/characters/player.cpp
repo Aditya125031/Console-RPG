@@ -2,6 +2,7 @@
 #include "../include/player.h"
 #include "../include/map.h"
 #include "../include/tile.h"
+#include "../include/colors.h"
 
 // ⭐️ Use the curses header instead of iostream
 // #include <iostream> 

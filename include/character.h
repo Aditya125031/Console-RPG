@@ -25,8 +25,8 @@ public:
     std::string get_name() const;
     int get_health() const;
     int get_max_health() const;
-    virtual int get_x(){};
-    virtual int get_y(){};
+    virtual int get_x(){return 0;}
+    virtual int get_y(){return 0;}
     virtual void set_x(int){};
     virtual void set_y(int){};
     unsigned getAttackInterval() const;

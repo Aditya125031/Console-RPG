@@ -9,7 +9,6 @@
 #include <limits>
 #include <chrono>
 #include <cstdlib> // Required for std::system
-#include <conio.h>
 #include "player.h" 
 #include "map.h"
 using namespace std;

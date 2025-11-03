@@ -18,8 +18,6 @@ public:
     std::string get_name() const; 
     std::chrono::steady_clock::time_point getNormalAttackReady() const;
     void setNormalAttackCooldown(float seconds);
-    void setNormalAttackInterval(float seconds);
-    void setSpecialAttackInterval(float seconds);
-    virtual void specialAbility(Character& target) = 0;
-    virtual void triggerDialogue() const = 0;
+    virtual void specialAbility(Character& target){};
+    virtual void triggerDialogue() const {};
 };

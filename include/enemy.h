@@ -5,6 +5,8 @@
 #include <vector>
 
 class Enemy : public Character {
+private:
+    double specialAttackInterval;
 protected:
     std::vector<std::string> dialogue;
     int speed;

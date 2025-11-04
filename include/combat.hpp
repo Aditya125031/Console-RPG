@@ -1,14 +1,9 @@
-#include "player.h"
-#include "enemy.h"
+#include "character.h"
 #ifndef COMBAT_HPP
 #define COMBAT_HPP
 
 class Combat {
-    private:
-        void start() const;
-        void end() const;
+    protected:
     public:
-        bool fight(Player&, Enemy&);
-        
 };
 #endif //COMBAT_HPP

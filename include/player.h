@@ -17,7 +17,6 @@ enum class PlayerType {
 class Player : public Character {
 private:
     PlayerType type;
-    double specialAttackInverval;
 protected:
     int max_mana;
     int mana;
@@ -25,8 +24,8 @@ protected:
     std::chrono::steady_clock::time_point normal_attack_ready;
     std::chrono::steady_clock::time_point special_attack_ready;
     std::chrono::steady_clock::time_point next_mana_regen;
-    
-    public:
+
+public:
     Player(std::string name, PlayerType type); 
     int get_x() override;
     int get_y() override;
@@ -34,7 +33,6 @@ protected:
     void set_y(int) override;
     void use_mana(int amount);
     void add_mana(int amount);
-    double getSpecialAttackInterval();
     void modify_maxmana(int amount);
     void update_mana_regen(std::chrono::steady_clock::time_point current_time);
     int get_mana() const;
@@ -50,8 +48,6 @@ protected:
     std::chrono::steady_clock::time_point get_special_attack_ready() const;
     void set_normal_attack_cooldown(float seconds);
     void set_special_attack_cooldown(float seconds);
-    void setSpecialAttackInterval(float seconds);
-    void setNormalAttackInterval(float seconds);
 };
 
 #endif

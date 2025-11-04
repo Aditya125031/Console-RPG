@@ -1,4 +1,3 @@
-
 #include "../include/character.h" 
 #include <iostream>
 using namespace std;
@@ -31,11 +30,12 @@ void Character::take_damage(int damage) {
 std::string Character::get_name() const {
     return this->name;
 }
-
 int Character::get_health() const {
     return this->health;
 }
-
 int Character::get_max_health() const {
     return this->maxHealth;
+}
+int Character::getAttackPower() const{
+    return this->attackPower;
 }

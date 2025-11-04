@@ -44,6 +44,7 @@ file(GLOB GAME_SRCS
     src/characters/*.cpp
     src/maps/*.cpp
     src/game.cpp
+    src/combat/*.cpp
 )
 
 # Create the executable target

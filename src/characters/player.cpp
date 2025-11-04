@@ -2,11 +2,7 @@
 #include "../include/player.h"
 #include "../include/map.h"
 #include "../include/tile.h"
-#include "../include/colors.h"
-
-// ⭐️ Use the curses header instead of iostream
-// #include <iostream> 
-#include "../extern/pdcurses/curses.h" // Assuming this is your path
+#include "../extern/pdcurses/curses.h"
 
 using namespace std;
 
@@ -56,15 +52,14 @@ void Player::show_details() const {
     mvprintw(row++, 0, "---------------------");
     mvprintw(row++, 0, "Name: %s", this->name.c_str());
     mvprintw(row++, 0, "Type: %s", get_type_string().c_str());
-    mvprintw(row++, 0, "Health: %d / %d", this->health, this->maxHealth); // Show max health too
+    mvprintw(row++, 0, "Health: %d / %d", this->health, this->maxHealth);
     mvprintw(row++, 0, "Attack Power: %d", this->attackPower);
     mvprintw(row++, 0, "Mana: %d", this->mana);
     mvprintw(row++, 0, "Stamina: %d", this->stamina);
     mvprintw(row++, 0, "---------------------");
 }
 
-void Player::special_move(Character& enemy) 
-{
+void Player::special_move(Character& enemy) {
     // Get the current cursor row to print messages clearly
     int row, col;
     getyx(stdscr, row, col); 
@@ -125,30 +120,13 @@ int Player::get_y() {
 }
 
 void Player::set_x(int a) {
-    this->coord_x=a;
+    this->coord_x = a;
 }
 
-void Player::set_y(int a){
-    this->coord_y=a;
+void Player::set_y(int a) {
+    this->coord_y = a;
 }
 
-std::chrono::steady_clock::time_point Player::get_normal_attack_ready() const {
-    return this->normal_attack_ready;
-}
-
-std::chrono::steady_clock::time_point Player::get_special_attack_ready() const {
-    return this->special_attack_ready;
-}
-
-void Player::set_normal_attack_cooldown(float seconds) {
-    this->normal_attack_ready = std::chrono::steady_clock::now() + 
-        std::chrono::microseconds(static_cast<int>(seconds * 1000000));
-}
-
-void Player::set_special_attack_cooldown(float seconds) {
-    this->special_attack_ready = std::chrono::steady_clock::now() + 
-        std::chrono::microseconds(static_cast<int>(seconds * 2500000));
-}
 void Player::modify_max_health(int amount) {
     this->maxHealth += amount;
 
@@ -175,9 +153,60 @@ void Player::modify_max_mana(int amount) {
         this->mana = this->max_mana;
     }
 }
+
 void Player::use_mana(int amount) {
     this->mana -= amount; 
     if (this->mana < 0) {
         this->mana = 0;
     }
+}
+
+void Player::setNormalAttackInterval(double sec) {
+    this->normalAttackInterval = sec;
+}
+
+double Player::getNormalAttackInterval() const {
+    return this->normalAttackInterval;
+}
+
+void Player::setSpecialAttackInterval(double sec) {
+    this->specialAttackInterval = sec;
+}
+
+double Player::getSpecialAttackInterval() const {
+    return this->specialAttackInterval;
+}
+
+// Missing method implementations that were declared in the header
+void Player::add_mana(int amount) {
+    this->mana += amount;
+    if (this->mana > this->max_mana) {
+        this->mana = this->max_mana;
+    }
+}
+
+void Player::modify_maxmana(int amount) {
+    this->max_mana += amount;
+    if (this->mana > this->max_mana) {
+        this->mana = this->max_mana;
+    }
+}
+
+void Player::update_mana_regen(std::chrono::steady_clock::time_point current_time) {
+    // Implement mana regeneration logic here
+    // This would typically be called periodically in the game loop
+}
+
+int Player::get_mana() const {
+    return this->mana;
+}
+
+int Player::get_max_mana() const {
+    return this->max_mana;
+}
+
+std::string Player::move(int x, int y, Map& map) {
+    // Implement movement logic here
+    // Return a string describing the movement result
+    return "Moved to position (" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }

@@ -6,6 +6,6 @@ class BoneGolem : public Enemy {
 public:
     BoneGolem();
 
-    //void specialAbility(Character& target) override;
+    void specialAbility(Character& target) override;
     void triggerDialogue() const override;
 };

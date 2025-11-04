@@ -21,10 +21,9 @@ using namespace std;
 #include "../include/enemy.h"
 #include "../include/map.h"
 #include "../include/character.h"
-#include "../include/tile.h"
+//#include "../include/tile.h"
 #include "../include/items.h"
 #include "../include/goblin.h"
-#include "../include/colors.h"
 
 // --- CONSTANTS ---
 const unsigned int MAX_LOG_LINES = 10;
@@ -34,12 +33,12 @@ int run_combat(Player& hero, Enemy& target) {
     clear();
     int row = 0;
     
-    // ⭐️ REPLACED: std::cout with mvprintw
+    //REPLACED: std::cout with mvprintw
     mvprintw(row++, 0, "\n--- A wild %s appears! ---", target.get_name().c_str());
 
     while (hero.isAlive() && target.isAlive()) {
         row++;
-        // ⭐️ REPLACED: std::cout with mvprintw
+        //REPLACED: std::cout with mvprintw
         mvprintw(row++, 0, "%s HP: %d | %s HP: %d",
                  hero.get_name().c_str(), hero.get_health(),
                  target.get_name().c_str(), target.get_health());
@@ -53,7 +52,9 @@ int run_combat(Player& hero, Enemy& target) {
 
         int choice;
         // ⭐️ REPLACED: std::cin >> choice with scanw
+        echo(); // Enable echo for user input
         scanw("%d", &choice);
+        noecho(); // Disable echo after input
         row++; // Move past the input line
 
         if (choice == 1) {
@@ -327,13 +328,14 @@ void Game::explore_forest(Player& player, Map& map) {
             default:
                 add_log_message("Invalid key pressed.");
         }
-        this_thread::sleep_for(chrono::milliseconds(150));
+        //this_thread::sleep_for(chrono::milliseconds(150));
         flushinp();
     }
 }
 
 void Game::game_loop(Player& player) {
-    Map stage1(player, 153, 37, "../data/map.txt");
+    vector<bool> quest(5,false);
+    Map stage1(player, quest, 153, 37, "../data/map.txt");
     // ⭐️ REPLACED: std::cout with printw
     printw("\n--- You find your way to a nearby village to rest. ---\n");
     bool isGameRunning = true;
@@ -396,6 +398,11 @@ void Game::move_character(Character& entity, int x, int y, Map& map){
     int newx=entity.get_x()+y;
     int newy=entity.get_y()+x;
     if(map.getTileAt(newx,newy)->getCharacter() != nullptr) {
+        if(!map.getTileAt(newx,newy)->getQuestStatus()){
+            add_log_message("You are not not powerful enough!");
+            add_log_message("Meet Hattori at (X,X)");
+            return;
+        }
         Player& player = static_cast<Player&>(entity);
         // NOTE: You need to be careful with the lifetime of the Goblin here.
         // If it's stored on the map, it should be a pointer/unique_ptr.

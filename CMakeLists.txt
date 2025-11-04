@@ -1,22 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
 project(Console-RPG CXX C)
 
-# --- VENDORIZED PDCURSES LIBRARY SETUP ---
-
 set(PDCURSES_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extern/pdcurses")
 
-# Define file groups for PDCurses source files (Use case-insensitive globbing)
 file(GLOB PDCURSES_COMMON_SRCS "${PDCURSES_ROOT_DIR}/pdcurses/*.[cC]")
 file(GLOB PDCURSES_WINCON_SRCS "${PDCURSES_ROOT_DIR}/wincon/*.[cC]")
 
-# DEBUGGING MESSAGES: SHOWS WHAT FILES WERE FOUND
-# message(STATUS "COMMON PATH USED: ${PDCURSES_ROOT_DIR}/pdcurses/*.[cC]")
-# message(STATUS "WINCON PATH USED: ${PDCURSES_ROOT_DIR}/wincon/*.[cC]")
-# message(STATUS "COMMON SOURCES FOUND: ${PDCURSES_COMMON_SRCS}")
-# message(STATUS "WINCON SOURCES FOUND: ${PDCURSES_WINCON_SRCS}")
-# END DEBUGGING MESSAGES
-
-# Create the static library target
 add_library(pdcurses_lib STATIC
     ${PDCURSES_COMMON_SRCS}
     ${PDCURSES_WINCON_SRCS}
@@ -43,6 +32,9 @@ file(GLOB GAME_SRCS
     src/main.cpp
     src/characters/*.cpp
     src/maps/*.cpp
+    src/items/*.cpp
+    src/items/Equipables/*.cpp
+    src/items/Usables/*.cpp
     src/game.cpp
 )
 

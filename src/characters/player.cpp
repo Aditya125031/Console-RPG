@@ -156,7 +156,7 @@ int Player::get_attack_power() const {
 }
 
 void Player::add_health(int amount) {
-    this->health += amount;\
+    this->health += amount;
     if (this->health > this->maxHealth) {
         this->health = this->maxHealth;
     }

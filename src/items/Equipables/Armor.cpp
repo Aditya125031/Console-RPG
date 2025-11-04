@@ -4,15 +4,15 @@
 #include <bits/stdc++.h>
 #include "../include/game.h"
 
-string Armor::get_armor_name()
-{
-    return armor_name;
-}
+// string Armor::get_armor_name()
+// {
+//     return armor_name;
+// }
 
-string Armor::get_armor_description()
-{
-    return armor_description;
-}
+// string Armor::get_armor_description()
+// {
+//     return armor_description;
+// }
 
 int Armor::get_armor_health()
 {

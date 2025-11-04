@@ -32,6 +32,9 @@ file(GLOB GAME_SRCS
     src/main.cpp
     src/characters/*.cpp
     src/maps/*.cpp
+    src/items/*.cpp
+    src/items/Equipables/*.cpp
+    src/items/Usables/*.cpp
     src/game.cpp
 )
 

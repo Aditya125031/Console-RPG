@@ -1,40 +1,27 @@
 #pragma once
-#include <bits/stdc++.h>
-#include "../include/character.h"
-#include "../include/player.h"
-#include "../include/game.h"
+#include <string>
+#include <vector>
+#include <deque>
+#include <cmath>
+#include <limits>
+#include <cstdlib>
+#include <thread>
+#include <chrono>
+#include "character.h"
+#include "player.h"
+// #include "game.h"
+class Game;
+class Player;
 using namespace std;
 
 class Item
 {
     protected:
-        // bool equipped=false;
         string item_name="";
         string item_description="";
         int code=0;
-        // std::chrono::steady_clock::time_point last_use;
-
 
     public:
-        // void sword_stats()
-        // {
-        //     cout<<"Weapon Name : "<<item_name<<endl;
-        //     cout<<"attack : "<<extra_attack<<endl;
-        //     cout<<"extra_mana : "<<extra_mana<<endl;
-        // }
-        // void armor_stats()
-        // {
-        //     cout<<"Armor Name : "<<item_name<<endl;
-        //     cout<<"Health : "<<extra_health<<endl;
-        //     cout<<"Mana : "<<extra_mana<<endl;
-        // }
-        // void potion_stats()
-        // {
-        //     cout<<"Potion Name : "<<item_name<<endl;
-        //     cout<<"Health : "<<extra_health<<endl;
-        //     cout<<"Mana : "<<extra_mana<<endl;
-        // }
-
         string get_item_name() 
         {
             return item_name;
@@ -43,12 +30,6 @@ class Item
         {
             return item_description;
         }
-        void equip();
-        void unequip();
-        bool is_equipped() const;
-        void virtual display();
-        // virtual void apply_effects(Player& player, Game& world);
-        // virtual void remove_effects(Player& player, Game& world);
 };
 
 class Equipables : public Item
@@ -75,8 +56,6 @@ class Equipables : public Item
 class Weapon : public Equipables
 {
     protected:
-            // string item_name="";
-            // string item_description="";
             int extra_attack=0;
             int extra_weapon_mana=0;
             double weapon_cooldown=0.0;
@@ -110,11 +89,6 @@ class Armor : public Equipables
         int armor_mana=0;
 
     public:
-        Armor()
-        {
-            // Default constructor for Armor
-        }
-
         int get_armor_health();
         int get_armor_mana();
         void armor_apply_effects(Player& player,Game& world);
@@ -128,11 +102,6 @@ class Usables : public Item
         int usable_mana=0;
 
     public:
-        Usables()
-        {
-            // Default constructor for Usables
-        }
-
         int get_usable_health();
         int get_usable_mana();
 
@@ -179,48 +148,7 @@ class Soul_Reaper : public Weapon
             special = true;
         }
         
-        void special_attack(Player& player, Character& enemy, Game& world) override
-        {
-            if(special == true)
-            {
-                if(!can_use_special())
-                {
-                    double remaining = get_cooldown();
-                    world.add_log_message("Soul Reaper's special attack is on cooldown. " + to_string(remaining) + " seconds remaining.");
-                    return;
-                }
-                if(player.get_mana() < 10)
-                {
-                    world.add_log_message("Not enough mana to perform Soul Reaper's special attack.");
-                    return;
-                }
-
-                double health_percentage = (double)player.get_health() / player.get_max_health();
-                double damage_multiplier;
-                
-                if (health_percentage < 0.4) 
-                {
-                    damage_multiplier = 2.5;
-                    world.add_log_message("Desperate times! Soul Reaper resonates with your fading vitality...");
-                    player.modify_health(-10);
-                } 
-                else 
-                {
-                    damage_multiplier = 2.0;
-                    world.add_log_message("Soul Reaper draws upon your life force...");
-                    player.modify_health(-20); 
-                }
-
-                int damage = player.get_attack_power() * damage_multiplier;
-                enemy.take_damage(damage);
-                player.use_mana(12);
-
-                world.add_log_message("Soul Reaper's 'SOUL HARVEST' unleashed! Dealt " + to_string(damage) + " damage to the enemy.");
-                world.add_log_message("Player healed for 20 health.");
-                
-                update_sa_last_use();
-            }
-        }
+        void special_attack(Player& player, Character& enemy, Game& world) override;
 };
 
 class God_Slayer : public Weapon
@@ -237,34 +165,7 @@ class God_Slayer : public Weapon
             special=true;
         }
         
-        void special_attack(Player& player,Character& enemy,Game& world) override
-        {
-            if(special==true)
-            {
-                if(!can_use_special())
-                {
-                    double remaining = get_cooldown();
-                    world.add_log_message("God Slayer's special attack is on cooldown. " + to_string(remaining) + " seconds remaining.");
-                    return;
-                }
-
-                if(player.get_mana()<15)
-                {
-                    world.add_log_message("Not enough mana to perform God Slayer's special attack.");
-                    return;
-                }
-
-                int damage = player.get_attack_power() * 1.75;
-                enemy.take_damage(damage);
-                player.use_mana(15);
-                player.modify_health(30);
-
-                world.add_log_message("God Slayer's 'DIVINE SLASH' unleashed! Dealt " + to_string(damage) + " damage to the enemy.");
-                world.add_log_message("Player healed for 40 health.");
-                
-                update_sa_last_use();
-            }
-        }
+        void special_attack(Player& player, Character& enemy, Game& world) override;
 };
 
 class Orb_of_Avarice : public Weapon
@@ -288,9 +189,22 @@ class Silent_Death : public Weapon
         {
             item_description = "A Bow that strikes without a sound, delivering swift and deadly justice from the shadows.";
             item_name = "Silent_Death";
-            extra_attack=10;
-            extra_weapon_mana=10;
+            extra_attack=8;
             weapon_cooldown=1.3;
+            code=1;
+        }
+};
+
+class Eclipse_Striker : public Weapon
+{
+    public:
+        Eclipse_Striker()
+        {
+            item_description = "Crafted during a total solar eclipse, its arrows blot out the very light as they fly.";
+            item_name = "Eclipse_Striker";
+            extra_attack=15;
+            extra_weapon_mana=10;
+            weapon_cooldown=1.5;
             code=1;
         }
 };
@@ -302,41 +216,14 @@ class Void_Embrace : public Weapon
         {
             item_description = "A bow crafted from the essence of the void, its arrows seem to disappear into nothingness before striking.";
             item_name="Void_Embrace";
-            extra_attack=25;
+            extra_attack=20;
             extra_weapon_mana=20;
             weapon_cooldown=2.0;
             code=1;
             special=true;
         }
 
-        void special_attack(Player& player,Character& enemy,Game& world) override
-        {
-            if(special==true)
-            {
-                if(!can_use_special())
-                {
-                    double remaining = get_cooldown();
-                    world.add_log_message("Void Embrace's special attack is on cooldown. " + to_string(remaining) + " seconds remaining.");
-                    return;
-                }
-
-                if(player.get_mana()<25)
-                {
-                    world.add_log_message("Not enough mana to perform Void Embrace's special attack.");
-                    return;
-                }
-
-                int damage = player.get_attack_power() * 2.0; 
-                enemy.take_damage(damage);
-                player.use_mana(50);
-                player.modify_health(30); 
-
-                world.add_log_message("Void Embrace's special attack unleashed! Dealt " + to_string(damage) + " damage to the enemy.");
-                world.add_log_message("Player healed for 20 health.");
-
-                update_sa_last_use();
-            }
-        }
+        void special_attack(Player& player, Character& enemy, Game& world) override;
 };
 
 class Elder_Wand : public Weapon
@@ -367,56 +254,7 @@ class Oblivion_Shard : public Weapon
             special = true;
         }
         
-        void special_attack(Player& player, Character& enemy, Game& world) override
-        {
-            if(special == true)
-            {
-                if(!can_use_special())
-                {
-                    double remaining = get_cooldown();
-                    world.add_log_message("The Oblivion Shard's special attack is on cooldown. " + to_string(remaining) + " seconds remaining.");
-                    return;
-                }
-
-                if(player.get_mana() < 45)
-                {
-                    world.add_log_message("The Shard demands more soul-energy.");
-                    return;
-                }
-
-                double mana_percentage = (double)player.get_mana() / player.get_max_mana();
-                double damage_multiplier;
-                
-                if (mana_percentage > 0.7) 
-                {
-                    damage_multiplier = 2.0;
-                    world.add_log_message(" The Shard whispers... you have used BLACK FLASH!");
-                } 
-                else if (mana_percentage > 0.4) 
-                {
-                    damage_multiplier = 2.5;
-                    world.add_log_message("The Shard screams! You haves used HOLLOW PURPLE !");
-                }
-                else 
-                {
-                    damage_multiplier = 3.0;
-                    world.add_log_message("Depleting Mana!,You use your domain expansion INFINITE VOID!");
-                    player.take_damage(15);
-                    world.add_log_message("Low on Mana! You take 15 damage.");
-                }
-
-                int base_damage = player.get_attack_power();
-                int damage = base_damage * damage_multiplier;
-                
-                enemy.take_damage(damage);
-                player.use_mana(45);
-
-                world.add_log_message("Oblivion deals " + to_string(damage) + " damage!");
-                world.add_log_message("Mana consumed: 45, Remaining: " + to_string(player.get_mana()) + "/" + to_string(player.get_max_mana()));
-                
-                update_sa_last_use();
-            }
-        }
+        void special_attack(Player& player, Character& enemy, Game& world) override;
 };
 
 class Shadowhide_Armor : public Armor
@@ -482,61 +320,61 @@ class Aether_Robe : public Armor
         }
 };
 
-class Small_Health_Potion : public Usables
+class Health_Potion : public Usables
 {
     public:
-        Small_Health_Potion()
+        Health_Potion()
         {
             item_description = "A red potion that restores health when consumed.";
-            item_name = "Health_Potion";
+            item_name = "Health Potion";
             usable_health = 30;
             code=3;
         }
 };
 
-class Medium_Health_Potion : public Usables
+class Angel_Blessings : public Usables
 {
     public:
-        Medium_Health_Potion()
+        Angel_Blessings()
         {
-            item_description = "A medium red potion that restores a moderate amount of health when consumed.";
-            item_name = "Medium_Health_Potion";
+            item_description = "A divine potion blessed by angels, restoring a moderate amount of health when consumed.";
+            item_name = "Angel's Blessings";
             usable_health = 50;
             code=3;
         }
 };
 
-class Large_Health_Potion : public Usables
+class Elixir_Of_Life : public Usables
 {
     public:
-        Large_Health_Potion()
+        Elixir_Of_Life()
         {
-            item_description = "A large red potion that restores a significant amount of health when consumed.";
-            item_name = "Large_Health_Potion";
+            item_description = "Elixir of life, healing wounds and increasing vitality.";
+            item_name = "Elixir Of Life";
             usable_health = 70;
             code=3;
         }
 };
 
-class Small_Mana_Potion : public Usables
+class Mana_Potion : public Usables
 {
     public:
-        Small_Mana_Potion()
+        Mana_Potion()
         {
             item_description = "A blue potion that restores mana when consumed.";
-            item_name = "Mana_Potion";
+            item_name = "Mana Potion";
             usable_mana = 30;
             code=3;
         }
 };
 
-class Medium_Mana_Potion : public Usables
+class Dragon_Breath : public Usables
 {
     public:
-        Medium_Mana_Potion()
+        Dragon_Breath()
         {
-            item_description = "A medium blue potion that restores a moderate amount of mana when consumed.";
-            item_name = "Medium_Mana_Potion";
+            item_description = "A mystical potion brewed from dragon's breath, restoring a moderate amount of mana when consumed.";
+            item_name = "Dragon Breath";
             usable_mana = 50;
             code=3;
         }

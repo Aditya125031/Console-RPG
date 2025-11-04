@@ -3,6 +3,7 @@
 #include "character.h"
 #include <string>
 #include <vector>
+#include "item.h"
 
 class Enemy : public Character {
 private:        
@@ -20,4 +21,6 @@ public:
     double getNormalAttackInterval() const;
     virtual void specialAbility (Character& target) {};
     virtual void triggerDialogue() const {};
+    void Enemy::setNormalAttackCooldown(float seconds);
+    std::vector<Item> getLoot(const Player& player) const;
 };

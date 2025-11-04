@@ -12,7 +12,6 @@
 #include <chrono>
 #include <cstdlib> // Required for std::system
 #include "../include/character.h"
-#include "../include/enemy.h"
 #include "../include/goblin.h"
 #include "../include/items.h"
 using namespace std;

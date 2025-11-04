@@ -52,7 +52,7 @@ Tile::Tile(Player& player, string displayChar, int x, int y)
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
 
-            Character* goblin = new Goblin("Goblin", 50, 5);
+            Character* goblin = new Goblin();
             m_characterOnTile = goblin;
             m_isWalkable = false;
         }

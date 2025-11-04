@@ -1,23 +1,20 @@
-#include "../include/giant.h"
+#include "../include/orc.h"
 #include "../include/items.h"
 #include "../include/player.h"
 #include <iostream>
-#include <cstdlib>
-
-GiantGoblin::GiantGoblin()
-    : Enemy("Giant Goblin", 180, 15) 
+#include <cstdlib> 
+Orc::Orc()
+    : Enemy("Orc",120,18)  
 {
-    dialogue.push_back("Me bigger! Me stronger!");
-    dialogue.push_back("CRUSH PUNY THING!");
-    dialogue.push_back("WAAAGH!");
+    dialogue.push_back("Smash the weakling!");
+    dialogue.push_back("Meat's back on the menu!");
+    dialogue.push_back("I'll crush your bones!");
 }
-
-void GiantGoblin::triggerDialogue() const {
-    if (!dialogue.empty()) {
-        std::cout << get_name() << " roars: \"" << dialogue[rand() % dialogue.size()] << "\"\n";
-    }
+void Orc::triggerDialogue() const 
+{
+    std::cout << get_name() << " bellows: \"" << dialogue[rand() % dialogue.size()] << "\"\n";
 }
-std::vector<Item> GiantGoblin::getLoot(const Player& player) const
+std::vector<Item> Orc::getLoot(const Player& player) const
 {
     std::vector<Item> allLoot = Enemy::getLoot(player);
 

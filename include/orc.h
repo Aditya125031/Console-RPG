@@ -1,12 +1,15 @@
-#pragma once
+#ifndef ORC_H
+#define ORC_H
 #include "enemy.h" 
 #include <chrono>
 #include <string>
 #include <vector>
 
-class GiantGoblin : public Enemy {
+class Orc : public Enemy 
+{
 public:
-    GiantGoblin();
+    Orc();
     std::vector<Item> getLoot(const Player& player) const override;
     virtual void triggerDialogue() const override;
 };
+#endif

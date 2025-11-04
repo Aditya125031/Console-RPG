@@ -7,11 +7,14 @@
 
 class Goblin : public Enemy {
 public:
-    Goblin(std::string name, int health, int attackPower);
+    Goblin();
+    // Goblin(std::string name, int health, int attackPower);
 
     // We MUST provide implementations for the pure virtual functions
     //void specialAbility(Character& target) override;
-    void triggerDialogue() const override;
+    std::vector<Item> getLoot(const Player& player) const override;
+    virtual void triggerDialogue() const override;
+    virtual void specialAbility(Character& target) override;
 };
 
 #endif //GOBLIN_H

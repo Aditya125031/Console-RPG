@@ -1,15 +1,12 @@
-#ifndef GOBLIN_H
-#define GOBLIN_H
+#pragma once
 #include "enemy.h" 
 #include <chrono>
 #include <string>
 #include <vector>
 
-class Goblin : public Enemy {
+class GiantGoblin : public Enemy {
 public:
-    Goblin();
+    GiantGoblin();
     std::vector<Item> getLoot(const Player& player) const override;
     virtual void triggerDialogue() const override;
-    virtual void specialAbility(Character& target) override;
 };
-#endif

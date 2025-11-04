@@ -15,6 +15,7 @@
 #include "../include/infernalimp.h"
 #include "../include/necromancer.h"
 #include "../include/imp.h"
+#include "../include/goblin.h"
 #include "../include/giant.h"
 #include "../include/stoneimp.h"
 #include "../include/final_boss.h"
@@ -67,7 +68,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
 
-            Character* goblin = new Goblin("Goblin", 50, 5);
+            Character* goblin = new Goblin();
             m_characterOnTile = goblin;
             m_isWalkable = false;
         }

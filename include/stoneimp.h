@@ -9,7 +9,7 @@ private:
 public:
     StoneImp(); // Constructor
     void triggerDialogue() const override;
-
+    std::vector<Item> getLoot(const Player& player) const override;
     // Optional: Override take_damage to implement defense boost
     // void take_damage(int damage) override;
 };

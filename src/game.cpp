@@ -33,12 +33,12 @@ int run_combat(Player& hero, Enemy& target) {
     clear();
     int row = 0;
     
-    // ⭐️ REPLACED: std::cout with mvprintw
+    //REPLACED: std::cout with mvprintw
     mvprintw(row++, 0, "\n--- A wild %s appears! ---", target.get_name().c_str());
 
     while (hero.isAlive() && target.isAlive()) {
         row++;
-        // ⭐️ REPLACED: std::cout with mvprintw
+        //REPLACED: std::cout with mvprintw
         mvprintw(row++, 0, "%s HP: %d | %s HP: %d",
                  hero.get_name().c_str(), hero.get_health(),
                  target.get_name().c_str(), target.get_health());

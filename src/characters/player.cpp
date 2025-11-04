@@ -1,8 +1,9 @@
 // Player.cpp
-#include "../include/player.h"
 #include "../include/map.h"
 #include "../include/tile.h"
 #include "../include/colors.h"
+#include"../include/player.h"
+#include"../include/inventory.hpp"
 
 // ⭐️ Use the curses header instead of iostream
 // #include <iostream> 
@@ -12,6 +13,9 @@ using namespace std;
 
 Player::Player(std::string name, PlayerType type)
     : Character(name, 100, 10), type(type) {
+        inventory.pickup("Healing Potion",2);
+        inventory.pickup("Mana Potion",1);
+        inventory.eq[0]="Leather Armour";
     switch (type) {
         case PlayerType::Swordsman:
             this->health = 150;

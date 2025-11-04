@@ -3,36 +3,25 @@
 #include<iostream>
 #include <map>
 #include<set>
-<<<<<<< HEAD
 #include<vector>
 #include<string>
-=======
->>>>>>> f7cb41a (wip inventory.attempting to rebase)
 using namespace std;
 class Inventory
 {
     public:
-<<<<<<< HEAD
     const int c=20;
     int t=0;
      map<string, int> hash;
-     vector<string> itemq{21};
-     vector<int>quantity{21};
-     vector<string>eq{2};
-=======
-    int c=20;
-    int t=0;
-     map<string, int> hash;
-     map<string,int> itemq;
->>>>>>> f7cb41a (wip inventory.attempting to rebase)
+     vector<string> itemq;
+     vector<int>quantity;
+     vector<string>eq;
      set<string> sub1={"Leather Armour","Iron Armour","Legendary Armour"};
      set<string> sub2={"Sword","Katana","Legendary Sword"};
     Inventory()
     {
-<<<<<<< HEAD
-
-=======
->>>>>>> f7cb41a (wip inventory.attempting to rebase)
+        itemq.resize(21,"");
+        quantity.resize(21,0);
+        eq.resize(2,"");
         hash["Healing Potion"]=10;
         hash["Mana Potion"]=10;
         hash["Leather Armour"]=1;
@@ -42,7 +31,6 @@ class Inventory
         hash["Katana"]=1;
         hash["Legendary Sword"]=1;
     }
-<<<<<<< HEAD
     int pickup(string,int);
     void drop(int);
     int find(string);
@@ -52,15 +40,10 @@ class Inventory
     void equipsword(string);
     void remove(string);
     void use_from_inventory(int);
-    int findequip(string);
+    bool find_sword();
     void unequipsword();
     void unequiparmour();
     void displayequip();
-=======
-    void pickup(string,int);
-    void drop(string);
-  //  map equip();
-    void display();
->>>>>>> f7cb41a (wip inventory.attempting to rebase)
+    bool find_armour();
 };
 #endif

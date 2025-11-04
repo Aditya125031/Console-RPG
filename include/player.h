@@ -2,7 +2,7 @@
 #define PLAYER_H
 
 #include "../include/character.h"  
-#include "inventory.hpp"
+#include"../include/inventory.hpp"
 #include <string>
 #include <chrono>
 using namespace std;
@@ -27,7 +27,7 @@ protected:
     std::chrono::steady_clock::time_point next_mana_regen;
 
 public:
-    Inventory inventory;
+Inventory inventory;
     Player(std::string name, PlayerType type); 
     int get_x() override;
     int get_y() override;
@@ -42,7 +42,6 @@ public:
     void add_health(int amount);
     void modify_max_health(int amount);
     void modify_max_mana(int amount);
-    Inventory inventory;
     std::string get_type_string() const;
     string move(int , int , Map& map); 
     void show_details() const; 

@@ -11,7 +11,6 @@
 #include <cstdlib> // Required for std::system
 #include "player.h" 
 #include "map.h"
-#include "inventory.hpp"
 using namespace std;
 
 class Game

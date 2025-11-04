@@ -16,7 +16,6 @@
 using namespace std;
 
 // Your project headers
-#include"../include/inventory.hpp"
 #include "../include/game.h"
 #include "../include/player.h"
 #include "../include/enemy.h"
@@ -99,30 +98,97 @@ int run_combat(Player& hero, Enemy& target) {
         return 0; // Loss
     }
 }
-    void open_inventory(Player& player)
+   void open_inventory(Player& player)
+{
+    // 1. CRITICAL: Clear the entire screen (clears the map)
+    clear(); 
+    
+    // Get screen dimensions for positioning text
+    int max_y, max_x;
+    getmaxyx(stdscr, max_y, max_x); 
+    
+    char x;
+    int input_val;
+
+    // --- Initial Display ---
+    // Display inventory content using global Curses functions
+    
+    
+    // Refresh the screen to display the inventory and menu
+    refresh();
+
+    // Get user input (will read from the screen)
+    x = '1'; 
+
+    // --- Main Loop ---
+    while (x != '3')
     {
-         char x;
-        player.inventory.display();
-        cout<<"Press 1 to pick items.       Press 2 to drop items.          Press 3 to return to game."<<endl;
-        cin >>x;
-        while(x!='3')
-        {
-            switch(x){
-            case '1':
-            player.inventory.pickup("Healing Potion",2);
-            break;
-            case '2':
-            player.inventory.drop("Healing Potion");
-            break;
-            case '3':
-            x='3';
-            }
-            if(x=='3')
-            break;
-            player.inventory.display();
-             cin>>x;
+        // Clear the screen for a clean redraw after action
+        if (is_termresized()) {
+            resize_term(0, 0);
+            clear();
+            refresh();
+            continue; 
         }
+        clear();
+        player.inventory.display(); 
+
+    // Print the menu instructions near the bottom of the screen
+        mvprintw(max_y - 3, 2, "Press 1 to pick items.   Press 2 to drop items.   Press 3 to return to game.");
+        echo();
+        nocbreak();
+        scanw("%c", &x);
+        cbreak(); 
+         noecho();
+        switch (x) {
+            case '1': {
+                // Assuming pickup() is updated to use Curses I/O and display messages
+                // NOTE: Update the parameters if pickup needs more than just item name and quantity
+                printw("\n Enter the slot index you want to use\n");
+                echo();
+                nocbreak();
+                 scanw("%d", &input_val);
+                cbreak(); 
+                noecho();
+                player.inventory.use_from_inventory(input_val); 
+                
+                break;
+            }
+            case '2': {
+                
+                mvprintw(max_y - 5, 2, "Enter item slot index to drop (1-%d): ", player.inventory.c);
+                echo();
+                nocbreak();
+                 scanw("%d", &input_val);
+                cbreak(); 
+                noecho();
+                player.inventory.drop(input_val); 
+                break;
+            }
+            case '3':
+                break;
+            default:
+                mvprintw(max_y - 2, 2, "Invalid choice. Please press 1, 2, or 3.");
+                break;
+        }
+
+        // --- Loop Redraw & Input ---
+        // Redraw inventory after the action
+        
+        // Print the menu instructions again
+        //mvprintw(max_y - 3, 2, "Press 1 to pick items.   Press 2 to drop items.   Press 3 to return to game.");
+        
+        // Show changes
+        refresh();
+          
+        // Get next command
+        
     }
+    
+    // 2. Clear screen when exiting inventory (ready for map redraw)
+    clear();
+    refresh(); 
+}
 void Game::add_log_message(std::string message) {
     event_log.push_front(message);
     while (event_log.size() > MAX_LOG_LINES) {

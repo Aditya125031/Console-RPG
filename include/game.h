@@ -21,11 +21,11 @@ class Game
     public:
         void game_loop(Player& player);
         void display_welcome_message();
-        void explore_forest(Player& player, Map& map);
+        void explore_forest(Player& player, Map& map, vector<bool>& quest);
         void add_log_message(std::string message);
         void display_dashboard(Player& player, Map& map); // New render function
         void show_full_map(Map& map);
-        void move_character(Character&, int, int, Map&);
+        void move_character(Character&, int, int, Map&, vector<bool>&);
 };
 
 #endif

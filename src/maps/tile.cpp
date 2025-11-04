@@ -25,7 +25,7 @@ Tile::Tile() {}
 
 // Constructor implementation
 Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y)
-    : m_isWalkable(true), m_characterOnTile(nullptr), outOfBounds(false), requiredQuestCompleted(true), // Always initialize pointers to nullptr
+    : m_isWalkable(true), m_characterOnTile(nullptr), outOfBounds(false), requiredQuestCompleted(-1), // Always initialize pointers to nullptr
         doQuest(-1)
     //   ,m_itemOnTile(nullptr), 
     { 
@@ -132,7 +132,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
             Character* orc = new OrcRaider();
             m_characterOnTile = orc;
-            requiredQuestCompleted = quest[0];
+            requiredQuestCompleted = 0;
             m_isWalkable = false;
             doQuest=1;
         }
@@ -143,7 +143,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
             Character* golem = new BoneGolem();
             m_characterOnTile = golem;
-            requiredQuestCompleted = quest[1];
+            requiredQuestCompleted = 1;
             m_isWalkable = false;
             doQuest=2;
         }
@@ -154,7 +154,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
             Character* infimp = new InfernalImp();
             m_characterOnTile = infimp;
-            requiredQuestCompleted = quest[1];
+            requiredQuestCompleted = 2;
             m_isWalkable = false;
             doQuest=3;
         }
@@ -165,7 +165,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
             Character* golem = new BoneGolem();
             m_characterOnTile = golem;
-            requiredQuestCompleted = quest[1];
+            requiredQuestCompleted = 3;
             m_isWalkable = false;
             doQuest=4;
         }
@@ -176,9 +176,9 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMiniMap = 5; // ⭐️ Assign the color pair ID
             Character* lichlord = new LichLord();
             m_characterOnTile = lichlord;
-            requiredQuestCompleted = quest[1];
+            requiredQuestCompleted = 4;
             m_isWalkable = false;
-            doQuest=4;
+            //doQuest=4;
         }
         else{
             m_mapDisplayChar = m_miniMapDisplayChar = "X";
@@ -273,8 +273,9 @@ void Tile::seQuestStatus(bool status){
     requiredQuestCompleted=status;
 }
 
-bool Tile::getQuestStatus(){
-    return requiredQuestCompleted;
+bool Tile::getQuestStatus(vector<bool>& quest){
+    if(requiredQuestCompleted == -1) return true;
+    return quest[requiredQuestCompleted];
 }
 
 int Tile::get_doQuest(){

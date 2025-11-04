@@ -189,7 +189,7 @@ void Game::show_full_map(Map& map) {
     clear(); 
 }
 
-void Game::explore_forest(Player& player, Map& map) {
+void Game::explore_forest(Player& player, Map& map, vector<bool>& quest) {
     add_log_message("You entered the forest.");
     bool inForest = true;
     while (inForest) {
@@ -207,22 +207,22 @@ void Game::explore_forest(Player& player, Map& map) {
         switch(input) {
             case 'w':
             case 'W':
-                move_character(player, 0, -1, map);
+                move_character(player, 0, -1, map, quest);
                 break;
 
             case 's':
             case 'S':
-                move_character(player, 0, 1, map);
+                move_character(player, 0, 1, map, quest);
                 break;
 
             case 'a':
             case 'A':
-                move_character(player, -1, 0, map);
+                move_character(player, -1, 0, map, quest);
                 break;
 
             case 'd':
             case 'D':
-                move_character(player, 1, 0, map);
+                move_character(player, 1, 0, map, quest);
                 break;
 
             case 'm':
@@ -281,7 +281,7 @@ void Game::game_loop(Player& player) {
                 getch();
                 break;
             case '2':
-                explore_forest(player, stage1);
+                explore_forest(player, stage1, quest);
                 if (!player.isAlive()) {
                     isGameRunning = false;
                 }
@@ -305,18 +305,16 @@ void Game::game_loop(Player& player) {
     }
 }
 
-void Game::move_character(Character& entity, int x, int y, Map& map){
+void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool>& quest) {
     int newx=entity.get_x()+y;
     int newy=entity.get_y()+x;
     if(map.getTileAt(newx,newy)->getCharacter() != nullptr) {
-        if(!map.getTileAt(newx,newy)->getQuestStatus()){
+        if(!map.getTileAt(newx,newy)->getQuestStatus(quest)){
             add_log_message("You are not not powerful enough!");
             add_log_message("Meet Hattori at (X,X)");
             return;
         }
         Player& player = static_cast<Player&>(entity);
-        // NOTE: You need to be careful with the lifetime of the Goblin here.
-        // If it's stored on the map, it should be a pointer/unique_ptr.
         Character* target_ptr = map.getTileAt(newx,newy)->getCharacter();
         Enemy& target = static_cast<Enemy&>(*target_ptr);
         add_log_message("Combat Triggered!");
@@ -330,6 +328,9 @@ void Game::move_character(Character& entity, int x, int y, Map& map){
         }
         else if(k==1){
             add_log_message("You defeated the enemy");
+            if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
+                quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
+            }
             map.getTileAt(newx,newy)->setIsWalkable(true);
             map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
             map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);

@@ -22,20 +22,13 @@ class Player;
 class Tile{
     public:
         Tile();
-        // ## Constructor ##
-        // Initializes a tile with its visual representation and walkability.
         Tile(Player& player, vector<bool>& quest, string displayChar = ".", int x=0, int y=0);
 
-        // ## Getters (Accessors) ##
-        // These methods allow other parts of the code to safely read the tile's state.
         string getMiniMapDisplayChar() ;
         string getMapDisplayChar() ;
         bool getIsWalkable() ;
         Character* getCharacter() ;
         //Item* getItem() const;
-
-        // ## Setters (Mutators) ##
-        // These methods allow controlled modification of the tile's state.
         void setCharacter(Character* character);
         //void setItem(Item* item);
         void setMiniMapDisplayChar(string);
@@ -45,7 +38,7 @@ class Tile{
         bool checkQuest();
         void setBounds(bool);
         bool getBounds();
-        bool getQuestStatus();
+        bool getQuestStatus(vector<bool>& quest);
         void seQuestStatus(bool);
         int get_map_color_pair() ;
         void set_map_color_pair(int) ;
@@ -56,19 +49,16 @@ class Tile{
         
 
     private:
-        // ## Attributes #
-        // These are kept private to enforce encapsulation. They can only be
-        // accessed or modified through the public getter and setter methods.
-        string m_miniMapDisplayChar;          // The character for rendering (e.g., '.', '#')
+        string m_miniMapDisplayChar;
         string m_mapDisplayChar;  
-        bool m_isWalkable;           // Can a character move onto this tile?
-        Character* m_characterOnTile; // Pointer to a Character on this tile (nullptr if none)
-        bool requiredQuestCompleted;
-        // Item* m_itemOnTile;          // Pointer to an Item on this tile (nullptr if none)
+        bool m_isWalkable;           
+        Character* m_characterOnTile; 
+        int requiredQuestCompleted;
+        // Item* m_itemOnTile;   
         bool outOfBounds;
         int m_colorPairMiniMap;
         int m_colorPairMap;
         int doQuest;
     };
 
-#endif // TILE_H
+#endif 

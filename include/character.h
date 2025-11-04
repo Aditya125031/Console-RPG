@@ -25,6 +25,7 @@ public:
     std::string get_name() const;
     int get_health() const;
     int get_max_health() const;
+    int getAttackPower() const;
     virtual int get_x(){return 0;}
     virtual int get_y(){return 0;}
     virtual void set_x(int){};

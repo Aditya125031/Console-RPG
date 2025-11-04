@@ -17,37 +17,48 @@ enum class PlayerType {
 class Player : public Character {
 private:
     PlayerType type;
+    double specialAttackInterval;
+    double normalAttackInterval;
 protected:
     int max_mana;
     int mana;
+    int stamina;
     std::chrono::steady_clock::time_point normal_attack_ready;
     std::chrono::steady_clock::time_point special_attack_ready;
     std::chrono::steady_clock::time_point next_mana_regen;
-
-public:
+    
+    public:
     Player(std::string name, PlayerType type); 
-    void special_move(Character& enemy); 
-    std::string get_type_string() const;
-    void show_details() const; 
     int get_x() override;
     int get_y() override;
     void set_x(int) override;
     void set_y(int) override;
     void use_mana(int amount);
     void add_mana(int amount);
-    void modify_max_mana(int amount);
-    void modify_attack(int amount);
+    void modify_maxmana(int amount);
+    void update_mana_regen(std::chrono::steady_clock::time_point current_time);
     int get_mana() const;
     int get_max_mana() const;
-    int get_attack_power() const;
     void add_health(int amount);
     void modify_max_health(int amount);
+    void modify_max_mana(int amount);
+    int get_attack_power() const;
+    void modify_attack(int amount);
+    std::string get_type_string() const;
     string move(int , int , Map& map); 
-    void update_mana_regen(std::chrono::steady_clock::time_point current_time);
+    void show_details() const; 
+    void special_move(Character& enemy); 
+
     std::chrono::steady_clock::time_point get_normal_attack_ready() const;
     std::chrono::steady_clock::time_point get_special_attack_ready() const;
+    
     void set_normal_attack_cooldown(float seconds);
     void set_special_attack_cooldown(float seconds);
+    
+    void setSpecialAttackInterval(double seconds);
+    void setNormalAttackInterval(double seconds);
+    double getSpecialAttackInterval() const;
+    double getNormalAttackInterval() const;
 };
 
 #endif

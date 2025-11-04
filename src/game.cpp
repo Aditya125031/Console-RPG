@@ -12,10 +12,10 @@
 
 // ADD PDCURSES HEADER
 #include "../extern/pdcurses/curses.h" // Assuming this is your path
-
 using namespace std;
 
 // Your project headers (kept for completeness)
+#include "../include/combat.hpp"
 #include "../include/game.h"
 #include "../include/player.h"
 #include "../include/enemy.h"
@@ -309,6 +309,7 @@ void Game::move_character(Character& entity, int x, int y, Map& map){
     int newx=entity.get_x()+y;
     int newy=entity.get_y()+x;
     if(map.getTileAt(newx,newy)->getCharacter() != nullptr) {
+        Combat c;
         if(!map.getTileAt(newx,newy)->getQuestStatus()){
             add_log_message("You are not not powerful enough!");
             add_log_message("Meet Hattori at (X,X)");
@@ -320,7 +321,7 @@ void Game::move_character(Character& entity, int x, int y, Map& map){
         Character* target_ptr = map.getTileAt(newx,newy)->getCharacter();
         Enemy& target = static_cast<Enemy&>(*target_ptr);
         add_log_message("Combat Triggered!");
-        int k = run_combat(player, target);
+        int k = c.fight(player, target);
         if(k==0){
             // ⭐️ REPLACED: std::cout with mvprintw
             clear();

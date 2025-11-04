@@ -2,7 +2,6 @@
 #include "../include/player.h"
 #include "../include/map.h"
 #include "../include/tile.h"
-#include "../include/colors.h"
 
 #include "../extern/pdcurses/curses.h"
 

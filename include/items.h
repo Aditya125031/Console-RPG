@@ -1,10 +1,9 @@
 #pragma once
 #include <bits/stdc++.h>
 #include "../include/character.h"
-#include "../include/player.h"
-#include "../include/game.h"
 using namespace std;
-
+class Player;
+class Game;
 class Item
 {
     protected:

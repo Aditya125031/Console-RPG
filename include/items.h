@@ -22,6 +22,7 @@ class Item
         int code=0;
 
     public:
+    virtual ~Item() = default;
         string get_item_name() 
         {
             return item_name;
@@ -114,7 +115,7 @@ class Shinketsu_Sword : public Weapon
         Shinketsu_Sword()
         {
             item_description = "A blade that drinks light and bleeds shadows, forged in the heart of a dying star.";
-            item_name = "Shinketsu_Sword";
+            item_name = "Shinketsu Sword";
             extra_attack = 10;
             weapon_cooldown = 1.0;
             code=1;
@@ -188,7 +189,7 @@ class Silent_Death : public Weapon
         Silent_Death()
         {
             item_description = "A Bow that strikes without a sound, delivering swift and deadly justice from the shadows.";
-            item_name = "Silent_Death";
+            item_name = "Silent Death";
             extra_attack=8;
             weapon_cooldown=1.3;
             code=1;
@@ -201,7 +202,7 @@ class Eclipse_Striker : public Weapon
         Eclipse_Striker()
         {
             item_description = "Crafted during a total solar eclipse, its arrows blot out the very light as they fly.";
-            item_name = "Eclipse_Striker";
+            item_name = "Eclipse Striker";
             extra_attack=15;
             extra_weapon_mana=10;
             weapon_cooldown=1.5;
@@ -215,7 +216,7 @@ class Void_Embrace : public Weapon
         Void_Embrace()
         {
             item_description = "A bow crafted from the essence of the void, its arrows seem to disappear into nothingness before striking.";
-            item_name="Void_Embrace";
+            item_name="Void Embrace";
             extra_attack=20;
             extra_weapon_mana=20;
             weapon_cooldown=2.0;
@@ -275,7 +276,7 @@ class Runeforged_Armor : public Armor
         Runeforged_Armor()
         {
             item_description = "Armor etched with ancient runes that bolster the wearer's vitality and resilience.";
-            item_name = "Runeforged_Armor";
+            item_name = "Runeforged Armor";
             armor_health = 55;
             code=2;
         }
@@ -287,7 +288,7 @@ class Dragon_Armor : public Armor
         Dragon_Armor()
         {
             item_description = "Forged from the scales of ancient dragons, this armor offers unparalleled protection and a fiery aura.";
-            item_name = "Dragon_Armor";
+            item_name = "Dragon Armor";
             armor_health = 100;
             armor_mana = 20;
             code=2;
@@ -313,7 +314,7 @@ class Aether_Robe : public Armor
         Aether_Robe()
         {
             item_description = "A robe imbued with the essence of the Aether, enhancing both vitality and magical prowess.";
-            item_name = "Aether_Robe";
+            item_name = "Aether Robe";
             armor_health = 35;
             armor_mana = 70;
             code=2;

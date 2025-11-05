@@ -16,6 +16,7 @@ using namespace std;
 
 // Your project headers (kept for completeness)
 #include "../include/combat.hpp"
+#include"../include/inventory.hpp"
 #include "../include/game.h"
 #include "../include/player.h"
 #include "../include/enemy.h"
@@ -33,12 +34,12 @@ int run_combat(Player& hero, Enemy& target) {
     clear();
     int row = 0;
     
-    //REPLACED: std::cout with mvprintw
+    //REPLACED: cout with mvprintw
     mvprintw(row++, 0, "\n--- A wild %s appears! ---", target.get_name().c_str());
 
     while (hero.isAlive() && target.isAlive()) {
         row++;
-        //REPLACED: std::cout with mvprintw
+        //REPLACED: cout with mvprintw
         mvprintw(row++, 0, "%s HP: %d | %s HP: %d",
                  hero.get_name().c_str(), hero.get_health(),
                  target.get_name().c_str(), target.get_health());
@@ -51,7 +52,7 @@ int run_combat(Player& hero, Enemy& target) {
         refresh(); // Refresh to show the menu
 
         int choice;
-        // ⭐️ REPLACED: std::cin >> choice with scanw
+        // ⭐️ REPLACED: cin >> choice with scanw
         echo(); // Enable echo for user input
         scanw("%d", &choice);
         noecho(); // Disable echo after input
@@ -66,7 +67,7 @@ int run_combat(Player& hero, Enemy& target) {
             return 2; // Flee
         }
         else {
-            // ⭐️ REPLACED: std::cout with mvprintw
+            // ⭐️ REPLACED: cout with mvprintw
             mvprintw(row++, 0, "Invalid choice, you hesitate!");
             refresh();
             this_thread::sleep_for(chrono::milliseconds(500)); // Pause briefly
@@ -74,7 +75,7 @@ int run_combat(Player& hero, Enemy& target) {
 
         if (!target.isAlive()) break;
 
-        // ⭐️ REPLACED: std::cout with mvprintw
+        // ⭐️ REPLACED: cout with mvprintw
         mvprintw(row++, 0, "\nThe %s attacks you!", target.get_name().c_str());
         target.attack(hero);
         refresh();
@@ -100,8 +101,6 @@ int run_combat(Player& hero, Enemy& target) {
     }
 }
 
-// ... (add_log_message remains the same)
-
 void Game::add_log_message(std::string message) {
     event_log.push_front(message);
     while (event_log.size() > MAX_LOG_LINES) {
@@ -118,7 +117,7 @@ void Game::display_dashboard(Player& player, Map& map) {
     
     string title = "========================== The Defeated ==========================";
     int title_length = title.length();
-    int left_padding = std::max(0, (term_width - title_length) / 2);
+    int left_padding = max(0, (term_width - title_length) / 2);
     
     int row = 0;
 
@@ -188,6 +187,149 @@ void Game::show_full_map(Map& map) {
 
     clear(); 
 }
+void Game:: runItemActionMenu(DisplayItem selectedItem, Player& player, Game& world)
+{
+    clear();
+    printw("Selected: %s\n Item Description: %s", selectedItem.displayName.c_str(),selectedItem.description.c_str());
+    printw("------------------\n");
+    
+    // "Use" text changes based on item type
+    if (selectedItem.type == "WEAPON" || selectedItem.type == "ARMOR") {
+        printw("(e) Equip / Swap\n");
+    } else if (selectedItem.type == "POTION") {
+        printw("(u) Use\n");
+    }
+    
+    printw("(d) Drop\n");
+    printw("(c) Cancel\n");
+    refresh();
+
+    char ch = getch();
+    switch (ch)
+    {
+        case 'e': // Equip/Swap
+        case 'u': // Use
+            if (selectedItem.type == "WEAPON") {
+                player.inventory.swapWeapon(player, world);
+            } else if (selectedItem.type == "ARMOR") {
+                player.inventory.swapArmor(player, world);
+            } else if (selectedItem.type == "POTION") {
+                // We use the itemID, which holds the potion's name
+                player.inventory.usePotion(selectedItem.itemID, player, world);
+            }
+            break;
+
+        case 'd': // Drop
+            if (selectedItem.itemID == "EQUIPPED_WEAPON") {
+                player.inventory.dropEquippedWeapon(world, player);
+            } else if (selectedItem.itemID == "INVENTORY_WEAPON") {
+                player.inventory.dropInventoryWeapon(world);
+            } else if (selectedItem.itemID == "EQUIPPED_ARMOR") {
+                player.inventory.dropEquippedArmor(world, player);
+            } else if (selectedItem.itemID == "INVENTORY_ARMOR") {
+                player.inventory.dropInventoryArmor(world);
+            } else if (selectedItem.type == "POTION") {
+                // We use the itemID, which holds the potion's name
+                player.inventory.dropPotion(selectedItem.itemID, world);
+            }
+            break;
+            
+        case 'c': // Cancel
+        default:
+            break;
+    }
+}
+void Game:: runInventoryMenu(Player& player, Game& world)
+{
+    bool inInventory = true;
+    while(inInventory)
+    {
+        clear();
+        printw("--- INVENTORY --- (Select # or 'q' to quit)\n\n");
+
+        // This vector maps a menu index (1, 2, 3...) to an item
+        vector<DisplayItem> itemMap;
+
+        // --- Build the dynamic list of items ---
+        
+        // 1. Add Equipment (using public members)
+        if (player.inventory.equippedWeapon) {
+            itemMap.push_back({
+                player.inventory.equippedWeapon->get_item_name() + " (Equipped)",
+                "EQUIPPED_WEAPON", "WEAPON",player.inventory.equippedWeapon->get_item_description()
+            });
+        }
+        if (player.inventory.equippedArmor) {
+            itemMap.push_back({
+                player.inventory.equippedArmor->get_item_name() + " (Equipped)",
+                "EQUIPPED_ARMOR", "ARMOR",player.inventory.equippedArmor->get_item_description()
+            });
+        }
+
+        // 2. Add Bag Items (using public members)
+        if (player.inventory.inventoryWeapon) {
+            itemMap.push_back({
+                player.inventory.inventoryWeapon->get_item_name() + " (Bag)",
+                "INVENTORY_WEAPON", "WEAPON",player.inventory.inventoryWeapon->get_item_description()
+            });
+        }
+        if (player.inventory.inventoryArmor) {
+            itemMap.push_back({
+                player.inventory.inventoryArmor->get_item_name() + " (Bag)",
+                "INVENTORY_ARMOR", "ARMOR",player.inventory.inventoryArmor->get_item_description()
+            });
+        }
+        
+        // 3. Add Potions
+        for (const auto& pair : player.inventory.potionStorage) {
+            if(pair.second.quantity>0)
+            itemMap.push_back({
+                pair.first + " (x" + to_string(pair.second.quantity) + ")",
+                pair.first, "POTION", pair.second.itemPrototype->get_item_description()
+            });
+        }
+        
+        // --- Display the list ---
+        if (itemMap.empty()) {
+            printw(" (Empty)\n");
+        } else {
+            for (int i = 0; i < itemMap.size(); ++i) {
+                printw(" %d: %s\n", i + 1, itemMap[i].displayName.c_str());
+            }
+        }
+        
+        printw("\nSelect item #: ");
+        refresh();
+
+        // --- Get user input ---
+        char ch = getch();
+
+        if (ch == 'q') {
+            inInventory = false; // Exit loop
+            continue;
+        }
+
+        // Convert char '1' to int 1
+        int choice = ch - '0';
+
+        // Check if choice is valid
+        if (choice > 0 && choice <= itemMap.size())
+        {
+            // Valid item selected!
+            DisplayItem selectedItem = itemMap[choice - 1]; // -1 for 0-indexing
+            runItemActionMenu(selectedItem, player, world);
+        }
+        else {
+            // Invalid key
+            printw("\nInvalid selection. Press any key.");
+            getch();
+        }
+    } // end while(inInventory)
+
+    clear();
+    printw("You close your bag.\n");
+    refresh();
+}
 
 void Game::explore_forest(Player& player, Map& map) {
     add_log_message("You entered the forest.");
@@ -235,7 +377,8 @@ void Game::explore_forest(Player& player, Map& map) {
                 add_log_message("You return to the village.");
                 inForest = false;
                 break;
-                
+                case 'i':
+                runInventoryMenu(player,*this);
             default:
                 add_log_message("Invalid key pressed.");
         }
@@ -247,7 +390,7 @@ void Game::explore_forest(Player& player, Map& map) {
 void Game::game_loop(Player& player) {
     vector<bool> quest(5,false);
     Map stage1(player, quest, 153, 37, "../data/map.txt");
-    // ⭐️ REPLACED: std::cout with printw
+    // ⭐️ REPLACED: cout with printw
     printw("\n--- You find your way to a nearby village to rest. ---\n");
     bool isGameRunning = true;
     refresh();
@@ -256,7 +399,7 @@ void Game::game_loop(Player& player) {
         clear(); 
         int row = 0;
         
-        // ⭐️ REPLACED: std::cout with mvprintw
+        // ⭐️ REPLACED: cout with mvprintw
         mvprintw(row++, 0, "\n--- Village Menu ---");
         mvprintw(row++, 0, "1. Show My Stats");
         mvprintw(row++, 0, "2. Venture into the forest");
@@ -287,7 +430,7 @@ void Game::game_loop(Player& player) {
                 }
                 break;
             case '3':
-                // ⭐️ REPLACED: std::cout with mvprintw
+                // ⭐️ REPLACED: cout with mvprintw
                 mvprintw(row + 1, 0, "Thanks for playing!");
                 refresh();
                 this_thread::sleep_for(chrono::seconds(1));
@@ -295,7 +438,7 @@ void Game::game_loop(Player& player) {
                 isGameRunning = false;
                 break;
             default:
-                // ⭐️ REPLACED: std::cout with mvprintw, and removed cin error handling
+                // ⭐️ REPLACED: cout with mvprintw, and removed cin error handling
                 mvprintw(row + 1, 0, "Invalid choice. Please try again.");
                 refresh();
                 this_thread::sleep_for(chrono::seconds(1));
@@ -323,7 +466,7 @@ void Game::move_character(Character& entity, int x, int y, Map& map){
         add_log_message("Combat Triggered!");
         int k = c.fight(player, target);
         if(k==0){
-            // ⭐️ REPLACED: std::cout with mvprintw
+            // ⭐️ REPLACED: cout with mvprintw
             clear();
             mvprintw(0, 0, "You have been defeated! Press any key to exit.");
             refresh();

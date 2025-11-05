@@ -2,12 +2,13 @@
 #define PLAYER_H
 
 #include "../include/character.h"  
+#include"../include/inventory.hpp"
 #include <string>
 #include <chrono>
 using namespace std;
 
 class Map;
-
+class Game;
 enum class PlayerType {
     Swordsman,
     Archer,
@@ -22,12 +23,16 @@ private:
 protected:
     int max_mana;
     int mana;
+    int baseMaxHealth;
+    int baseAttackPower;
+    int baseMaxMana;
     int stamina;
     std::chrono::steady_clock::time_point normal_attack_ready;
     std::chrono::steady_clock::time_point special_attack_ready;
     std::chrono::steady_clock::time_point next_mana_regen;
-    
-    public:
+
+public:
+Inventory inventory;
     Player(std::string name, PlayerType type); 
     int get_x() override;
     int get_y() override;
@@ -35,7 +40,6 @@ protected:
     void set_y(int) override;
     void use_mana(int amount);
     void add_mana(int amount);
-    void modify_maxmana(int amount);
     void update_mana_regen(std::chrono::steady_clock::time_point current_time);
     int get_mana() const;
     int get_max_mana() const;
@@ -48,7 +52,7 @@ protected:
     string move(int , int , Map& map); 
     void show_details() const; 
     void special_move(Character& enemy); 
-
+    void reset_stats();
     std::chrono::steady_clock::time_point get_normal_attack_ready() const;
     std::chrono::steady_clock::time_point get_special_attack_ready() const;
     

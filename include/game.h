@@ -11,8 +11,14 @@
 #include <cstdlib> // Required for std::system
 #include "player.h" 
 #include "map.h"
+#include "inventory.hpp"
 using namespace std;
-
+struct DisplayItem {
+    string displayName; // "Old Sword (Equipped)"
+    string itemID;      // "EQUIPPED_WEAPON" or "Small Health Potion"
+    string type;        // "WEAPON", "ARMOR", "POTION"
+    string description;
+};
 class Game
 {
     private:
@@ -26,6 +32,8 @@ class Game
         void display_dashboard(Player& player, Map& map); // New render function
         void show_full_map(Map& map);
         void move_character(Character&, int, int, Map&);
+        void runItemActionMenu(DisplayItem, Player&, Game&);
+        void runInventoryMenu(Player&, Game&);
 };
 
 #endif

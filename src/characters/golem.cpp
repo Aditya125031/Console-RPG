@@ -29,8 +29,13 @@ std::vector<Item> BoneGolem::getLoot(const Player& player) const
     }
     return allLoot;
 }
+void BoneGolem::triggerDialogue() const {
+    if (!dialogue.empty()) {
+        std::cout << get_name() << " makes a sound: \"" << dialogue[rand() % dialogue.size()] << "\"\n";
+    }
+}
 void BoneGolem::specialAbility(Character& target) { 
-    
+
     std::cout << get_name() << " uses 'Grave Harvest'!" << std::endl;
     std::cout << "It launches jagged bones at you and pulls in dark energy!\n";
 
@@ -51,10 +56,5 @@ void BoneGolem::specialAbility(Character& target) {
         std::cout << get_name() << " knits its bones back together, healing to " << this->health << " HP!\n";
     } else {
         std::cout << get_name() << " is already at full health!\n";
-    }
-}
-void BoneGolem::triggerDialogue() const {
-    if (!dialogue.empty()) {
-        std::cout << get_name() << " makes a sound: \"" << dialogue[rand() % dialogue.size()] << "\"\n";
     }
 }

@@ -7,6 +7,8 @@
 #include <vector>
 
 class Enemy : public Character {
+private:        
+    double normalAttackInterval;
 protected:
     std::vector<std::string> dialogue;
     int speed;
@@ -18,6 +20,8 @@ public:
     virtual ~Enemy() = default;
     std::string get_name() const; 
     std::chrono::steady_clock::time_point getNormalAttackReady() const;
+    void setNormalAttackInterval(double sec);
+    double getNormalAttackInterval() const;
     void setNormalAttackCooldown(float seconds);
     virtual void specialAbility(Character& target){};
     virtual void triggerDialogue() const {};

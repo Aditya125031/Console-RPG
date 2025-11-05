@@ -36,6 +36,7 @@ file(GLOB GAME_SRCS
     src/items/Equipables/*.cpp
     src/items/Usables/*.cpp
     src/game.cpp
+    src/combat/*.cpp
 )
 
 # Create the executable target

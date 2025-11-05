@@ -4,17 +4,16 @@
 #include "../include/colors.h"
 #include"../include/player.h"
 #include"../include/inventory.hpp"
-
+#include"../include/items.h"
 #include "../extern/pdcurses/curses.h"
+#include"../include/game.h"
 
 using namespace std;
 
 Player::Player(std::string name, PlayerType type)
     : Character(name, 100, 10), type(type) {
-        inventory.pickup("Healing Potion",2);
-        inventory.pickup("Mana Potion",1);
-        inventory.eq[0]="Leather Armour";
-    switch (type) {
+        switch (type) {
+        
         case PlayerType::Swordsman:
             this->health = 150;
             this->attackPower = 15;
@@ -34,8 +33,28 @@ Player::Player(std::string name, PlayerType type)
             break;
     }
     this->maxHealth = this->health;
+    this->max_mana=this->mana;
+    this->baseMaxHealth = this->health;
+            this->baseAttackPower = this->attackPower;
+            this->baseMaxMana = this->mana;
 
     printw("A new %s named %s has arrived!\n", get_type_string().c_str(), this->name.c_str());
+}
+void Player::reset_stats()
+{
+    // Set all current stats back to their base values
+    this->attackPower = this->baseAttackPower;
+    this->maxHealth = this->baseMaxHealth;
+    this->max_mana = this->baseMaxMana;
+    
+    // Safety check: If your current health is now
+    // higher than your max, lower it.
+    if (this->health > this->maxHealth) {
+        this->health = this->maxHealth;
+    }
+    if (this->mana > this->max_mana) {
+        this->mana = this->max_mana;
+    }
 }
 
 std::string Player::get_type_string() const {

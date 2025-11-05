@@ -16,6 +16,7 @@
 #include "../include/items.h"
 #include "../include/game.h"
 #include "../include/enemy.h"
+#include"../include/inventory.hpp"
 
 // Note: I'm assuming 'PlayerType' is an enum defined in one of your headers.
 
@@ -106,6 +107,8 @@ int main()
     setup_curses();
     Game world;
     Player hero = create_player();
+    hero.inventory.addItem(make_shared<Health_Potion>(), 3, hero, world);
+    hero.inventory.addItem(make_shared<Mana_Potion>(), 2, hero, world);
     world.game_loop(hero);
     endwin();
     

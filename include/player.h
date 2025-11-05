@@ -8,7 +8,7 @@
 using namespace std;
 
 class Map;
-
+class Game;
 enum class PlayerType {
     Swordsman,
     Archer,
@@ -21,6 +21,9 @@ private:
 protected:
     int max_mana;
     int mana;
+    int baseMaxHealth;
+    int baseAttackPower;
+    int baseMaxMana;
     std::chrono::steady_clock::time_point normal_attack_ready;
     std::chrono::steady_clock::time_point special_attack_ready;
     std::chrono::steady_clock::time_point next_mana_regen;
@@ -39,6 +42,7 @@ Inventory inventory;
     void add_mana(int amount);
     void modify_max_mana(int amount);
     void modify_attack(int amount);
+    void reset_stats();
     int get_mana() const;
     int get_max_mana() const;
     int get_attack_power() const;

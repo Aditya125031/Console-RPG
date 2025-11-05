@@ -1,187 +1,205 @@
-#include "inventory.hpp"
+#include "../include/inventory.hpp"
 #include "../extern/pdcurses/curses.h"
-#include<iostream>
+#include <algorithm> // For std::min
 
+// --- FULL INCLUDES ---
+// We need the full definitions in the .cpp file
+#include "../include/items.h"
+#include "../include/player.h"
+#include "../include/game.h"
+using namespace std;
 
-void Inventory::displayequip()
+void Inventory::reapplyAllEquipStats(Player& player, Game& world)
 {
-    printw("Equipables\n"); 
+    // Reset player to base stats first
+    player.reset_stats(); 
     
-    for(int i=0;i<2;i++)
-    {
-        if(eq[i]!="")
-           
-            printw("%s :1     ", eq[i].c_str()); 
-        else
-           
-            printw("___     "); 
+    // Apply stats from equipped items
+    if (equippedWeapon) {
+        equippedWeapon->weapon_apply_effects(player, world);
     }
-   
-    printw("\n"); 
+    if (equippedArmor) {
+        equippedArmor->armor_apply_effects(player, world);
+    }
 }
-int Inventory::find(std::string a) 
-{
-    for(int i=1;i<=t;i++)
-    {
-        if(itemq[i]==a)
-            return i;
-    }
-    return -1;
-}
-bool Inventory::find_armour()
-{
-    if(eq[0]=="")
-        return false;
-    return true;
-}
-bool Inventory::find_sword()
-{
-    if(eq[1]=="")
-        return false;
-    return true;
-}
-int Inventory:: pickup(std::string a,int x) 
-{
-    int cap=hash[a];
-    int index=find(a);
-    if(sub1.find(a)!=sub1.end())
-    {
-        if(!find_armour()){
-            equiparmour(a);
-            return x-1;}
-        else{
-            printw("%s cannot be picked up as it is already equipped.\n", a.c_str());
-            return x;}
-    }
-    else if(sub2.find(a)!=sub2.end())
-    {
-        if(!find_sword()){
-            equipsword(a);
-            return x-1;}
-        else{ 
-    
-            printw("%s cannot be picked up as it is already equipped.\n", a.c_str());
-            return x;}
-    }
-    else if(index!=-1)
-    {
-        int t1=quantity[index];
-        if(t1==cap){
-      
-            printw("Maximum limit reached.\n");
-            return x;}
-        else if(cap-t1>x){
-            quantity[index]=t1+x;
-            return 0;}
-        else{ quantity[index]=cap;
-            return x-cap+t1;}
-    }
-    else if(t==c){
-       
-        printw("Your inventory has been filled\n");
-        return x;}
-    else{
-        itemq[++t]=a;
-        if(cap<x){
-            quantity[t]=cap;
-            return x-cap;}
-        else {quantity[t]=x;
-            return 0;}
 
-    }
-}
-void Inventory::equiparmour(std::string a) 
+// --- Core Functions (addItem, swapWeapon, swapArmor, usePotion) ---
+// (These are the same as the previous version)
+
+bool Inventory::addItem(std::shared_ptr<Item> item, int quantity, Player& player, Game& world)
 {
-    printw("%s is equipped.\n", a.c_str());
-    eq[0]=a;
-}
-void Inventory::equipsword(std::string a) 
-{
-    printw("%s is equipped.\n", a.c_str());
-    eq[1]=a;
-}
-void Inventory::unequiparmour()
-{
-    printw("Armour unequipped\n");
-    eq[0]="";
-}
-void Inventory::unequipsword()
-{
-    printw("Sword unequipped\n");
-    eq[1]="";
-}
-void Inventory::remove(std::string a)
-{
-    int index=find(a);
-    if(quantity[index]==1){
-      auto it=itemq.begin()+index;
-     itemq.erase(it);
-     itemq.push_back("");
-     auto f=quantity.begin()+index;
-     quantity.erase(f);
-     quantity.push_back(0);
-     t--;
-    }
-    else quantity[index]=quantity[index]-1;
-}
-void Inventory::use_from_inventory(int x)
-{
-    if(x>c||x<1)
-        printw("Item Slot does not exist.\n");
-    else if(x>t)
-        
-        printw("You chose an Empty Item Slot. \n");
-    else{
-        if(sub1.find(itemq[x])!=sub1.end()){
-            equiparmour(itemq[x]);
-            remove(itemq[x]);
+    shared_ptr<Weapon> weapon = dynamic_pointer_cast<Weapon>(item);
+    if (weapon)
+    {
+        if (equippedWeapon == nullptr) {
+            equippedWeapon = weapon;
+            equippedWeapon->equip();
+            world.add_log_message("Equipped " + weapon->get_item_name());
+            reapplyAllEquipStats(player, world);
+            return true;
         }
-        else if(sub2.find(itemq[x])!=sub2.end()){
-            equipsword(itemq[x]);
-            remove(itemq[x]);}
+        else if (inventoryWeapon == nullptr) {
+            inventoryWeapon = weapon;
+            world.add_log_message("Added " + weapon->get_item_name() + " to inventory.");
+            return true;
+        }
         else {
-            printw("%s used.\n", itemq[x].c_str());
-            remove(itemq[x]);
+            world.add_log_message("Weapon inventory is full!");
+            return false;
         }
     }
-}
-void Inventory:: drop(int index){
-    if(index>=c||itemq[index]=="")
+
+    // --- 2. Try to cast to Armor ---
+    shared_ptr<Armor> armor=dynamic_pointer_cast<Armor>(item);
+    if (armor)
     {
-        printw("Invalid index\n");
+        if (equippedArmor == nullptr) {
+            equippedArmor = armor;
+            equippedArmor->equip();
+            world.add_log_message("Equipped " + armor->get_item_name());
+            reapplyAllEquipStats(player, world);
+            return true;
+        }
+        else if (inventoryArmor == nullptr) {
+            inventoryArmor = armor;
+            world.add_log_message("Added " + armor->get_item_name() + " to inventory.");
+            return true;
+        }
+        else {
+            world.add_log_message("Armor inventory is full!");
+            return false;
+        }
+    }
+ shared_ptr<Usables> potion = dynamic_pointer_cast<Usables>(item);
+if (potion)
+{
+    string name = potion->get_item_name();
+
+    // Check if this potion type is tracked in the max quantity map 'm'
+    if (m.count(name) == 0) {
+        world.add_log_message("Error: Potion '" + name + "' has no max stack size.");
+        // We will add it anyway, but you should add it to your 'm' map
+        // in the Inventory.h constructor.
+    }
+    
+    // If this is the first time, store its prototype
+    if (potionStorage.count(name) == 0) {
+        potionStorage[name].itemPrototype = potion;
+    }
+    
+    // Get current and max quantities
+    // We'll default to 5 if not in the map
+    int maxQuantity = m.count(name) ? m[name] : 5; 
+    int currentQuantity = potionStorage[name].quantity;
+    
+    if (currentQuantity >= maxQuantity) {
+        world.add_log_message(name + " stack is full!");
+        return true; // Not an error, just can't add more
+    }
+    
+    // Calculate how many we can actually add
+    int roomLeft = maxQuantity - currentQuantity;
+    int amountToAdd = std::min(quantity, roomLeft);
+    int leftover = quantity - amountToAdd;
+    
+    // --- THIS IS THE LINE THAT FIXES THE BUG ---
+    potionStorage[name].quantity += amountToAdd;
+    
+    world.add_log_message("Added " + to_string(amountToAdd) + " " + name + ".");
+    
+    if (leftover > 0) {
+        world.add_log_message(name + " stack is now full. " + to_string(leftover) + " " + name + "(s) were not added.");
+    }
+    
+    return true;
+}
+return false;
+}
+
+void Inventory::swapWeapon(Player& player, Game& world)
+{
+    if (equippedWeapon == nullptr && inventoryWeapon == nullptr) {
+        world.add_log_message("No weapons to swap.");
         return;
     }
-    
-        printw("select quantity\n");
-    int x;
-     echo();
-    nocbreak();
-    scanw("%d", &x); 
-     cbreak(); 
-      noecho();
-    int t1=quantity[index];
-    if(x>=t1){
-        
-        printw("Dropped all %s\n", itemq[index].c_str());
-        quantity[index]=1;
-        remove(itemq[index]);
+    world.add_log_message("Swapped weapons.");
+    swap(equippedWeapon, inventoryWeapon);
+    if (equippedWeapon) equippedWeapon->equip();
+    if (inventoryWeapon) inventoryWeapon->unequip();
+    reapplyAllEquipStats(player, world);
+}
+
+void Inventory::swapArmor(Player& player, Game& world)
+{
+    if (equippedArmor == nullptr && inventoryArmor == nullptr) {
+        world.add_log_message("No armor to swap.");
+        return;
     }
-    else{
-        printw("Dropped %d %s\n", x, itemq[index].c_str());
-        quantity[index]=t1-x;
+    world.add_log_message("Swapped armor.");
+    std::swap(equippedArmor, inventoryArmor);
+    if (equippedArmor) equippedArmor->equip();
+    if (inventoryArmor) inventoryArmor->unequip();
+    reapplyAllEquipStats(player, world);
+}
+
+void Inventory::usePotion(const std::string& potionName, Player& player, Game& world)
+{
+    if (potionStorage.count(potionName) == 0 || potionStorage[potionName].quantity <=0) {
+        world.add_log_message("No " + potionName + " left.");
+        return;
+    }
+    std::shared_ptr<Usables> potion = potionStorage[potionName].itemPrototype;
+    potion->potion_use(player, world);
+    potionStorage[potionName].quantity--;
+}
+void Inventory::dropEquippedWeapon(Game& world, Player& player)
+{
+    if (equippedWeapon) {
+        world.add_log_message("Dropped " + equippedWeapon->get_item_name());
+        equippedWeapon->unequip();
+        equippedWeapon = nullptr; // Set the public pointer to null
+        reapplyAllEquipStats(player, world); // Re-calc stats
     }
 }
-void Inventory::display()
+void Inventory::dropInventoryWeapon(Game& world)
 {
-    printw("Items in Inventory:\n");
-    for(int i=1;i<c+1;i++)
-    {
-        if(itemq[i]!="")
-            printw("%s :%d     ", itemq[i].c_str(), quantity[i]);
-        else
-            printw("___     "); 
+    if (inventoryWeapon) {
+        world.add_log_message("Dropped " + inventoryWeapon->get_item_name());
+        inventoryWeapon = nullptr;
     }
-    printw("\n"); 
-    displayequip();
-    refresh(); 
+}
+void Inventory::dropEquippedArmor(Game& world, Player& player)
+{
+    if (equippedArmor) {
+        world.add_log_message("Dropped " + equippedArmor->get_item_name());
+        equippedArmor->unequip();
+        equippedArmor = nullptr;
+        reapplyAllEquipStats(player, world);
+    }
+}
+void Inventory::dropInventoryArmor(Game& world)
+{
+    if (inventoryArmor) {
+        world.add_log_message("Dropped " + inventoryArmor->get_item_name());
+        inventoryArmor = nullptr;
+    }
+}
+
+void Inventory::dropPotion(const std::string& potionName, Game& world)
+{
+    if (potionStorage.count(potionName) && potionStorage[potionName].quantity > 0)
+    {
+        potionStorage[potionName].quantity--;
+        world.add_log_message("Dropped 1 " + potionName);
+    }
+}
+std::map<std::string, int> Inventory::getUsablePotions() const
+{
+    std::map<std::string, int> usable;
+    for (const auto& pair : potionStorage) {
+        if (pair.second.quantity > 0) {
+            usable[pair.first] = pair.second.quantity;
+        }
+    }
+    return usable;
 }

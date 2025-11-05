@@ -1,49 +1,119 @@
-#ifndef INVENTORY_HPP
-#define INVENTORY_HPP
-#include<iostream>
+#ifndef INVENTORY_H
+#define INVENTORY_H
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <memory>
 #include <map>
-#include<set>
-#include<vector>
-#include<string>
+#include"type.hpp"
 using namespace std;
+// --- FORWARD DECLARATIONS ---
+// We only need pointers/references in the header,
+// so we don't need the full #include.
+class Item;
+class Weapon;
+class Armor;
+class Player;
+class Game;
+class Usables;
+struct PotionSlot
+{
+    shared_ptr<Usables> itemPrototype = nullptr;
+    int quantity = 0;
+};
+
 class Inventory
 {
-    public:
-    const int c=20;
-    int t=0;
-     map<string, int> hash;
-     vector<string> itemq;
-     vector<int>quantity;
-     vector<string>eq;
-     set<string> sub1={"Leather Armour","Iron Armour","Legendary Armour"};
-     set<string> sub2={"Sword","Katana","Legendary Sword"};
-    Inventory()
-    {
-        itemq.resize(21,"");
-        quantity.resize(21,0);
-        eq.resize(2,"");
-        hash["Healing Potion"]=10;
-        hash["Mana Potion"]=10;
-        hash["Leather Armour"]=1;
-        hash["Iron Armour"]=1;
-        hash["Legendary Armour"]=1;
-        hash["Sword"]=1;
-        hash["Katana"]=1;
-        hash["Legendary Sword"]=1;
-    }
-    int pickup(string,int);
-    void drop(int);
-    int find(string);
-    vector<string> equip(int);
-    void display();
-    void equiparmour(string);
-    void equipsword(string);
-    void remove(string);
-    void use_from_inventory(int);
-    bool find_sword();
-    void unequipsword();
-    void unequiparmour();
-    void displayequip();
-    bool find_armour();
+public:
+    // --- Member Variables (All Public) ---
+
+    // Equipment Slots: Rule: Max 1 equipped, Max 1 in the "bag"
+    map<string,int> m;
+    shared_ptr<Weapon> equippedWeapon = nullptr;
+    shared_ptr<Armor>  equippedArmor = nullptr;
+    shared_ptr<Weapon> inventoryWeapon = nullptr; // "Bag" slot
+    shared_ptr<Armor>  inventoryArmor = nullptr;  // "Bag" slot
+
+    // Potion/Consumable Storage: Maps "Potion Name" -> {prototype, quantity}
+    std::map<std::string, PotionSlot> potionStorage;
+
+    // --- Constructor ---
+    Inventory() {
+        m["Health Potion"]=5;
+        m["Angel's Blessings"]=3;
+        m["Elixir Of Life"]=2;
+        m["Mana Potion"]=5;
+        m["Dragon Breath"]=3;
+        m["Aether Elixir"]=2;
+    } 
+
+    // --- Helper Function ---
+    
+    /**
+     * @brief Resets player stats and applies stats from equipped items.
+     * Must be public to be called from Inventory.cpp.
+     */
+    void reapplyAllEquipStats(Player& player, Game& world);
+
+    // --- Core Functions ---
+
+    /**
+     * @brief Tries to add an item. Fills equipped slot first, then bag slot.
+     * Fails (returns false) if both slots are full.
+     * @return True on success, False if inventory is full.
+     */
+    bool addItem(std::shared_ptr<Item> item, int quantity, Player& player, Game& world);
+
+    /**
+     * @brief Swaps the equipped weapon with the one in the bag.
+     */
+    void swapWeapon(Player& player, Game& world);
+
+    /**
+     * @brief Swaps the equipped armor with the one in the bag.
+     */
+    void swapArmor(Player& player, Game& world);
+
+    /**
+     * @brief Uses a potion from storage by its name.
+     */
+    void usePotion(const std::string& potionName, Player& player, Game& world);
+    
+    // --- Drop Functions ---
+
+    /**
+     * @brief Drops the equipped weapon.
+     */
+    void dropEquippedWeapon(Game& world, Player& player);
+
+    /**
+     * @brief Drops the weapon from the inventory/bag slot.
+     */
+    void dropInventoryWeapon(Game& world);
+
+    /**
+     * @brief Drops the equipped armor.
+     */
+    void dropEquippedArmor(Game& world, Player& player);
+
+    /**
+     * @brief Drops the armor from the inventory/bag slot.
+     */
+    void dropInventoryArmor(Game& world);
+
+    /**
+     * @brief Drops one potion of the specified type.
+     */
+    void dropPotion(const std::string& potionName, Game& world);
+
+    // --- Utility Function ---
+
+    /**
+     * @brief Gets a list of all potions with quantity > 0.
+     * @return A map of Potion Name -> Quantity
+     */
+    std::map<std::string, int> getUsablePotions() const;
 };
-#endif
+
+#endif // INVENTORY_H

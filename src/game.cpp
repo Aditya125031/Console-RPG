@@ -16,6 +16,7 @@ using namespace std;
 
 // Your project headers (kept for completeness)
 #include "../include/combat.hpp"
+#include"../include/inventory.hpp"
 #include "../include/game.h"
 #include "../include/player.h"
 #include "../include/enemy.h"
@@ -100,7 +101,7 @@ int run_combat(Player& hero, Enemy& target) {
     }
 }
 
-void Game::add_log_message(string message) {
+void Game::add_log_message(std::string message) {
     event_log.push_front(message);
     while (event_log.size() > MAX_LOG_LINES) {
         event_log.pop_back();

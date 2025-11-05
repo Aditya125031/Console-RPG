@@ -1,14 +1,21 @@
-# Ignore the binary/executable folder
-/bin
-/build
-
-# Ignore compiled object files
+# --- Standard Build Artifacts (Ignore these) ---
+build/
+bin/
+*.exe
 *.o
-*.a
 *.obj
+
+# --- IDE Settings (Ignore these) ---
+.vscode/
+.idea/
+
+# --- Libraries and DLLs (General Rule: IGNORE) ---
+# Ignore these by default so you don't commit your own build outputs accidentally
 *.dll
 *.lib
+*.a
 
-# Ignore executables on Windows
-*.exe
-*.vscode
+# --- EXCEPTIONS (Crucial for your team) ---
+# Force git to TRACK everything inside the 'extern' folder,
+# even if it matches the ignored types above.
+!extern/**/

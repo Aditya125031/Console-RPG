@@ -7,11 +7,8 @@
 #include <thread>
 #include <chrono>
 
-// REMOVE: #include <iostream>
-// REMOVE: #include <windows.h>
+#include "../extern/pdcurses/curses.h" 
 
-// ADD PDCURSES HEADER
-#include "../extern/pdcurses/curses.h" // Assuming this is your path
 using namespace std;
 
 // Your project headers (kept for completeness)
@@ -22,24 +19,19 @@ using namespace std;
 #include "../include/enemy.h"
 #include "../include/map.h"
 #include "../include/character.h"
-//#include "../include/tile.h"
 #include "../include/items.h"
 #include "../include/goblin.h"
 
-// --- CONSTANTS ---
 const unsigned int MAX_LOG_LINES = 10;
 
-// Handles a single combat encounter
 int run_combat(Player& hero, Enemy& target) {
     clear();
     int row = 0;
     
-    //REPLACED: cout with mvprintw
     mvprintw(row++, 0, "\n--- A wild %s appears! ---", target.get_name().c_str());
 
     while (hero.isAlive() && target.isAlive()) {
         row++;
-        //REPLACED: cout with mvprintw
         mvprintw(row++, 0, "%s HP: %d | %s HP: %d",
                  hero.get_name().c_str(), hero.get_health(),
                  target.get_name().c_str(), target.get_health());
@@ -49,14 +41,13 @@ int run_combat(Player& hero, Enemy& target) {
         mvprintw(row++, 0, "2. Special Move");
         mvprintw(row++, 0, "3. Flee");
         mvprintw(row, 0, "Your choice: ");
-        refresh(); // Refresh to show the menu
+        refresh();
 
         int choice;
-        // ⭐️ REPLACED: cin >> choice with scanw
-        echo(); // Enable echo for user input
+        echo();
         scanw("%d", &choice);
-        noecho(); // Disable echo after input
-        row++; // Move past the input line
+        noecho();
+        row++;
 
         if (choice == 1) {
             hero.attack(target);
@@ -64,40 +55,36 @@ int run_combat(Player& hero, Enemy& target) {
             hero.special_move(target);
         }
         else if(choice==3) {
-            return 2; // Flee
+            return 2;
         }
         else {
-            // ⭐️ REPLACED: cout with mvprintw
             mvprintw(row++, 0, "Invalid choice, you hesitate!");
             refresh();
-            this_thread::sleep_for(chrono::milliseconds(500)); // Pause briefly
+            this_thread::sleep_for(chrono::milliseconds(500));
         }
 
         if (!target.isAlive()) break;
 
-        // ⭐️ REPLACED: cout with mvprintw
         mvprintw(row++, 0, "\nThe %s attacks you!", target.get_name().c_str());
         target.attack(hero);
         refresh();
-        this_thread::sleep_for(chrono::milliseconds(500)); // Pause briefly
+        this_thread::sleep_for(chrono::milliseconds(500)); 
         
-        // Clear old combat text for the next turn
         clear();
         row = 0;
     }
     
-    // Final result message
     clear();
     if (hero.isAlive()) {
         mvprintw(0, 0, "You defeated the %s! Press any key to continue...", target.get_name().c_str());
         refresh();
-        getch(); // ⭐️ getch() instead of _getch()
-        return 1; // Win
+        getch();
+        return 1;
     } else {
         mvprintw(0, 0, "You have been defeated! Press any key to continue...", hero.get_name().c_str());
         refresh();
-        getch(); // ⭐️ getch() instead of _getch()
-        return 0; // Loss
+        getch();
+        return 0;
     }
 }
 
@@ -113,7 +100,7 @@ void Game::display_dashboard(Player& player, Map& map) {
     clear(); 
     int term_width = 0;
     int term_height = 0;
-    getmaxyx(stdscr, term_height, term_width); // Curses get dimensions
+    getmaxyx(stdscr, term_height, term_width);
     
     string title = "========================== The Defeated ==========================";
     int title_length = title.length();
@@ -121,41 +108,32 @@ void Game::display_dashboard(Player& player, Map& map) {
     
     int row = 0;
 
-    // Header
     mvprintw(row++, left_padding, "%s", title.c_str());
 
-    // 1. Start printing the static text
     mvprintw(row, 0, " Name: ");
     
-    // 2. Print Name in Cyan
     attron(COLOR_PAIR(1));
     printw("%s", player.get_name().c_str());
     attroff(COLOR_PAIR(1));
 
-    // 3. Print the text that follows
     printw(" [%s]\t HP: ", player.get_type_string().c_str());
     
-    // 4. Print HP in Green
     attron(COLOR_PAIR(2));
     printw("%d / %d", player.get_health(), player.get_max_health());
     attroff(COLOR_PAIR(2));
     
-    // 5. Move to the next line
     row++;
 
     mvprintw(row++, 0, "────────────────────────────────────────────────────────");
 
-    // Middle Section (Minimap + Log)
     int minimap_height = 15;
     int minimap_width = 25;
-    // NOTE: map.get_minimap_view must be updated to use curses (mvprintw) inside it!
     map.get_minimap_view(player, minimap_width, minimap_height, event_log);
 
-    // Footer
     mvprintw(term_height - 3, 0, " CONTROLS: (W/A/S/D) Move | (M) Full Map | (Q) Quit to Village");
     mvprintw(term_height - 2, 0, " Your Location: (%d, %d)", player.get_y(), player.get_x());
     
-    refresh(); // Show everything
+    refresh();
 }
 
 void Game::show_full_map(Map& map) {
@@ -163,14 +141,12 @@ void Game::show_full_map(Map& map) {
 
     while (onFullMap) {
         map.render(); 
-        // ⭐️ --- ADD THIS BLOCK --- ⭐️
         if (is_termresized()) {
             resize_term(0, 0);
             clear();
             refresh();
             continue; 
         }
-        // ⭐️ ------------------------ ⭐️
         int input = getch(); 
 
         switch (input) {
@@ -336,14 +312,12 @@ void Game::explore_forest(Player& player, Map& map, vector<bool>& quest) {
     bool inForest = true;
     while (inForest) {
         display_dashboard(player, map);
-        // ⭐️ --- ADD THIS BLOCK --- ⭐️
         if (is_termresized()) {
             resize_term(0, 0);
             clear();
             refresh();
-            continue; // Force the loop to restart and redraw
+            continue;
         }
-        // ⭐️ ------------------------ ⭐️
         int input = getch(); 
 
         switch(input) {
@@ -382,15 +356,14 @@ void Game::explore_forest(Player& player, Map& map, vector<bool>& quest) {
             default:
                 add_log_message("Invalid key pressed.");
         }
-        //this_thread::sleep_for(chrono::milliseconds(150));
         flushinp();
     }
 }
 
 void Game::game_loop(Player& player) {
+    clear();
     vector<bool> quest(5,false);
     Map stage1(player, quest, 153, 37, "../data/map.txt");
-    // ⭐️ REPLACED: cout with printw
     printw("\n--- You find your way to a nearby village to rest. ---\n");
     bool isGameRunning = true;
     refresh();
@@ -399,22 +372,19 @@ void Game::game_loop(Player& player) {
         clear(); 
         int row = 0;
         
-        // ⭐️ REPLACED: cout with mvprintw
         mvprintw(row++, 0, "\n--- Village Menu ---");
         mvprintw(row++, 0, "1. Show My Stats");
         mvprintw(row++, 0, "2. Venture into the forest");
         mvprintw(row++, 0, "3. Exit Game");
         mvprintw(row, 0, "Choice: ");
         refresh();
-        // ⭐️ --- ADD THIS BLOCK --- ⭐️
         if (is_termresized()) {
             resize_term(0, 0);
             clear();
             refresh();
-            continue; // Force the loop to restart and redraw
+            continue; 
         }
         int menuChoice = getch();
-        // ⭐️ ------------------------ ⭐️
         switch (menuChoice) {
             case '1':
                 clear();
@@ -430,7 +400,6 @@ void Game::game_loop(Player& player) {
                 }
                 break;
             case '3':
-                // ⭐️ REPLACED: cout with mvprintw
                 mvprintw(row + 1, 0, "Thanks for playing!");
                 refresh();
                 this_thread::sleep_for(chrono::seconds(1));
@@ -438,7 +407,6 @@ void Game::game_loop(Player& player) {
                 isGameRunning = false;
                 break;
             default:
-                // ⭐️ REPLACED: cout with mvprintw, and removed cin error handling
                 mvprintw(row + 1, 0, "Invalid choice. Please try again.");
                 refresh();
                 this_thread::sleep_for(chrono::seconds(1));
@@ -464,7 +432,6 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
         add_log_message("Combat Triggered!");
         int k = c.fight(player, target);
         if(k==0){
-            // ⭐️ REPLACED: cout with mvprintw
             clear();
             mvprintw(0, 0, "You have been defeated! Press any key to exit.");
             refresh();

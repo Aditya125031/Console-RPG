@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
 project(Console-RPG CXX C)
 
+# ==============================================================================
+# 1. DEPENDENCY SETUP
+# ==============================================================================
+
+# --- PDCurses Setup (Static) ---
 set(PDCURSES_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extern/pdcurses")
 
 file(GLOB PDCURSES_COMMON_SRCS "${PDCURSES_ROOT_DIR}/pdcurses/*.[cC]")
@@ -11,23 +16,41 @@ add_library(pdcurses_lib STATIC
     ${PDCURSES_WINCON_SRCS}
 )
 
-# Set include path for PDCurses headers (curses.h, panel.h)
-target_include_directories(pdcurses_lib PUBLIC
-    ${PDCURSES_ROOT_DIR}
-)
+target_include_directories(pdcurses_lib PUBLIC ${PDCURSES_ROOT_DIR})
 
-# Add compiler definitions for WIDE and UTF-8 support
+# PDCurses definitions for Windows/Unicode
 target_compile_definitions(pdcurses_lib PUBLIC
     PDC_WIDE
     PDC_FORCE_UTF8
-    # We can keep the Windows version set, as it is standard practice
     _WIN32_WINNT=0x0601
     WINVER=0x0601
 )
 
-# --- GAME EXECUTABLE SETUP ---
+# --- SDL3 Setup (Dynamic) ---
+set(SDL3_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/extern/SDL3")
+set(SDL2_MIXER_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/extern/SDL2_mixer")
 
-# Define a file group for all of your game's source files
+# Define paths based on the folder structure you created
+set(SDL3_INCLUDE_DIR "${SDL3_ROOT}/include")
+set(SDL3_LIB_DIR     "${SDL3_ROOT}/lib")
+set(SDL3_BIN_DIR     "${SDL3_ROOT}/bin")
+
+set(SDL2_MIXER_INCLUDE_DIR "${SDL2_MIXER_ROOT}/include")
+set(SDL2_MIXER_LIB_DIR     "${SDL2_MIXER_ROOT}/lib")
+set(SDL2_MIXER_BIN_DIR     "${SDL2_MIXER_ROOT}/bin")
+
+# Find the main SDL3 library file to link against
+find_library(SDL3_LIB NAMES SDL3 PATHS ${SDL3_LIB_DIR} NO_DEFAULT_PATH)
+find_library(SDL2_MIXER_LIB NAMES SDL2_mixer PATHS ${SDL2_MIXER_LIB_DIR} NO_DEFAULT_PATH)
+
+# Find all DLLs in the bin folder to copy later (SDL3.dll)
+file(GLOB SDL3_DLLS "${SDL3_BIN_DIR}/*.dll" "${SDL2_MIXER_BIN_DIR}/*.dll")
+
+# ==============================================================================
+# 2. GAME EXECUTABLE SETUP
+# ==============================================================================
+
+# Gather all your source files
 file(GLOB GAME_SRCS
     src/main.cpp
     src/characters/*.cpp
@@ -39,23 +62,50 @@ file(GLOB GAME_SRCS
     src/combat/*.cpp
 )
 
-# Create the executable target
+# Create the game executable
 add_executable(Console-RPG ${GAME_SRCS})
 
-# Include directory for your custom headers (tile.h, map.h, etc.)
+# --- Include Paths ---
+# Allows #include "game.h" and #include <SDL3/SDL.h>
 target_include_directories(Console-RPG PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${SDL3_INCLUDE_DIR}
+    ${SDL2_MIXER_INCLUDE_DIR}
 )
 
-# Link your executable to the custom-built PDCurses library
+# --- Linking Libraries ---
 target_link_libraries(Console-RPG
     pdcurses_lib
+    ${SDL3_LIB}
+    ${SDL2_MIXER_LIB}
 )
 
-# Add system libraries required by PDCurses on Windows
+# Additional system libraries often needed by PDCurses/SDL on Windows
 if (WIN32)
     target_link_libraries(Console-RPG
+        mingw32 # Important for MinGW entry points
         user32
         gdi32
+        winmm
+        imm32
+        ole32
+        oleaut32
+        version
+        uuid
+        advapi32
+        setupapi
+        shell32
     )
 endif()
+
+# ==============================================================================
+# 3. POST-BUILD STEPS
+# ==============================================================================
+
+# Automatically copy SDL3.dll next to Console-RPG.exe after every build
+add_custom_command(TARGET Console-RPG POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${SDL3_DLLS}
+    $<TARGET_FILE_DIR:Console-RPG>
+    COMMENT "Copying runtime DLLs to output directory"
+)

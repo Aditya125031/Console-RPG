@@ -93,6 +93,8 @@ void setup_curses() {
         init_pair(5, COLOR_YELLOW, COLOR_BLACK); 
         init_pair(6, COLOR_WHITE, COLOR_BLACK); 
         init_pair(7, COLOR_MAGENTA, COLOR_BLACK);  
+        init_pair(8, COLOR_WHITE, COLOR_WHITE); 
+        init_pair(9, COLOR_RED, COLOR_RED); 
     }
     
     // The timeout below is optional, but often useful for game loops
@@ -100,12 +102,75 @@ void setup_curses() {
     //timeout(100); 
 }
 
-//---
+void show_welcome_screen() {
+    std::vector<std::string> title_art = {
+        " ........ ..   .. .......          ......   ....... ....... .......        ..    ........ ....... ...... ",
+        "    ..    ..   .. ..               ..   ..  ..      ..      ..            ....      ..    ..      ..   ..",
+        "    ..    ..   .. ..               ..    .. ..      ..      ..           ..  ..     ..    ..      ..    ..",
+        "    ..    ....... .......          ..    .. ......  ....... .......     ..    ..    ..    ....... ..    ..",
+        "    ..    ..   .. ..               ..    .. ..      ..      ..         ..........   ..    ..      ..    ..",
+        "    ..    ..   .. ..               ..   ..  ..      ..      ..        ..        ..  ..    ..      ..   ..",
+        "    ..    ..   .. .......          ......   ....... ..      ........ ..          .. ..    ....... ...... "
+    };
+
+    while (true) {
+        if (is_termresized()) {
+            resize_term(0, 0);
+            clear();
+        }
+
+        clear();
+        int term_height, term_width;
+        getmaxyx(stdscr, term_height, term_width);
+
+        int art_height = title_art.size();
+        int art_width = title_art[0].length();
+        int art_start_y = (term_height / 2) - (art_height / 2) - 5; 
+        int art_start_x = (term_width / 2) - (art_width / 2);
+
+        if (art_start_y < 0) art_start_y = 0;
+        if (art_start_x < 0) art_start_x = 0;
+
+        for (int i = 0; i < art_height; ++i) {
+            std::string& line = title_art[i];
+            
+            for (int j = 0; j < line.length(); ++j) {
+                char c = line[j];
+                if(j<28){
+                    if (c != ' ') {
+                        attron(COLOR_PAIR(8));
+                        mvaddch(art_start_y + i, art_start_x + j, c);
+                        attroff(COLOR_PAIR(8));
+                    }
+                }
+                
+                else{
+                    if (c != ' ') {
+                        attron(COLOR_PAIR(9));
+                       
+                        mvaddch(art_start_y + i, art_start_x + j, c);
+                        attroff(COLOR_PAIR(9));
+                    }
+                }
+                
+            }
+        }
+
+        mvprintw(term_height-2, 0, "Press Enter to start...");
+        refresh();
+        int input = getch(); 
+
+        if (input == 10 || input == 13 || input == KEY_ENTER) {
+            return; 
+        }
+    }
+}
 
 int main()
 {
     setup_curses();
     Game world;
+    show_welcome_screen();
     Player hero = create_player();
     hero.inventory.addItem(make_shared<Health_Potion>(), 3, hero, world);
     hero.inventory.addItem(make_shared<Mana_Potion>(), 2, hero, world);

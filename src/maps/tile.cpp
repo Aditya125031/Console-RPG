@@ -5,10 +5,11 @@
 #include<cmath>
 #include <limits>
 #include <chrono>
-#include <cstdlib> // Required for std::system
+#include <cstdlib>
 #include "../include/tile.h"
 #include "../include/player.h"
 #include "../include/war_chief.h"
+#include "../include/orc.h"
 #include "../include/orc_raider.h"
 #include "../include/golem.h"
 #include "../include/orc_raider.h"
@@ -24,9 +25,8 @@ using namespace std;
 
 Tile::Tile() {}
 
-// Constructor implementation
 Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y)
-    : m_isWalkable(true), m_characterOnTile(nullptr), outOfBounds(false), requiredQuestCompleted(true), // Always initialize pointers to nullptr
+    : m_isWalkable(true), m_characterOnTile(nullptr), outOfBounds(false), requiredQuestCompleted(-1),
         doQuest(-1)
     //   ,m_itemOnTile(nullptr), 
     { 
@@ -83,17 +83,17 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_characterOnTile = imp;
             m_isWalkable = false;
         }
-        // else if(displayChar=="O"){
-        //     m_mapDisplayChar = "."; 
-        //     m_miniMapDisplayChar = "§"; 
+        else if(displayChar=="O"){
+            m_mapDisplayChar = "."; 
+            m_miniMapDisplayChar = "§"; 
             
-        //     m_colorPairMap = 6;
-        //     m_colorPairMiniMap = 4; 
+            m_colorPairMap = 6;
+            m_colorPairMiniMap = 4; 
 
-        //     Character* orc = new Orc();
-        //     m_characterOnTile = orc;
-        //     m_isWalkable = false;
-        // }
+            Character* orc = new Orc();
+            m_characterOnTile = orc;
+            m_isWalkable = false;
+        }
         else if(displayChar=="GG"){
             m_mapDisplayChar = "."; 
             m_miniMapDisplayChar = "Ω"; 
@@ -120,7 +120,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_mapDisplayChar = "."; 
             m_miniMapDisplayChar = "Ö";
             m_colorPairMap = 6;
-            m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
+            m_colorPairMiniMap = 4; 
             Character* warchief = new GoblinWarChief();
             m_characterOnTile = warchief;
             m_isWalkable = false;
@@ -130,10 +130,10 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_mapDisplayChar = "."; 
             m_miniMapDisplayChar = "Ö";
             m_colorPairMap = 6;
-            m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
+            m_colorPairMiniMap = 4; 
             Character* orc = new OrcRaider();
             m_characterOnTile = orc;
-            requiredQuestCompleted = quest[0];
+            requiredQuestCompleted = 0;
             m_isWalkable = false;
             doQuest=1;
         }
@@ -141,10 +141,10 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_mapDisplayChar = "."; 
             m_miniMapDisplayChar = "⚜";
             m_colorPairMap = 6;
-            m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
+            m_colorPairMiniMap = 4; 
             Character* golem = new BoneGolem();
             m_characterOnTile = golem;
-            requiredQuestCompleted = quest[1];
+            requiredQuestCompleted = 1;
             m_isWalkable = false;
             doQuest=2;
         }
@@ -152,10 +152,10 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_mapDisplayChar = "."; 
             m_miniMapDisplayChar = "Ö";
             m_colorPairMap = 6;
-            m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
+            m_colorPairMiniMap = 4; 
             Character* infimp = new InfernalImp();
             m_characterOnTile = infimp;
-            requiredQuestCompleted = quest[1];
+            requiredQuestCompleted = 2;
             m_isWalkable = false;
             doQuest=3;
         }
@@ -163,10 +163,10 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_mapDisplayChar = "."; 
             m_miniMapDisplayChar = "⚜";
             m_colorPairMap = 6;
-            m_colorPairMiniMap = 4; // ⭐️ Assign the color pair ID
+            m_colorPairMiniMap = 4; 
             Character* golem = new BoneGolem();
             m_characterOnTile = golem;
-            requiredQuestCompleted = quest[1];
+            requiredQuestCompleted = 3;
             m_isWalkable = false;
             doQuest=4;
         }
@@ -174,22 +174,20 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_mapDisplayChar = "."; 
             m_miniMapDisplayChar = "♛";
             m_colorPairMap = 6;
-            m_colorPairMiniMap = 5; // ⭐️ Assign the color pair ID
+            m_colorPairMiniMap = 5; 
             Character* lichlord = new LichLord();
             m_characterOnTile = lichlord;
-            requiredQuestCompleted = quest[1];
+            requiredQuestCompleted = 4;
             m_isWalkable = false;
-            doQuest=4;
         }
         else{
             m_mapDisplayChar = m_miniMapDisplayChar = "X";
             m_isWalkable = false;
-            m_colorPairMap = m_colorPairMiniMap = 7; // ⭐️ Assign the default color pair
+            m_colorPairMap = m_colorPairMiniMap = 7;
         }
 
       }
 
-// Getter for the display character
 string Tile::getMiniMapDisplayChar() {
     // if(m_reqQuest == nullptr || m_reqQuest->isCompleted()){
     //     return m_miniMapDisplayChar;
@@ -205,13 +203,10 @@ string Tile::getMapDisplayChar() {
 }
 
 
-// Getter for walkability
 bool Tile::getIsWalkable() {
-    // A tile is not walkable if it's inherently a wall OR if a character is on it.
     return m_isWalkable;
 }
 
-// Getter for the character pointer
 Character* Tile::getCharacter() {
     return m_characterOnTile;
 }
@@ -221,7 +216,6 @@ Character* Tile::getCharacter() {
 //     return m_itemOnTile;
 // }
 
-// Setter for the character pointer
 void Tile::setCharacter(Character* character) {
     m_characterOnTile = character;
 }
@@ -274,8 +268,9 @@ void Tile::seQuestStatus(bool status){
     requiredQuestCompleted=status;
 }
 
-bool Tile::getQuestStatus(){
-    return requiredQuestCompleted;
+bool Tile::getQuestStatus(vector<bool>& quest){
+    if(requiredQuestCompleted == -1) return true;
+    return quest[requiredQuestCompleted];
 }
 
 int Tile::get_doQuest(){

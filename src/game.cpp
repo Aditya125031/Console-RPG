@@ -8,6 +8,7 @@
 #include <chrono>
 
 #include "../extern/pdcurses/curses.h" 
+#include "../extern/pdcurses/curses.h" 
 
 using namespace std;
 

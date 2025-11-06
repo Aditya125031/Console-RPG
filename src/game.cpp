@@ -7,8 +7,7 @@
 #include <thread>
 #include <chrono>
 
-#include "../extern/pdcurses/curses.h" 
-#include "../extern/pdcurses/curses.h" 
+#include "../extern/pdcurses/curses.h"  
 
 using namespace std;
 
@@ -23,71 +22,9 @@ using namespace std;
 #include "../include/items.h"
 #include "../include/goblin.h"
 
+class AudioManager; // Forward declaration
+
 const unsigned int MAX_LOG_LINES = 10;
-
-int run_combat(Player& hero, Enemy& target) {
-    clear();
-    int row = 0;
-    
-    mvprintw(row++, 0, "\n--- A wild %s appears! ---", target.get_name().c_str());
-
-    while (hero.isAlive() && target.isAlive()) {
-        row++;
-        mvprintw(row++, 0, "%s HP: %d | %s HP: %d",
-                 hero.get_name().c_str(), hero.get_health(),
-                 target.get_name().c_str(), target.get_health());
-        
-        mvprintw(row++, 0, "Choose your action:");
-        mvprintw(row++, 0, "1. Attack");
-        mvprintw(row++, 0, "2. Special Move");
-        mvprintw(row++, 0, "3. Flee");
-        mvprintw(row, 0, "Your choice: ");
-        refresh();
-
-        int choice;
-        echo();
-        scanw("%d", &choice);
-        noecho();
-        row++;
-
-        if (choice == 1) {
-            hero.attack(target);
-        } else if (choice == 2) {
-            hero.special_move(target);
-        }
-        else if(choice==3) {
-            return 2;
-        }
-        else {
-            mvprintw(row++, 0, "Invalid choice, you hesitate!");
-            refresh();
-            this_thread::sleep_for(chrono::milliseconds(500));
-        }
-
-        if (!target.isAlive()) break;
-
-        mvprintw(row++, 0, "\nThe %s attacks you!", target.get_name().c_str());
-        target.attack(hero);
-        refresh();
-        this_thread::sleep_for(chrono::milliseconds(500)); 
-        
-        clear();
-        row = 0;
-    }
-    
-    clear();
-    if (hero.isAlive()) {
-        mvprintw(0, 0, "You defeated the %s! Press any key to continue...", target.get_name().c_str());
-        refresh();
-        getch();
-        return 1;
-    } else {
-        mvprintw(0, 0, "You have been defeated! Press any key to continue...", hero.get_name().c_str());
-        refresh();
-        getch();
-        return 0;
-    }
-}
 
 void Game::add_log_message(std::string message) {
     event_log.push_front(message);
@@ -308,7 +245,7 @@ void Game:: runInventoryMenu(Player& player, Game& world)
     refresh();
 }
 
-void Game::explore_forest(Player& player, Map& map, vector<bool>& quest) {
+void Game::explore_forest(Player& player, Map& map, vector<bool>& quest, AudioManager& audio) {
     add_log_message("You entered the forest.");
     bool inForest = true;
     while (inForest) {
@@ -324,22 +261,22 @@ void Game::explore_forest(Player& player, Map& map, vector<bool>& quest) {
         switch(input) {
             case 'w':
             case 'W':
-                move_character(player, 0, -1, map, quest);
+                move_character(player, 0, -1, map, quest, audio);
                 break;
 
             case 's':
             case 'S':
-                move_character(player, 0, 1, map, quest);
+                move_character(player, 0, 1, map, quest, audio);
                 break;
 
             case 'a':
             case 'A':
-                move_character(player, -1, 0, map, quest);
+                move_character(player, -1, 0, map, quest, audio);
                 break;
 
             case 'd':
             case 'D':
-                move_character(player, 1, 0, map, quest);
+                move_character(player, 1, 0, map, quest, audio);
                 break;
 
             case 'm':
@@ -361,10 +298,10 @@ void Game::explore_forest(Player& player, Map& map, vector<bool>& quest) {
     }
 }
 
-void Game::game_loop(Player& player) {
+void Game::game_loop(Player& player, AudioManager& audio) {
     clear();
     vector<bool> quest(5,false);
-    Map stage1(player, quest, 153, 37, "../data/map.txt");
+    Map stage1(player, quest, 153, 37, "../data/map/map.txt");
     printw("\n--- You find your way to a nearby village to rest. ---\n");
     bool isGameRunning = true;
     refresh();
@@ -395,7 +332,7 @@ void Game::game_loop(Player& player) {
                 getch();
                 break;
             case '2':
-                explore_forest(player, stage1, quest);
+                explore_forest(player, stage1, quest, audio);
                 if (!player.isAlive()) {
                     isGameRunning = false;
                 }
@@ -417,7 +354,7 @@ void Game::game_loop(Player& player) {
     }
 }
 
-void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool>& quest) {
+void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool>& quest, AudioManager& audio) {
     int newx=entity.get_x()+y;
     int newy=entity.get_y()+x;
     if(map.getTileAt(newx,newy)->getCharacter() != nullptr) {
@@ -431,6 +368,7 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
         Character* target_ptr = map.getTileAt(newx,newy)->getCharacter();
         Enemy& target = static_cast<Enemy&>(*target_ptr);
         add_log_message("Combat Triggered!");
+        audio.playMusic("../data/audio/battle-bgm.mp3", *this);
         int k = c.fight(player, target);
         if(k==0){
             clear();
@@ -460,6 +398,7 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
         else if(k==2){
             add_log_message("You fled the battle!");
         }
+        audio.playMusic("../data/audio/sacred-garden-10377.mp3", *this);
         return;
     } 
     // else if(map->getTileAt(newy,newx)->getItem()) { ... (Item handling)
@@ -471,6 +410,7 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
         return;
     } 
     else if(map.getTileAt(newx,newy)->getIsWalkable()) {
+        audio.playSFX("../data/audio/move-sfx.mp3", *this);
         map.getTileAt(entity.get_x(),entity.get_y())->setCharacter(nullptr);
         map.getTileAt(newx,newy)->setCharacter(&entity);
         map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);

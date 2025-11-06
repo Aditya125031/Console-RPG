@@ -1,3 +1,5 @@
+#define SDL_MAIN_HANDLED // <--- ADD THIS LINE FIRST
+#include "../include/audiomanager.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -169,12 +171,15 @@ void show_welcome_screen() {
 int main()
 {
     setup_curses();
+    AudioManager audio;
+    audio.init();
     Game world;
+    audio.playMusic("../data/audio/sacred-garden-10377.mp3", world);
     show_welcome_screen();
     Player hero = create_player();
     hero.inventory.addItem(make_shared<Health_Potion>(), 3, hero, world);
     hero.inventory.addItem(make_shared<Mana_Potion>(), 2, hero, world);
-    world.game_loop(hero);
+    world.game_loop(hero, audio);
     endwin();
     
     return 0;

@@ -71,7 +71,7 @@ void Game::display_dashboard(Player& player, Map& map) {
     // 3. HP
     mvprintw(row, 0, " HP:    ");
     attron(COLOR_PAIR(2));
-    printw("%d / %d", player.get_health(), player.get_max_health());
+    printw("%d/%d", player.get_health(), player.get_max_health());
     attroff(COLOR_PAIR(2));
     row++;
 

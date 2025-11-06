@@ -6,8 +6,9 @@
 #include <cstdlib>
 #include <thread>
 #include <chrono>
-
 #include "../extern/pdcurses/curses.h"  
+// REMOVE: #include <iostream>
+// REMOVE: #include <windows.h>
 
 using namespace std;
 
@@ -40,32 +41,56 @@ void Game::display_dashboard(Player& player, Map& map) {
     int term_height = 0;
     getmaxyx(stdscr, term_height, term_width);
     
-    string title = "========================== The Defeated ==========================";
-    int title_length = title.length();
-    int left_padding = max(0, (term_width - title_length) / 2);
+    string title_prefix = "========================== THE ";
+    string title_red = "DEFEATED";
+    string title_suffix = " ==========================";
     
+    int full_len = title_prefix.length() + title_red.length() + title_suffix.length();
+    int left_padding = max(0, (term_width - full_len) / 2);
     int row = 0;
 
-    mvprintw(row++, left_padding, "%s", title.c_str());
-
-    mvprintw(row, 0, " Name: ");
+    // Print the title centered at row 0
+    mvprintw(row, left_padding, "%s", title_prefix.c_str());
+    attron(COLOR_PAIR(4) | A_BOLD); // Red for "DEFEATED"
+    printw("%s", title_red.c_str());
+    attroff(COLOR_PAIR(4) | A_BOLD);
+    printw("%s", title_suffix.c_str());
     
+    row += 2; // Move down 2 rows to leave a blank line after title
+
+    mvprintw(row, 0, " Name:  ");
     attron(COLOR_PAIR(1));
     printw("%s", player.get_name().c_str());
     attroff(COLOR_PAIR(1));
+    row++;
 
-    printw(" [%s]\t HP: ", player.get_type_string().c_str());
-    
+    // 2. Class (separated for clarity)
+    mvprintw(row, 0, " Class: %s", player.get_type_string().c_str());
+    row++;
+
+    // 3. HP
+    mvprintw(row, 0, " HP:    ");
     attron(COLOR_PAIR(2));
     printw("%d / %d", player.get_health(), player.get_max_health());
     attroff(COLOR_PAIR(2));
-    
     row++;
 
+    // 4. Mana
+    mvprintw(row, 0, " Mana:  ");
+    attron(COLOR_PAIR(1));
+    // Note: Assuming get_mana() is current and you might need a get_max_mana() later
+    printw("%d / %d", player.get_mana(), player.get_mana());
+    attroff(COLOR_PAIR(1));
+    row++;
     mvprintw(row++, 0, "────────────────────────────────────────────────────────");
+    
+    row+=12;
+    mvprintw(row++, 2, "[ EQUIPMENT ]");
+    mvprintw(row++, 2, " H: Iron Sword");
+    mvprintw(row++, 2, " A: Leather Armor");
 
-    int minimap_height = 15;
-    int minimap_width = 25;
+    int minimap_height = 19;
+    int minimap_width = 31;
     map.get_minimap_view(player, minimap_width, minimap_height, event_log);
 
     mvprintw(term_height - 3, 0, " CONTROLS: (W/A/S/D) Move | (M) Full Map | (Q) Quit to Village");

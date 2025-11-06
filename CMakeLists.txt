@@ -38,6 +38,8 @@ set(SDL2_MIXER_INCLUDE_DIR "${SDL2_MIXER_ROOT}/include")
 set(SDL2_MIXER_LIB_DIR     "${SDL2_MIXER_ROOT}/lib")
 set(SDL2_MIXER_BIN_DIR     "${SDL2_MIXER_ROOT}/bin")
 
+message(STATUS "DEBUG: SDL2 root is: ${SDL2_ROOT}")
+message(STATUS "DEBUG: Looking for SDL2 libs in: ${SDL2_LIB_DIR}")
 # Find libraries
 find_library(SDL2MAIN_LIB NAMES SDL2main PATHS ${SDL2_LIB_DIR} NO_DEFAULT_PATH)
 find_library(SDL2_LIB NAMES SDL2 PATHS ${SDL2_LIB_DIR} NO_DEFAULT_PATH)

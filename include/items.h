@@ -62,7 +62,6 @@ class Weapon : public Equipables
             double weapon_cooldown=0.0;
             std::chrono::steady_clock::time_point last_use;
             std::chrono::steady_clock::time_point sa_last_use;
-            int special=false;
             double special_cooldown=5.0;
 
     public:
@@ -70,7 +69,7 @@ class Weapon : public Equipables
                    sa_last_use(std::chrono::steady_clock::now()) 
         {
         }
-
+        int special=false;
         int get_weapon_attack();
         int get_weapon_mana();
         bool can_use();

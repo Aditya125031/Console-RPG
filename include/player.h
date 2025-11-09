@@ -7,8 +7,10 @@
 #include <chrono>
 using namespace std;
 
+class Item;
 class Map;
 class Game;
+class Inventory;
 enum class PlayerType {
     Swordsman,
     Archer,
@@ -17,6 +19,7 @@ enum class PlayerType {
 
 class Player : public Character {
 private:
+    Game& world;
     PlayerType type;
     double specialAttackInterval;
     double normalAttackInterval;
@@ -33,7 +36,7 @@ protected:
 
 public:
 Inventory inventory;
-    Player(std::string name, PlayerType type); 
+    Player(Game& game_world, std::string name, PlayerType type);
     int get_x() override;
     int get_y() override;
     void set_x(int) override;
@@ -51,7 +54,7 @@ Inventory inventory;
     std::string get_type_string() const;
     string move(int , int , Map& map); 
     void show_details() const; 
-    void special_move(Character& enemy); 
+    void special_move(Character& enemy);
     void reset_stats();
     std::chrono::steady_clock::time_point get_normal_attack_ready() const;
     std::chrono::steady_clock::time_point get_special_attack_ready() const;

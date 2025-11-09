@@ -56,15 +56,13 @@ void Game::display_dashboard(Player& player, Map& map) {
     attroff(COLOR_PAIR(4) | A_BOLD);
     printw("%s", title_suffix.c_str());
     
-    row += 2; // Move down 2 rows to leave a blank line after title
+    row += 2;
 
     mvprintw(row, 0, " Name:  ");
     attron(COLOR_PAIR(1));
     printw("%s", player.get_name().c_str());
     attroff(COLOR_PAIR(1));
     row++;
-
-    // 2. Class (separated for clarity)
     mvprintw(row, 0, " Class: %s", player.get_type_string().c_str());
     row++;
 

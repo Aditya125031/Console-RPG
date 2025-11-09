@@ -9,48 +9,54 @@
 
 using namespace std;
 
-Player::Player(std::string name, PlayerType type)
-    : Character(name, 100, 10), type(type) {
-        switch (type) {
-        
-        case PlayerType::Swordsman:
-            this->health = 150;
-            this->attackPower = 15;
-            this->mana = 20;
-            break;
+Player::Player(Game& game_world, std::string name, PlayerType type)
+    : Character(name, 100, 10), 
+      world(game_world),  // <-- THIS LINE IS THE FIX
+      type(type) 
+{
+    // The 'inventory' member is default-initialized automatically
+    
+    switch (type) {
+    
+    case PlayerType::Swordsman:
+        this->health = 150;
+        this->attackPower = 15;
+        this->mana = 20;
+        break;
 
-        case PlayerType::Archer:
-            this->health = 100;
-            this->attackPower = 12;
-            this->mana = 40;
-            break;
+    case PlayerType::Archer:
+        this->health = 100;
+        this->attackPower = 12;
+        this->mana = 40;
+        break;
 
-        case PlayerType::Mage:
-            this->health = 80;
-            this->attackPower = 8;
-            this->mana = 150;
-            break;
+    case PlayerType::Mage:
+        this->health = 80;
+        this->attackPower = 8;
+        this->mana = 150;
+        break;
     }
     this->maxHealth = this->health;
-    this->max_mana=this->mana;
+    this->max_mana = this->mana;
     this->baseMaxHealth = this->health;
-            this->baseAttackPower = this->attackPower;
-            this->baseMaxMana = this->mana;
+    this->baseAttackPower = this->attackPower;
+    this->baseMaxMana = this->mana;
 
+    // 'printw' here is risky if ncurses isn't initialized yet,
+    // but we'll leave it for now.
     printw("A new %s named %s has arrived!\n", get_type_string().c_str(), this->name.c_str());
 }
-void Player::reset_stats()
-{
-    // Set all current stats back to their base values
+
+// ... (reset_stats, get_type_string, show_details all look fine) ...
+void Player::reset_stats() {
     this->attackPower = this->baseAttackPower;
     this->maxHealth = this->baseMaxHealth;
     this->max_mana = this->baseMaxMana;
-    
-    // Safety check: If your current health is now
-    // higher than your max, lower it.
+
     if (this->health > this->maxHealth) {
         this->health = this->maxHealth;
     }
+
     if (this->mana > this->max_mana) {
         this->mana = this->max_mana;
     }
@@ -58,10 +64,14 @@ void Player::reset_stats()
 
 std::string Player::get_type_string() const {
     switch (this->type) {
-        case PlayerType::Swordsman: return "Swordsman";
-        case PlayerType::Archer:    return "Archer";
-        case PlayerType::Mage:      return "Mage";
-        default:                    return "Unknown";
+        case PlayerType::Swordsman:
+            return "Swordsman";
+        case PlayerType::Archer:
+            return "Archer";
+        case PlayerType::Mage:
+            return "Mage";
+        default:
+            return "Unknown";
     }
 }
 
@@ -70,59 +80,26 @@ void Player::show_details() const {
     mvprintw(row++, 0, "---------------------");
     mvprintw(row++, 0, "Name: %s", this->name.c_str());
     mvprintw(row++, 0, "Type: %s", get_type_string().c_str());
-    mvprintw(row++, 0, "Health: %d / %d", this->health, this->maxHealth); 
+    mvprintw(row++, 0, "Health: %d / %d", this->health, this->maxHealth);
     mvprintw(row++, 0, "Attack Power: %d", this->attackPower);
     mvprintw(row++, 0, "Mana: %d", this->mana);
     mvprintw(row++, 0, "---------------------");
 }
-
 void Player::special_move(Character& enemy) 
 {
-    int row, col;
-    getyx(stdscr, row, col); 
+    std::shared_ptr<Weapon> current_weapon = this->inventory.equippedWeapon;
     
-    mvprintw(row++, 0, "%s uses their special move: ", this->name.c_str());
-    int damage = 0;
-    std::string message = "";
-    
-    switch (this->type) {
-        case PlayerType::Swordsman:
-            if (this->mana >= 10) {
-                message = "'Whirlwind Slash'!";
-                damage = this->attackPower * 2.5; 
-                this->mana -= 10;
-            } else {
-                message = "Not enough stamina!";
-            }
-            break;
-
-        case PlayerType::Archer:
-            if (this->mana >= 20) {
-                message = "'Piercing Arrow'!";
-                damage = this->attackPower * 3; 
-                this->mana -= 20;
-            } else {
-                message = "Not enough stamina!";
-            }
-            break;
-
-        case PlayerType::Mage:
-            if (this->mana >= 30) {
-                message = "'Fireball'!";
-                damage =this->attackPower * 3.5;
-                this->mana -= 30;
-            } else {
-                message = "Not enough mana!";
-            }
-            break;
-    }
-    mvprintw(row++, 0, "%s", message.c_str());
-    
-    if (damage > 0) {
-        enemy.take_damage(damage);
+    if (current_weapon) 
+    {
+        
+        if (current_weapon->special) {
+            current_weapon->special_attack(*this, enemy, this->world);
+        }
+        else {
+            this->world.add_log_message("Your " + current_weapon->get_item_name() + " does not have a special move.");
+        }
     }
 }
-
 int Player::get_x() {
     return this->coord_x;
 }

@@ -22,7 +22,7 @@
 
 // Note: I'm assuming 'PlayerType' is an enum defined in one of your headers.
 
-Player create_player() {
+Player create_player(Game& game_world) {
     clear();
     mvprintw(0, 0, "Welcome to Text RPG!");
 
@@ -71,7 +71,7 @@ Player create_player() {
     }
 
     refresh();
-    return Player(playerName, playerType);
+    return Player(game_world,playerName, playerType);
 }
 
 // This function should be called once, before starting the game loop
@@ -176,7 +176,8 @@ int main()
     Game world;
     audio.playMusic("../data/audio/sacred-garden-10377.mp3", world);
     show_welcome_screen();
-    Player hero = create_player();
+    Game game;
+    Player hero = create_player(game);
     hero.inventory.addItem(make_shared<Health_Potion>(), 3, hero, world);
     hero.inventory.addItem(make_shared<Mana_Potion>(), 2, hero, world);
     world.game_loop(hero, audio);

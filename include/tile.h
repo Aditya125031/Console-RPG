@@ -44,6 +44,7 @@ class Tile{
         void set_mini_map_color_pair(int) ;
         int get_doQuest();
         void set_doQuest(int);
+        bool get_isNPC();
         
 
     private:
@@ -57,6 +58,7 @@ class Tile{
         int m_colorPairMiniMap;
         int m_colorPairMap;
         int doQuest;
+        bool isNPC;
     };
 
 #endif 

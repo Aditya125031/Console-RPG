@@ -174,7 +174,7 @@ int main()
     AudioManager audio;
     audio.init();
     Game world;
-    audio.playMusic("../data/audio/sacred-garden-10377.mp3", world);
+    audio.playMusic("../data/audio/sacred-garden-10377.mp3");
     show_welcome_screen();
     Game game;
     Player hero = create_player(game);

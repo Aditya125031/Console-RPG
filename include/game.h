@@ -28,6 +28,8 @@ class Game
     private:
         std::deque<std::string> event_log;
         const size_t MAX_LOG_LINES = 10;
+        int hpStepCount = 0;
+        int manaStepCount = 0;
     public:
         void game_loop(Player& player, AudioManager& audio);
         void display_welcome_message();

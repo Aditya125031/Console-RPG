@@ -757,6 +757,23 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
     } 
     else if(map.getTileAt(newx,newy)->getIsWalkable()) {
         audio.playSFX("../data/audio/move-sfx.mp3");
+        hpStepCount++;
+        manaStepCount++;
+        Player& player = static_cast<Player&>(entity);
+        if(hpStepCount==player.getHPRegenStep()){
+            hpStepCount=0;
+            if(player.get_health()<player.get_max_health()){
+                player.add_health(1);
+                add_log_message("Regenerated 1 HP");
+            }
+        }
+        if(manaStepCount==player.getManaRegenStep()){
+            manaStepCount=0;
+            if(player.get_mana()<player.get_max_mana()){
+                player.add_mana(1);
+                add_log_message("Regenerated 1 Mana");
+            }
+        }
         map.getTileAt(entity.get_x(),entity.get_y())->setCharacter(nullptr);
         map.getTileAt(newx,newy)->setCharacter(&entity);
         map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);
@@ -769,7 +786,6 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
         map.getTileAt(newx,newy)->set_mini_map_color_pair(5);
         entity.set_x(newx);
         entity.set_y(newy);
-        add_log_message("You moved to (" + to_string(entity.get_y()) + ", " + to_string(entity.get_x()) + ").");
         return;
     }
     else {

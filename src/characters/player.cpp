@@ -19,21 +19,27 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
     switch (type) {
     
     case PlayerType::Swordsman:
-        this->health = 1500;
-        this->attackPower = 150;
-        this->mana = 200;
+        this->health = 120;
+        this->attackPower = 15;
+        this->mana = 20;
+        this->regen_hp_step=16;
+        this->regen_mana_step=30;
         break;
 
     case PlayerType::Archer:
         this->health = 100;
         this->attackPower = 12;
-        this->mana = 40;
+        this->mana = 60;
+        this->regen_hp_step=20;
+        this->regen_mana_step=20;
         break;
 
     case PlayerType::Mage:
         this->health = 80;
         this->attackPower = 8;
-        this->mana = 150;
+        this->mana = 100;
+        this->regen_hp_step=24;
+        this->regen_mana_step=12;
         break;
     }
     this->maxHealth = this->health;
@@ -45,6 +51,8 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
     // 'printw' here is risky if ncurses isn't initialized yet,
     // but we'll leave it for now.
     printw("A new %s named %s has arrived!\n", get_type_string().c_str(), this->name.c_str());
+    this_thread::sleep_for(chrono::seconds(1));
+    flushinp();
 }
 
 // ... (reset_stats, get_type_string, show_details all look fine) ...
@@ -206,26 +214,18 @@ std::string Player::move(int x, int y, Map& map) {
     return "Moved to position (" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
 
- int Player::getHPRegenVal(){
-    return regen_hp_val;
+ int Player::getHPRegenStep(){
+    return regen_hp_step;
  }
 
- void Player::setHPRegenVal(int a){
-    regen_hp_val=a;
+ void Player::setHPRegenStep(int a){
+    regen_hp_step=a;
  }
 
- int Player::getManaRegenVal(){
-    return regen_mana_val;
+ int Player::getManaRegenStep(){
+    return regen_mana_step;
  }
 
- void Player::setManaRegenVal(int a){
-    regen_mana_val=a;
- }
-
- int Player::getStepCount(){
-    return step_count;
- }
-
- void Player::setStepCount(int a){
-    step_count=a;
+ void Player::setManaRegenStep(int a){
+    regen_mana_step=a;
  }

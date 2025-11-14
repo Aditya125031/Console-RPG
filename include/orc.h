@@ -9,7 +9,7 @@ class Orc : public Enemy
 {
 public:
     Orc();
-    std::vector<Item> getLoot(const Player& player) const override;
+    Orc(Player& player);
     virtual void triggerDialogue() const override;
 };
 #endif

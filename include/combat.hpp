@@ -17,10 +17,11 @@
 #include "imp.h"
 #include "infernalimp.h"
 #include "stoneimp.h"
+class Game; // Forward declaration
 
 class Combat {
 public:
-    int fight(Player&, Enemy&);
+    int fight(Player&, Enemy&,Game&);
     void start();
     void end();
     void clearScreen();   // declared as member

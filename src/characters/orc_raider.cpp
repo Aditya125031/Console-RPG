@@ -11,23 +11,24 @@ OrcRaider::OrcRaider()
     dialogue.push_back("Blood and thunder!");
     dialogue.push_back("I will crush you!");
 }
-std::vector<Item> OrcRaider::getLoot(const Player& player) const
+OrcRaider::OrcRaider(Player& player)
+    : Enemy("Orc Raider", 160, 16) 
 {
-    std::vector<Item> allLoot = Enemy::getLoot(player);
-
-    std::string playerType = player.get_type_string();
+     std::string playerType = player.get_type_string();
 
     if (playerType == "Swordsman") 
     {
-        allLoot.push_back(Shinketsu_Sword()); 
+        dropLoot.push_back(make_shared<Shinketsu_Sword>());
     } else if (playerType == "Archer") 
     {
-        allLoot.push_back(Void_Embrace()); 
+        dropLoot.push_back(make_shared<Void_Embrace>());
     } else if (playerType == "Mage") 
     {
-        allLoot.push_back(Elder_Wand()); 
+        dropLoot.push_back(make_shared<Elder_Wand>()); 
     }
-    return allLoot;
+    dialogue.push_back("For the Horde!");
+    dialogue.push_back("Blood and thunder!");
+    dialogue.push_back("I will crush you!");
 }
 void OrcRaider::triggerDialogue() const 
 {

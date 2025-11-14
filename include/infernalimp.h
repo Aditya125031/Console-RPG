@@ -4,6 +4,6 @@
 class InfernalImp : public Enemy {
 public:
     InfernalImp();
-    std::vector<Item> getLoot(const Player& player) const override;
+    InfernalImp(Player& player);
     void triggerDialogue() const override;
 };

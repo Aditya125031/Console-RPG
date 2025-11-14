@@ -203,3 +203,18 @@ std::map<std::string, int> Inventory::getUsablePotions() const
     }
     return usable;
 }
+std::shared_ptr<Usables> Inventory::removePotionForLoot(const std::string& potionName, Game& world)
+{
+    // Check if we have any
+    if (potionStorage.count(potionName) && potionStorage[potionName].quantity > 0)
+    {
+        // 1. Decrement the count (just like your void dropPotion)
+        potionStorage[potionName].quantity--;
+        world.add_log_message("Moved 1 " + potionName + " to loot box.");
+        
+        // 2. Return the prototype pointer (this is the new part)
+        return potionStorage[potionName].itemPrototype;
+    }
+    // No potion to remove
+    return nullptr; 
+}

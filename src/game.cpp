@@ -579,10 +579,6 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
             if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
                 quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
             }
-            
-            if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
-                quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
-            }
             map.getTileAt(newx,newy)->setIsWalkable(true);
             map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
             map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);

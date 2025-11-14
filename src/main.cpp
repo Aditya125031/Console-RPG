@@ -1,3 +1,5 @@
+#define SDL_MAIN_HANDLED // <--- ADD THIS LINE FIRST
+#include "../include/audiomanager.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -16,10 +18,11 @@
 #include "../include/items.h"
 #include "../include/game.h"
 #include "../include/enemy.h"
+#include"../include/inventory.hpp"
 
 // Note: I'm assuming 'PlayerType' is an enum defined in one of your headers.
 
-Player create_player() {
+Player create_player(Game& game_world) {
     clear();
     mvprintw(0, 0, "Welcome to Text RPG!");
 
@@ -68,7 +71,7 @@ Player create_player() {
     }
 
     refresh();
-    return Player(playerName, playerType);
+    return Player(game_world,playerName, playerType);
 }
 
 // This function should be called once, before starting the game loop
@@ -92,6 +95,8 @@ void setup_curses() {
         init_pair(5, COLOR_YELLOW, COLOR_BLACK); 
         init_pair(6, COLOR_WHITE, COLOR_BLACK); 
         init_pair(7, COLOR_MAGENTA, COLOR_BLACK);  
+        init_pair(8, COLOR_WHITE, COLOR_WHITE); 
+        init_pair(9, COLOR_RED, COLOR_RED); 
     }
     
     // The timeout below is optional, but often useful for game loops
@@ -99,14 +104,83 @@ void setup_curses() {
     //timeout(100); 
 }
 
-//---
+void show_welcome_screen() {
+    std::vector<std::string> title_art = {
+        " ........ ..   .. .......          ......   ....... ....... .......        ..    ........ ....... ...... ",
+        "    ..    ..   .. ..               ..   ..  ..      ..      ..            ....      ..    ..      ..   ..",
+        "    ..    ..   .. ..               ..    .. ..      ..      ..           ..  ..     ..    ..      ..    ..",
+        "    ..    ....... .......          ..    .. ......  ....... .......     ..    ..    ..    ....... ..    ..",
+        "    ..    ..   .. ..               ..    .. ..      ..      ..         ..........   ..    ..      ..    ..",
+        "    ..    ..   .. ..               ..   ..  ..      ..      ..        ..        ..  ..    ..      ..   ..",
+        "    ..    ..   .. .......          ......   ....... ..      ........ ..          .. ..    ....... ...... "
+    };
+
+    while (true) {
+        if (is_termresized()) {
+            resize_term(0, 0);
+            clear();
+        }
+
+        clear();
+        int term_height, term_width;
+        getmaxyx(stdscr, term_height, term_width);
+
+        int art_height = title_art.size();
+        int art_width = title_art[0].length();
+        int art_start_y = (term_height / 2) - (art_height / 2) - 5; 
+        int art_start_x = (term_width / 2) - (art_width / 2);
+
+        if (art_start_y < 0) art_start_y = 0;
+        if (art_start_x < 0) art_start_x = 0;
+
+        for (int i = 0; i < art_height; ++i) {
+            std::string& line = title_art[i];
+            
+            for (int j = 0; j < line.length(); ++j) {
+                char c = line[j];
+                if(j<28){
+                    if (c != ' ') {
+                        attron(COLOR_PAIR(8));
+                        mvaddch(art_start_y + i, art_start_x + j, c);
+                        attroff(COLOR_PAIR(8));
+                    }
+                }
+                
+                else{
+                    if (c != ' ') {
+                        attron(COLOR_PAIR(9));
+                       
+                        mvaddch(art_start_y + i, art_start_x + j, c);
+                        attroff(COLOR_PAIR(9));
+                    }
+                }
+                
+            }
+        }
+
+        mvprintw(term_height-2, 0, "Press Enter to start...");
+        refresh();
+        int input = getch(); 
+
+        if (input == 10 || input == 13 || input == KEY_ENTER) {
+            return; 
+        }
+    }
+}
 
 int main()
 {
     setup_curses();
+    AudioManager audio;
+    audio.init();
     Game world;
-    Player hero = create_player();
-    world.game_loop(hero);
+    audio.playMusic("../data/audio/sacred-garden-10377.mp3", world);
+    show_welcome_screen();
+    Game game;
+    Player hero = create_player(game);
+    hero.inventory.addItem(make_shared<Health_Potion>(), 3, hero, world);
+    hero.inventory.addItem(make_shared<Mana_Potion>(), 2, hero, world);
+    world.game_loop(hero, audio);
     endwin();
     
     return 0;

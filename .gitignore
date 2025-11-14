@@ -1,14 +1,18 @@
-# Ignore the binary/executable folder
-/bin
-/build
+/build/
+/bin/
 
-# Ignore compiled object files
+*.exe
 *.o
-*.a
 *.obj
+
+.vscode/
+.idea/
+
 *.dll
 *.lib
+*.a
 
-# Ignore executables on Windows
-*.exe
-*.vscode
+!extern/SDL2/
+!extern/SDL2/**
+!extern/SDL2_mixer/
+!extern/SDL2_mixer/**

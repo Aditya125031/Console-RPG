@@ -68,38 +68,48 @@ void Map::get_minimap_view(Player& player, int view_width, int view_height, std:
     int end_y = std::min(start_y + view_width, m_width);
     int end_x = std::min(start_x + view_height, m_height);
     
-    // --- 6. Get dimensions and calculate centering ---
+    // --- 5. Calculate Content Dimensions ---
+    int num_rows = end_x - start_x;
+    int map_content_width = (end_y - start_y) * 2; // Each map tile prints 2 chars ("T ")
+    
+    // Find the widest log message that will be displayed
+    int log_content_width = 0;
+    for (int i = 0; i < std::min((int)event_log.size(), num_rows); ++i) {
+        if (event_log[i].length() > log_content_width) {
+            log_content_width = event_log[i].length();
+        }
+    }
+    if (log_content_width == 0) log_content_width = 10; // Minimum width
+
+    // Calculate full section widths (content + 2 chars for " " padding)
+    int map_section_width = map_content_width + 2;
+    int log_section_width = log_content_width + 2;
+
+    // --- 6. Build Double-Lined Borders ---
+    std::string h_line_map;
+    std::string h_line_log;
+    for (int i = 0; i < map_section_width; ++i) h_line_map += "═";
+    for (int i = 0; i < log_section_width; ++i) h_line_log += "═";
+
+    // Create the full top and bottom borders
+    std::string border_top = "╔" + h_line_map + "╦" + h_line_log + "╗";
+    std::string border_bottom = "╚" + h_line_map + "╩" + h_line_log + "╝";
+
+    // --- 7. Get dimensions and calculate centering ---
     int term_width = 0;
     int term_height = 0;
     getmaxyx(stdscr, term_height, term_width); // Curses function
 
-    // Calculate effective widths (for drawing the border)
-    // ⭐️ SWAPPED: minimap width is determined by the y-range (cols)
-    int minimap_output_width = (end_y - start_y) * 2; // Width of the characters + spaces
-    int map_section_width = minimap_output_width + 1; // +1 for the border space
+    // Using visual width for centering, not byte length of UTF-8 string
+    int total_visual_width = map_section_width + 1 + log_section_width + 2; // +1 for middle separator, +2 for outer borders
+    int content_height = num_rows + 2; // +2 for top/bottom borders
     
-    // The total width of the content box (borders included)
-    int content_width = map_section_width + 5; // map + border + log
-
     // You said the header takes 3 lines (0, 1, 2)
     int top_offset = 3; 
     
-    // Calculate vertical and horizontal centering
-    // ⭐️ SWAPPED: content_height is determined by the x-range (rows)
-    int content_height = end_x - start_x + 2; // +2 for top/bottom borders
     int top_start_row = top_offset + std::max(0, (term_height - top_offset - content_height) / 2);
-    int left_start_col = std::max(0, (term_width - content_width) / 2);
+    int left_start_col = std::max(0, (term_width - total_visual_width) / 2);
 
-    // --- 7. Build Borders and Separators ---
-    std::string single_char = "─"; // Assuming this is the character you want
-    std::string h_line_map;
-    for (int i = 0; i < map_section_width; ++i) {
-        h_line_map += single_char;
-    }
-    
-    std::string border_top    = "┌" + h_line_map + "┬" +  "─";
-    std::string border_bottom = "└" + h_line_map + "┴" +  "─";
-    
     // --- 8. Print the centered content using Curses ---
     int current_row = top_start_row;
 
@@ -113,25 +123,29 @@ void Map::get_minimap_view(Player& player, int view_width, int view_height, std:
         // Use move() to set the cursor to the correct starting column for *this* line
         move(current_row, left_start_col);
         
-        addstr("│ "); // Print left map border
+        // --- Map Section ---
+        addstr("║ "); // Left border + left map padding
         
         // ⭐️ SWAPPED: Inner loop is 'y' (cols/width)
         for (int y = start_y; y < end_y; ++y) {
-            
             // ⭐️ SWAPPED: Array access is m_grid[x][y]
-            int clrCode=m_grid[x][y].get_mini_map_color_pair();             
+            int clrCode = m_grid[x][y].get_mini_map_color_pair();
             attron(COLOR_PAIR(clrCode));
-            addstr((m_grid[x][y].getMiniMapDisplayChar()+" ").c_str());    
+            addstr((m_grid[x][y].getMiniMapDisplayChar() + " ").c_str());
             attroff(COLOR_PAIR(clrCode));
         }
-        addstr("│ "); // Print right map border / log separator
+        addstr(" ║ "); // Right map padding + separator
 
-        // Get the corresponding log line
-        if (row_index < event_log.size()) {
-            attron(A_DIM | COLOR_PAIR(6));          // Set color (White)
-            addstr(event_log[row_index].c_str());      // Log content
-            attroff(A_DIM | COLOR_PAIR(6));
-        }
+        // --- Log Section ---
+        std::string log_line = (row_index < event_log.size()) ? event_log[row_index] : "";
+        
+        attron(A_DIM | COLOR_PAIR(6)); // Set color (White)
+        
+        // Print the log line, padded with spaces to fill the section
+        // " %-*.*s " -> " " + (padded content) + " "
+        printw(" %-*.*s ", log_content_width, log_content_width, log_line.c_str()); 
+        
+        attroff(A_DIM | COLOR_PAIR(6));
         
         // Manually increment the row counter.
         current_row++;

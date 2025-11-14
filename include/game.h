@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
-
+#define SDL_MAIN_HANDLED // <--- ADD THIS LINE FIRST
+#include "../include/audiomanager.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -11,21 +12,32 @@
 #include <cstdlib> // Required for std::system
 #include "player.h" 
 #include "map.h"
-using namespace std;
+#include "inventory.hpp"
 
+//class AudioManager; // Forward declaration
+
+using namespace std;
+struct DisplayItem {
+    string displayName; // "Old Sword (Equipped)"
+    string itemID;      // "EQUIPPED_WEAPON" or "Small Health Potion"
+    string type;        // "WEAPON", "ARMOR", "POTION"
+    string description;
+};
 class Game
 {
     private:
         std::deque<std::string> event_log;
-        const size_t MAX_LOG_LINES = 5;
+        const size_t MAX_LOG_LINES = 10;
     public:
-        void game_loop(Player& player);
+        void game_loop(Player& player, AudioManager& audio);
         void display_welcome_message();
-        void explore_forest(Player& player, Map& map);
+        void explore_forest(Player& player, Map& map, vector<bool>& quest, AudioManager& audio);
         void add_log_message(std::string message);
         void display_dashboard(Player& player, Map& map); // New render function
         void show_full_map(Map& map);
-        void move_character(Character&, int, int, Map&);
+        void move_character(Character&, int, int, Map&, vector<bool>&, AudioManager& audio);
+        void runItemActionMenu(DisplayItem, Player&, Game&);
+        void runInventoryMenu(Player&, Game&);
 };
 
 #endif

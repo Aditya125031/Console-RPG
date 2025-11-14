@@ -205,3 +205,27 @@ std::string Player::move(int x, int y, Map& map) {
     // Return a string describing the movement result
     return "Moved to position (" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
+
+ int Player::getHPRegenVal(){
+    return regen_hp_val;
+ }
+
+ void Player::setHPRegenVal(int a){
+    regen_hp_val=a;
+ }
+
+ int Player::getManaRegenVal(){
+    return regen_mana_val;
+ }
+
+ void Player::setManaRegenVal(int a){
+    regen_mana_val=a;
+ }
+
+ int Player::getStepCount(){
+    return step_count;
+ }
+
+ void Player::setStepCount(int a){
+    step_count=a;
+ }

@@ -22,6 +22,7 @@ using namespace std;
 #include "../include/character.h"
 #include "../include/items.h"
 #include "../include/goblin.h"
+#include "../include/npc.h"
 
 class AudioManager; // Forward declaration
 
@@ -87,8 +88,8 @@ void Game::display_dashboard(Player& player, Map& map) {
     mvprintw(row++, 2, " H: Iron Sword");
     mvprintw(row++, 2, " A: Leather Armor");
 
-    int minimap_height = 19;
-    int minimap_width = 31;
+    int minimap_height = 17;
+    int minimap_width = 29;
     map.get_minimap_view(player, minimap_width, minimap_height, event_log);
 
     mvprintw(term_height - 3, 0, " CONTROLS: (W/A/S/D) Move | (M) Full Map | (Q) Quit to Village");
@@ -381,48 +382,56 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
     int newx=entity.get_x()+y;
     int newy=entity.get_y()+x;
     if(map.getTileAt(newx,newy)->getCharacter() != nullptr) {
-        Combat c;
-        if(!map.getTileAt(newx,newy)->getQuestStatus(quest)){
-            add_log_message("You are not not powerful enough!");
-            add_log_message("Meet Hattori at (X,X)");
+        if(map.getTileAt(newx,newy)->get_isNPC()){
+            Character* npc_ptr = map.getTileAt(newx,newy)->getCharacter();
+            NPC& npc = static_cast<NPC&>(*npc_ptr);
+            npc.interact(quest);
             return;
         }
-        Player& player = static_cast<Player&>(entity);
-        Character* target_ptr = map.getTileAt(newx,newy)->getCharacter();
-        Enemy& target = static_cast<Enemy&>(*target_ptr);
-        add_log_message("Combat Triggered!");
-        audio.playMusic("../data/audio/battle-bgm.mp3", *this);
-        int k = c.fight(player, target);
-        if(k==0){
-            clear();
-            mvprintw(0, 0, "You have been defeated! Press any key to exit.");
-            refresh();
-            getch();
-        }
-        else if(k==1){
-            add_log_message("You defeated the enemy");
-            if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
-                quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
+        else{
+            Combat c;
+            if(!map.getTileAt(newx,newy)->getQuestStatus(quest)){
+                add_log_message("You are not not powerful enough!");
+                add_log_message("Meet Hattori at (46,13)");
+                return;
             }
-            map.getTileAt(newx,newy)->setIsWalkable(true);
-            map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
-            map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);
-            map.getTileAt(entity.get_x(), entity.get_y())->set_mini_map_color_pair(6);
-            map.getTileAt(newx,newy)->setCharacter(&entity);
-            map.getTileAt(newx,newy)->setMiniMapDisplayChar("♞");
-            map.getTileAt(entity.get_x(),entity.get_y())->setMiniMapDisplayChar(".");
-            map.getTileAt(newx,newy)->setMapDisplayChar("♞");
-            map.getTileAt(entity.get_x(),entity.get_y())->setMapDisplayChar(".");
-            map.getTileAt(newx,newy)->set_map_color_pair(5);
-            map.getTileAt(newx,newy)->set_mini_map_color_pair(5);
-            entity.set_x(newx);
-            entity.set_y(newy);
+            Player& player = static_cast<Player&>(entity);
+            Character* target_ptr = map.getTileAt(newx,newy)->getCharacter();
+            Enemy& target = static_cast<Enemy&>(*target_ptr);
+            add_log_message("Combat Triggered!");
+            audio.playMusic("../data/audio/battle-bgm.mp3");
+            int k = c.fight(player, target);
+            if(k==0){
+                clear();
+                mvprintw(0, 0, "You have been defeated! Press any key to exit.");
+                refresh();
+                getch();
+            }
+            else if(k==1){
+                add_log_message("You defeated the enemy");
+                if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
+                    quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
+                }
+                map.getTileAt(newx,newy)->setIsWalkable(true);
+                map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
+                map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);
+                map.getTileAt(entity.get_x(), entity.get_y())->set_mini_map_color_pair(6);
+                map.getTileAt(newx,newy)->setCharacter(&entity);
+                map.getTileAt(newx,newy)->setMiniMapDisplayChar("♞");
+                map.getTileAt(entity.get_x(),entity.get_y())->setMiniMapDisplayChar(".");
+                map.getTileAt(newx,newy)->setMapDisplayChar("♞");
+                map.getTileAt(entity.get_x(),entity.get_y())->setMapDisplayChar(".");
+                map.getTileAt(newx,newy)->set_map_color_pair(5);
+                map.getTileAt(newx,newy)->set_mini_map_color_pair(5);
+                entity.set_x(newx);
+                entity.set_y(newy);
+            }
+            else if(k==2){
+                add_log_message("You fled the battle!");
+            }
+            audio.playMusic("../data/audio/sacred-garden-10377.mp3");
+            return;
         }
-        else if(k==2){
-            add_log_message("You fled the battle!");
-        }
-        audio.playMusic("../data/audio/sacred-garden-10377.mp3", *this);
-        return;
     } 
     // else if(map->getTileAt(newy,newx)->getItem()) { ... (Item handling)
     //     // Your commented code here would also need to use curses
@@ -433,7 +442,7 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
         return;
     } 
     else if(map.getTileAt(newx,newy)->getIsWalkable()) {
-        audio.playSFX("../data/audio/move-sfx.mp3", *this);
+        audio.playSFX("../data/audio/move-sfx.mp3");
         map.getTileAt(entity.get_x(),entity.get_y())->setCharacter(nullptr);
         map.getTileAt(newx,newy)->setCharacter(&entity);
         map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);

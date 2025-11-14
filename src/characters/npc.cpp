@@ -1,5 +1,6 @@
 #include "NPC.h"
 #include <iostream>
+#include <vector>
 void NPC::give_quest_war_chief() {
     std::cout << getName() << ": 'A brutal War Chief has taken over the northern stronghold (37,5). He's a problem that needs handling. Show him our strength.'" << std::endl;
 }
@@ -37,4 +38,30 @@ void NPC::complete_quest_necromancer() {
 
 void NPC::complete_quest_golem() {
     std::cout << getName() << ": 'You... stopped the Golem? To stand against such power and prevail... Your strength is truly legendary. I... I am in your debt. We are all in your debt.'" << std::endl;
+}
+
+void NPC::interact(vector<bool>& questStatus) {
+    if (questStatus[4]) {
+        complete_quest_necromancer();
+        //give_quest_final_boss();
+    } 
+    else if (questStatus[3]) {
+        complete_quest_infernal_imp();
+        give_quest_necromancer();
+    } 
+    else if (questStatus[2]) {
+        complete_quest_golem();
+        give_quest_infernal_imp();
+    } 
+    else if (questStatus[1]) {
+        complete_quest_orc_raider();
+        give_quest_golem();
+    } 
+    else if (questStatus[0]) {
+        complete_quest_war_chief();
+        give_quest_orc_raider();
+    } 
+    else {
+        give_quest_war_chief();
+    }
 }

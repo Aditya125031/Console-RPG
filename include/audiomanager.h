@@ -10,8 +10,6 @@
 #include <iostream>
 //#include "game.h"
 
-class Game;
-
 class AudioManager {
 private:
     // Map to hold loaded sound effects so we don't reload them every time
@@ -26,11 +24,11 @@ public:
     void cleanup();
 
     // For background music (MP3/OGG)
-    void playMusic(const std::string& filePath, Game&);
+    void playMusic(const std::string& filePath);
     void stopMusic();
 
     // For sound effects (WAV)
-    void playSFX(const std::string& filePath, Game&);
+    void playSFX(const std::string& filePath);
 };
 
 #endif

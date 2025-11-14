@@ -1,8 +1,6 @@
 #include "../include/audiomanager.h"
 #include <curses.h>
-
-
-#include "../include/game.h"
+using namespace std;
 
 AudioManager::AudioManager() {}
 
@@ -13,12 +11,12 @@ AudioManager::~AudioManager() {
 void AudioManager::init() {
     // Initialize SDL Audio only
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-        std::cout << "SDL could not initialize! SDL Error: " << SDL_GetError() << std::endl;
+        cout << "SDL could not initialize! SDL Error: " << SDL_GetError() << endl;
     }
 
     // Initialize SDL_mixer for MP3 and OGG support
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-        std::cout << "SDL_mixer could not initialize! Mix Error: " << Mix_GetError() << std::endl;
+        cout << "SDL_mixer could not initialize! Mix Error: " << Mix_GetError() << endl;
     }
 }
 
@@ -37,14 +35,14 @@ void AudioManager::cleanup() {
     SDL_Quit();
 }
 
-void AudioManager::playMusic(const std::string& filePath, Game& world) {
+void AudioManager::playMusic(const string& filePath) {
     // If music is already playing, stop it
     stopMusic();
 
     // Load new music
     currentMusic = Mix_LoadMUS(filePath.c_str());
     if (currentMusic == nullptr) {
-        world.add_log_message(string("Failed to load music! Mix Error: ") + Mix_GetError());
+        cout << "Failed to load music! Mix Error: " << Mix_GetError() << endl;
         return;
     }
 
@@ -62,13 +60,13 @@ void AudioManager::stopMusic() {
     }
 }
 
-void AudioManager::playSFX(const std::string& filePath, Game& world) {
+void AudioManager::playSFX(const string& filePath) {
     // Check if we already loaded this file
     if (sfxMap.find(filePath) == sfxMap.end()) {
         // Not found, load it now
         Mix_Chunk* newSFX = Mix_LoadWAV(filePath.c_str());
         if (newSFX == nullptr) {
-             world.add_log_message(string("Failed to load SFX! Mix Error: ") + Mix_GetError());
+             cout << "Failed to load SFX! Mix Error: " << Mix_GetError() << endl;
              return;
         }
         sfxMap[filePath] = newSFX;

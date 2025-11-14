@@ -1,3 +1,5 @@
+# Add a leading slash '/' to ONLY ignore these folders at the project root.
+# This prevents them from matching folders inside 'extern'.
 /build/
 /bin/
 

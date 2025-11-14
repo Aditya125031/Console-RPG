@@ -20,6 +20,7 @@
 #include "../include/giant.h"
 #include "../include/stoneimp.h"
 #include "../include/final_boss.h"
+#include "../include/npc.h"
 using namespace std;
 
 
@@ -27,7 +28,7 @@ Tile::Tile() {}
 
 Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y)
     : m_isWalkable(true), m_characterOnTile(nullptr), outOfBounds(false), requiredQuestCompleted(-1),
-        doQuest(-1)
+        doQuest(-1), isNPC(false)
     //   ,m_itemOnTile(nullptr), 
     { 
         if(displayChar=="."){
@@ -180,6 +181,15 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             requiredQuestCompleted = 4;
             m_isWalkable = false;
         }
+        else if(displayChar=="NPC"){
+            m_mapDisplayChar = "!"; 
+            m_miniMapDisplayChar = "!";
+            isNPC=true;
+            m_colorPairMap = m_colorPairMiniMap = 5; 
+            Character* npc = new NPC();
+            m_characterOnTile = npc;
+            m_isWalkable = false;
+        }
         else{
             m_mapDisplayChar = m_miniMapDisplayChar = "X";
             m_isWalkable = false;
@@ -279,4 +289,8 @@ int Tile::get_doQuest(){
 
 void Tile::set_doQuest(int a){
     doQuest=a;
+}
+
+bool Tile::get_isNPC(){
+    return isNPC;
 }

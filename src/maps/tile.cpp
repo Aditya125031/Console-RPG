@@ -165,8 +165,8 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_miniMapDisplayChar = "⚜";
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
-            Character* golem = new BoneGolem();
-            m_characterOnTile = golem;
+            Character* necm = new Necromancer();
+            m_characterOnTile = necm;
             requiredQuestCompleted = 3;
             m_isWalkable = false;
             doQuest=4;

@@ -12,6 +12,7 @@
 #include <cstdlib> // Required for std::system
 #include "player.h" 
 #include "map.h"
+#include "NPC.h"
 #include "inventory.hpp"
 
 //class AudioManager; // Forward declaration
@@ -28,6 +29,7 @@ class Game
     private:
         std::deque<std::string> event_log;
         const size_t MAX_LOG_LINES = 10;
+        std::string current_dialogue_message = "";
     public:
         void game_loop(Player& player, AudioManager& audio);
         void display_welcome_message();
@@ -39,6 +41,11 @@ class Game
         void runItemActionMenu(DisplayItem, Player&, Game&);
         void runInventoryMenu(Player&, Game&);
         std::vector<std::shared_ptr<Item>>runLootMenu(Player& player, std::vector<std::shared_ptr<Item>> lootBox);
+        void show_dialogue_message(const std::string& message); // <-- CORRECT
+        void clear_dialogue_message();
+        void play_dialogue(const std::vector<std::string>& lines);
+        NPC hattori;
 };
+
 
 #endif

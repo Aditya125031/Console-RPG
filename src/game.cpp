@@ -28,6 +28,29 @@ class AudioManager; // Forward declaration
 
 const unsigned int MAX_LOG_LINES = 10;
 
+void Game::show_dialogue_message(const std::string& message) {
+    // This function just sets the message that will be drawn by the dashboard
+    current_dialogue_message = message;
+}
+
+void Game::clear_dialogue_message() {
+    // This function clears the message
+    current_dialogue_message = "";
+}
+void Game::play_dialogue(const std::vector<std::string>& lines) {
+    
+    // Loop through each line of dialogue
+    for (const std::string& line : lines) {
+        
+        show_dialogue_message(line); 
+        
+        refresh(); 
+        
+        getch(); 
+    }
+    
+    // When the dialogue is over, clear the message line
+}
 void Game::add_log_message(std::string message) {
     event_log.push_front(message);
     while (event_log.size() > MAX_LOG_LINES) {
@@ -283,7 +306,11 @@ void Game::display_dashboard(Player& player, Map& map) {
 
     mvprintw(term_height - 3, 0, " CONTROLS: (W/A/S/D) Move | (M) Full Map | (Q) Quit to Village");
     mvprintw(term_height - 2, 0, " Your Location: (%d, %d)", player.get_y(), player.get_x());
-    
+    int dialogue_Y_line = 35;
+    int dialogue_X_start = 33;
+    if (!current_dialogue_message.empty()) {
+        mvprintw(dialogue_Y_line, dialogue_X_start, current_dialogue_message.c_str());
+    }
     refresh();
 }
 
@@ -528,13 +555,82 @@ void Game::game_loop(Player& player, AudioManager& audio) {
 }
 
 void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool>& quest, AudioManager& audio) {
-    int newx=entity.get_x()+y;
-    int newy=entity.get_y()+x;
-    if(map.getTileAt(newx,newy)->getCharacter() != nullptr) {
-        if(map.getTileAt(newx,newy)->get_isNPC()){
-            Character* npc_ptr = map.getTileAt(newx,newy)->getCharacter();
-            NPC& npc = static_cast<NPC&>(*npc_ptr);
-            npc.interact(quest);
+    int newx = entity.get_x() + y;
+    int newy = entity.get_y() + x;
+    Tile* newTile = map.getTileAt(newx, newy);
+    Tile* oldTile = map.getTileAt(entity.get_x(), entity.get_y());
+
+    // --- 1. Check for Character on New Tile ---
+    if (newTile->getCharacter() != nullptr) {
+        
+        Character* charOnTile = newTile->getCharacter();
+        NPC* hattori_ptr = dynamic_cast<NPC*>(charOnTile);
+        if (!newTile->getQuestStatus(quest)) {
+        
+        int enemyQuestID = newTile->get_doQuest();
+        switch (enemyQuestID) 
+        {
+            case 0: // War Chief
+                show_dialogue_message("Hattori says you must prove your strength. Defeat the War Chief first.Meet Hattori at (X,X)."); // <-- FIXED
+                break;
+            case 1: // Orc Raider
+                show_dialogue_message("You are not powerful enough.Meet Hattori at (X,X)."); // <-- FIXED
+                break;
+            case 2: // Infernal Imp
+                show_dialogue_message("You are not powerful enough.Meet Hattori at (X,X)."); // <-- FIXED
+                break;
+            case 3: 
+                show_dialogue_message("The Golem's ancient magic is too strong. Complete other trials first.Meet Hattori at (X,X)."); // <-- FIXED
+                break;
+            case 4: 
+                show_dialogue_message("A dark aura repels you. You must complete Hattori's other tasks first.Meet Hattori at (X,X).");
+                break;
+            case 5: // Final Boss
+                show_dialogue_message("The Citadel is sealed. Hattori says you must defeat the bosses to enter.Meet Hattori at (X,X)."); // <-- FIXED
+                break;
+            default:
+                show_dialogue_message("You are not powerful enough! Meet Hattori at (X,X)."); // <-- FIXED
+                break;
+        }
+        return; // Stop the move
+    }
+        if (hattori_ptr) {
+            std::vector<std::string> dialogue_lines;
+            if (!quest[0]) { 
+                dialogue_lines = hattori_ptr->give_quest_war_chief();
+            } 
+            else if (!quest[1]) { 
+                dialogue_lines = hattori_ptr->give_quest_orc_raider();
+            }
+            else if (!quest[2]) { 
+                dialogue_lines = hattori_ptr->give_quest_infernal_imp();
+            }
+            else if (!quest[3]) { // <-- FIXED
+                dialogue_lines = hattori_ptr->give_quest_golem();
+            }
+            else if (!quest[4]) { // <-- FIXED
+                dialogue_lines = hattori_ptr->give_quest_necromancer();
+            }
+            else if (quest[3] && quest[4] && !quest[5]) {
+                dialogue_lines = hattori_ptr->give_quest_final_boss();
+            }
+            else if (quest[5]) {
+                 dialogue_lines = {hattori.getName() + ": 'You have saved us all, hero. Thank you.'" };
+            }
+            else {
+                dialogue_lines = {hattori.getName() + ": 'Be strong, warrior. Great trials await.'" };
+            }
+        
+            play_dialogue(dialogue_lines);
+            
+            return; // Stop the move
+        }
+        // --- IS IT AN ENEMY? (COMBAT CHECK) ---
+        Combat c;
+        if (!newTile->getQuestStatus(quest)) {
+            // (Your existing quest-gate logic is good)
+            int enemyQuestID = newTile->get_doQuest();
+            // ... (your switch statement for "not powerful enough") ...
             return;
         }
         else{
@@ -558,6 +654,28 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
         }
         else if(k==1){
             add_log_message("You defeated the enemy");
+            if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
+                quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
+            }
+            int questID = newTile->get_doQuest();
+            if (questID != -1) {
+                quest[questID] = true;
+                
+                std::vector<std::string> complete_lines;
+                
+                // --- This switch "uses" your complete_quest functions ---
+                switch (questID) {
+                    case 0: complete_lines = this->hattori.complete_quest_war_chief(); break;
+                    case 1: complete_lines = this->hattori.complete_quest_orc_raider(); break;
+                    case 2: complete_lines = this->hattori.complete_quest_infernal_imp(); break;
+                    case 3: complete_lines = this->hattori.complete_quest_golem(); break;
+                    case 4: complete_lines = this->hattori.complete_quest_necromancer(); break;
+                    case 5: complete_lines = this->hattori.complete_quest_final_boss(); break;
+                }
+
+                // Play the completion dialogue
+                play_dialogue(complete_lines);
+            }
             auto lootBox = target.getDropLoot();
             // --- 2. RUN THE LOOT MENU ---
             if (!lootBox.empty()) {

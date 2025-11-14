@@ -138,17 +138,6 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_isWalkable = false;
             doQuest=1;
         }
-        else if(displayChar=="QBGLM1"){
-            m_mapDisplayChar = "."; 
-            m_miniMapDisplayChar = "⚜";
-            m_colorPairMap = 6;
-            m_colorPairMiniMap = 4; 
-            Character* golem = new BoneGolem(player);
-            m_characterOnTile = golem;
-            requiredQuestCompleted = 1;
-            m_isWalkable = false;
-            doQuest=2;
-        }
         else if(displayChar=="QII3"){
             m_mapDisplayChar = "."; 
             m_miniMapDisplayChar = "Ö";
@@ -156,6 +145,17 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMiniMap = 4; 
             Character* infimp = new InfernalImp(player);
             m_characterOnTile = infimp;
+            requiredQuestCompleted = 1;
+            m_isWalkable = false;
+            doQuest=2;
+        }
+        else if(displayChar=="QBGLM1"){
+            m_mapDisplayChar = "."; 
+            m_miniMapDisplayChar = "⚜";
+            m_colorPairMap = 6;
+            m_colorPairMiniMap = 4; 
+            Character* golem = new BoneGolem(player);
+            m_characterOnTile = golem;
             requiredQuestCompleted = 2;
             m_isWalkable = false;
             doQuest=3;
@@ -165,8 +165,8 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_miniMapDisplayChar = "⚜";
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
-            Character* golem = new BoneGolem(player);
-            m_characterOnTile = golem;
+            Character* necm= new Necromancer(player);
+            m_characterOnTile =necm;
             requiredQuestCompleted = 3;
             m_isWalkable = false;
             doQuest=4;

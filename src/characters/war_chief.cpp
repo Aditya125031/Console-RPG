@@ -12,23 +12,25 @@ GoblinWarChief::GoblinWarChief()
     dialogue.push_back("You'll make a fine trophy!");
     dialogue.push_back("More guts! More glory!");
 }
-std::vector<Item> GoblinWarChief::getLoot(const Player& player) const
+GoblinWarChief::GoblinWarChief(Player& player)
+    // Mini-boss stats
+    : Enemy("Goblin War Chief", 150, 14) 
 {
-    std::vector<Item> allLoot = Enemy::getLoot(player);
-
-    std::string playerType = player.get_type_string();
+     std::string playerType = player.get_type_string();
 
     if (playerType == "Swordsman") 
     {
-        allLoot.push_back(Shinketsu_Sword()); 
+        dropLoot.push_back(make_shared<Shinketsu_Sword>());
     } else if (playerType == "Archer") 
     {
-        allLoot.push_back(Void_Embrace()); 
+        dropLoot.push_back(make_shared<Void_Embrace>());
     } else if (playerType == "Mage") 
     {
-        allLoot.push_back(Elder_Wand()); 
+        dropLoot.push_back(make_shared<Elder_Wand>()); 
     }
-    return allLoot;
+    dialogue.push_back("For the Boss! Attack!");
+    dialogue.push_back("You'll make a fine trophy!");
+    dialogue.push_back("More guts! More glory!");
 }
 void GoblinWarChief::triggerDialogue() const {
     if (!dialogue.empty()) {

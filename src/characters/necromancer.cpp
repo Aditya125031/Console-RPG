@@ -17,23 +17,24 @@ void Necromancer::triggerDialogue() const {
         std::cout << get_name() << " intones: \"" << dialogue[rand() % dialogue.size()] << "\"\n";
     }
 }
-std::vector<Item>Necromancer::getLoot(const Player& player) const
+Necromancer::Necromancer(Player& player)
+    : Enemy("Necromancer", 140, 18) 
 {
-    std::vector<Item> allLoot = Enemy::getLoot(player);
-
-    std::string playerType = player.get_type_string();
+     std::string playerType = player.get_type_string();
 
     if (playerType == "Swordsman") 
     {
-        allLoot.push_back(Shinketsu_Sword()); 
+        dropLoot.push_back(make_shared<Shinketsu_Sword>());
     } else if (playerType == "Archer") 
     {
-        allLoot.push_back(Void_Embrace()); 
+        dropLoot.push_back(make_shared<Void_Embrace>());
     } else if (playerType == "Mage") 
     {
-        allLoot.push_back(Elder_Wand()); 
+        dropLoot.push_back(make_shared<Elder_Wand>()); 
     }
-    return allLoot;
+    dialogue.push_back("The dead serve me!");
+    dialogue.push_back("Rise, my minions!");
+    dialogue.push_back("Your life force will sustain me.");
 }
 
 void Necromancer::specialAbility(Character& target) {

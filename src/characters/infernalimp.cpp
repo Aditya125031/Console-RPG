@@ -11,23 +11,24 @@ InfernalImp::InfernalImp()
     dialogue.push_back("The Black Pit awaits!");
     dialogue.push_back("*giggles manically*");
 }
-std::vector<Item>InfernalImp::getLoot(const Player& player) const
+InfernalImp::InfernalImp(Player& player)
+    : Enemy("Infernal Imp", 60, 18) 
 {
-    std::vector<Item> allLoot = Enemy::getLoot(player);
-
-    std::string playerType = player.get_type_string();
+     std::string playerType = player.get_type_string();
 
     if (playerType == "Swordsman") 
     {
-        allLoot.push_back(Shinketsu_Sword()); 
+        dropLoot.push_back(make_shared<Shinketsu_Sword>());
     } else if (playerType == "Archer") 
     {
-        allLoot.push_back(Void_Embrace()); 
+        dropLoot.push_back(make_shared<Void_Embrace>());
     } else if (playerType == "Mage") 
     {
-        allLoot.push_back(Elder_Wand()); 
+        dropLoot.push_back(make_shared<Elder_Wand>()); 
     }
-    return allLoot;
+    dialogue.push_back("Burn, fleshling, burn!");
+    dialogue.push_back("The Black Pit awaits!");
+    dialogue.push_back("*giggles manically*");
 }
 void InfernalImp::triggerDialogue() const {
     if (!dialogue.empty()) {

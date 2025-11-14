@@ -8,30 +8,29 @@
 
 Goblin::Goblin(): Enemy("goblin",50,8) 
 {
-    this->dropLoot.push_back(Health_Potion());
-    this->dropLoot.push_back(Mana_Potion());
 
     dialogue.push_back("Shiny things for Grug!");
     dialogue.push_back("Me smash you!");
     dialogue.push_back("*screech*");
 }
-std::vector<Item> Goblin::getLoot(const Player& player) const
+Goblin::Goblin(Player& player)
+    : Enemy("Goblin", 50, 8) 
 {
-    std::vector<Item> allLoot = Enemy::getLoot(player);
-
-    std::string playerType = player.get_type_string();
+     std::string playerType = player.get_type_string();
 
     if (playerType == "Swordsman") 
     {
-        allLoot.push_back(Shinketsu_Sword()); 
+        dropLoot.push_back(make_shared<Shinketsu_Sword>());
     } else if (playerType == "Archer") 
     {
-        allLoot.push_back(Void_Embrace()); 
+        dropLoot.push_back(make_shared<Void_Embrace>());
     } else if (playerType == "Mage") 
     {
-        allLoot.push_back(Elder_Wand()); 
+        dropLoot.push_back(make_shared<Elder_Wand>()); 
     }
-    return allLoot;
+    dialogue.push_back("Shiny things for Grug!");
+    dialogue.push_back("Me smash you!");
+    dialogue.push_back("*screech*");
 }
 void Goblin::triggerDialogue() const 
 {

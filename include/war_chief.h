@@ -6,6 +6,6 @@ private:
     bool isEnraged = false;
 public:
     GoblinWarChief();
-    std::vector<Item> getLoot(const Player& player) const override;
+    GoblinWarChief(Player& player);
     void triggerDialogue() const override;
 };

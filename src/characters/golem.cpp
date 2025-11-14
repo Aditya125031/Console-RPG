@@ -11,24 +11,25 @@ BoneGolem::BoneGolem()
     dialogue.push_back("*CLACK... CLACK... RATTLE*");
     dialogue.push_back("*A hollow moan...*");
 }
-std::vector<Item> BoneGolem::getLoot(const Player& player) const
+BoneGolem::BoneGolem(Player& player)
+    : Enemy("Bone Golem", 280, 20) 
 {
-    std::vector<Item> allLoot = Enemy::getLoot(player);
-
-    std::string playerType = player.get_type_string();
+     std::string playerType = player.get_type_string();
 
     if (playerType == "Swordsman") 
     {
-        allLoot.push_back(Shinketsu_Sword()); 
+        dropLoot.push_back(make_shared<Shinketsu_Sword>());
     } else if (playerType == "Archer") 
     {
-        allLoot.push_back(Void_Embrace()); 
+        dropLoot.push_back(make_shared<Void_Embrace>());
     } else if (playerType == "Mage") 
     {
-        allLoot.push_back(Elder_Wand()); 
+        dropLoot.push_back(make_shared<Elder_Wand>()); 
     }
-    return allLoot;
+    dialogue.push_back("*CLACK... CLACK... RATTLE*");
+    dialogue.push_back("*A hollow moan...*");
 }
+
 void BoneGolem::triggerDialogue() const {
     if (!dialogue.empty()) {
         std::cout << get_name() << " makes a sound: \"" << dialogue[rand() % dialogue.size()] << "\"\n";

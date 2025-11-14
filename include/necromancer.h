@@ -7,7 +7,7 @@ private:
 
 public:
     Necromancer();
-    std::vector<Item> getLoot(const Player& player) const override;
+    Necromancer(Player& player);
     void specialAbility(Character& target) override;
     void triggerDialogue() const override;
 };

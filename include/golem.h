@@ -3,8 +3,7 @@
 class BoneGolem : public Enemy {
 public:
     BoneGolem();
-
+    BoneGolem(Player& player);
     void specialAbility(Character& target) override;
-    std::vector<Item> getLoot(const Player& player) const override;
     void triggerDialogue() const override;
 };

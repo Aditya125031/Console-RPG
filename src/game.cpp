@@ -31,7 +31,15 @@ const unsigned int MAX_LOG_LINES = 10;
 
 void Game::show_dialogue_message(const std::string& message) {
     // This function just sets the message that will be drawn by the dashboard
-    current_dialogue_message = message;
+    int term_width, term_height;
+    getmaxyx(stdscr, term_height, term_width);
+    int dialogue_width = term_width - 10;
+    if (dialogue_width < 20) dialogue_width = 20;
+
+    std::vector<std::string> wrapped_lines = wrap_text(message, dialogue_width);
+    
+    // 2. Add the wrapped lines to the CORRECT vector
+    current_dialogue_lines.insert(current_dialogue_lines.end(),  wrapped_lines.begin(), wrapped_lines.end());
 }
 std::vector<DisplayItem>Game:: buildPlayerItemList(Player& player) {
     std::vector<DisplayItem> itemMap;
@@ -596,35 +604,6 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
         
         Character* charOnTile = newTile->getCharacter();
         NPC* hattori_ptr = dynamic_cast<NPC*>(charOnTile);
-        if (!newTile->getQuestStatus(quest)) {
-        
-        int enemyQuestID = newTile->get_doQuest();
-        switch (enemyQuestID) 
-        {
-            case 0: // War Chief
-                show_dialogue_message("Hattori says you must prove your strength. Defeat the War Chief first.Meet Hattori at (46,13)."); // <-- FIXED
-                break;
-            case 1: // Orc Raider
-                show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13)."); // <-- FIXED
-                break;
-            case 2: // Infernal Imp
-                show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13))."); // <-- FIXED
-                break;
-            case 3: 
-                show_dialogue_message("The Golem's ancient magic is too strong. Complete other trials first.Meet Hattori at (46,13)."); // <-- FIXED
-                break;
-            case 4: 
-                show_dialogue_message("A dark aura repels you. You must complete Hattori's other tasks first.Meet Hattori at (46,13).");
-                break;
-            case 5: // Final Boss
-                show_dialogue_message("The Citadel is sealed. Hattori says you must defeat the bosses to enter.Meet Hattori at (46,13)."); // <-- FIXED
-                break;
-            default:
-                show_dialogue_message("You are not powerful enough! Meet Hattori at (46,13)."); // <-- FIXED
-                break;
-        }
-        return; // Stop the move
-    }
         if (hattori_ptr) {
             clear_dialogue_message();
             std::vector<std::string> dialogue_lines;
@@ -646,9 +625,6 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
             else if (quest[3] && quest[4]) {
                 dialogue_lines = hattori_ptr->give_quest_final_boss();
             }
-            else if (quest[5]) {
-                 dialogue_lines = {hattori.getName() + ": 'You have saved us all, hero. Thank you.'" };
-            }
             else {
                 dialogue_lines = {hattori.getName() + ": 'Be strong, warrior. Great trials await.'" };
             }
@@ -657,21 +633,32 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
             
             return; // Stop the move
         }
+        if (!newTile->getQuestStatus(quest))
+        {
+        
+            int enemyQuestID = newTile->get_doQuest();
+            switch (enemyQuestID) 
+            {
+                case 1: // Orc Raider
+                    show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13)."); // <-- FIXED
+                    break;
+                case 2: // Infernal Imp
+                    show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13))."); // <-- FIXED
+                    break;
+                case 3: 
+                    show_dialogue_message("The Golem's ancient magic is too strong. Complete other trials first.Meet Hattori at (46,13)."); // <-- FIXED
+                    break;
+                case 4: 
+                    show_dialogue_message("A dark aura repels you. You must complete Hattori's other tasks first.Meet Hattori at (46,13).");
+                    break;
+                default:
+                    show_dialogue_message("You are not powerful enough! Meet Hattori at (46,13)."); // <-- FIXED
+                    break;
+            }
+            return; // Stop the move
+        }
         // --- IS IT AN ENEMY? (COMBAT CHECK) ---
         Combat c;
-        if (!newTile->getQuestStatus(quest)) {
-            // (Your existing quest-gate logic is good)
-            int enemyQuestID = newTile->get_doQuest();
-            // ... (your switch statement for "not powerful enough") ...
-            return;
-        }
-        else{
-            Combat c;
-            if(!map.getTileAt(newx,newy)->getQuestStatus(quest)){
-                add_log_message("You are not not powerful enough!");
-                add_log_message("Meet Hattori at (46,13)");
-                return;
-            }
         Player& player = static_cast<Player&>(entity);
         Character* target_ptr = map.getTileAt(newx,newy)->getCharacter();
         Enemy& target = static_cast<Enemy&>(*target_ptr);
@@ -684,7 +671,8 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
             refresh();
             getch();
         }
-        else if(k==1){
+        else if(k==1)
+        {
             add_log_message("You defeated the enemy");
             auto lootBox = target.getDropLoot();
             // --- 2. RUN THE LOOT MENU ---
@@ -722,7 +710,6 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
                     case 4: complete_lines = this->hattori.complete_quest_necromancer(); break;
                     case 5: complete_lines = this->hattori.complete_quest_final_boss(); break;
                 }
-\
                 play_dialogue(complete_lines,player,map);
             }
             map.getTileAt(newx,newy)->setIsWalkable(true);
@@ -740,13 +727,12 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
             entity.set_y(newy);
         }
     }
-        else if(k==2){
-            add_log_message("You fled the battle!");
-        }
-        audio.playMusic("../data/audio/sacred-garden-10377.mp3");
-        return;
-        }
-    } 
+    else if(k==2){
+        add_log_message("You fled the battle!");
+    }
+    audio.playMusic("../data/audio/sacred-garden-10377.mp3");
+    return;
+    }
     // else if(map->getTileAt(newy,newx)->getItem()) { ... (Item handling)
     //     // Your commented code here would also need to use curses
     //     return;

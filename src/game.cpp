@@ -276,7 +276,7 @@ void Game::display_dashboard(Player& player, Map& map) {
     mvprintw(row, 0, " Mana:  ");
     attron(COLOR_PAIR(1));
     // Note: Assuming get_mana() is current and you might need a get_max_mana() later
-    printw("%d / %d", player.get_mana(), player.get_mana());
+    printw("%d / %d", player.get_mana(), player.get_max_mana());
     attroff(COLOR_PAIR(1));
     row++;
     mvprintw(row++, 0, "────────────────────────────────────────────────────────");
@@ -611,35 +611,6 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
         
         Character* charOnTile = newTile->getCharacter();
         NPC* hattori_ptr = dynamic_cast<NPC*>(charOnTile);
-        if (!newTile->getQuestStatus(quest)) {
-        
-        int enemyQuestID = newTile->get_doQuest();
-        switch (enemyQuestID) 
-        {
-            case 0: // War Chief
-                show_dialogue_message("Hattori says you must prove your strength. Defeat the War Chief first.Meet Hattori at (46,13)."); // <-- FIXED
-                break;
-            case 1: // Orc Raider
-                show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13)."); // <-- FIXED
-                break;
-            case 2: // Infernal Imp
-                show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13))."); // <-- FIXED
-                break;
-            case 3: 
-                show_dialogue_message("The Golem's ancient magic is too strong. Complete other trials first.Meet Hattori at (46,13)."); // <-- FIXED
-                break;
-            case 4: 
-                show_dialogue_message("A dark aura repels you. You must complete Hattori's other tasks first.Meet Hattori at (46,13).");
-                break;
-            case 5: // Final Boss
-                show_dialogue_message("The Citadel is sealed. Hattori says you must defeat the bosses to enter.Meet Hattori at (46,13)."); // <-- FIXED
-                break;
-            default:
-                show_dialogue_message("You are not powerful enough! Meet Hattori at (46,13)."); // <-- FIXED
-                break;
-        }
-        return; // Stop the move
-    }
         if (hattori_ptr) {
             clear_dialogue_message();
             std::vector<std::string> dialogue_lines;
@@ -661,9 +632,6 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
             else if (quest[3] && quest[4]) {
                 dialogue_lines = hattori_ptr->give_quest_final_boss();
             }
-            else if (quest[5]) {
-                 dialogue_lines = {hattori.getName() + ": 'You have saved us all, hero. Thank you.'" };
-            }
             else {
                 dialogue_lines = {hattori.getName() + ": 'Be strong, warrior. Great trials await.'" };
             }
@@ -672,116 +640,124 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
             
             return; // Stop the move
         }
-        // --- IS IT AN ENEMY? (COMBAT CHECK) ---
-        Combat c;
         if (!newTile->getQuestStatus(quest)) {
-            // (Your existing quest-gate logic is good)
-            int enemyQuestID = newTile->get_doQuest();
-            // ... (your switch statement for "not powerful enough") ...
-            return;
+        
+            int enemyQuestID = newTile->getRequiredQuestCompleted();
+            switch (enemyQuestID) 
+            {
+                case -1: break;
+                case 0: // War Chief
+                    show_dialogue_message("Hattori says you must prove your strength. Defeat the War Chief first.Meet Hattori at (46,13)."); // <-- FIXED
+                    break;
+                case 1: // Orc Raider
+                    show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13)."); // <-- FIXED
+                    break;
+                case 2: 
+                    show_dialogue_message("The Golem's ancient magic is too strong. Complete other trials first.Meet Hattori at (46,13)."); // <-- FIXED
+                    break;
+                case 3: 
+                    show_dialogue_message("A dark aura repels you. You must complete Hattori's other tasks first.Meet Hattori at (46,13).");
+                    break;
+                case 4: // Final Boss
+                    show_dialogue_message("The Citadel is sealed. Hattori says you must defeat the bosses to enter.Meet Hattori at (46,13)."); // <-- FIXED
+                    break;
+                default:
+                    show_dialogue_message("You are not powerful enough! Meet Hattori at (46,13)."); // <-- FIXED
+                    break;
+            }
+            return; // Stop the move
         }
         else{
             Combat c;
-            if(!map.getTileAt(newx,newy)->getQuestStatus(quest)){
-                add_log_message("You are not not powerful enough!");
-                add_log_message("Meet Hattori at (46,13)");
-                return;
+            Player& player = static_cast<Player&>(entity);
+            Character* target_ptr = map.getTileAt(newx,newy)->getCharacter();
+            Enemy& target = static_cast<Enemy&>(*target_ptr);
+            add_log_message("Combat Triggered!");
+            audio.playMusic("../data/audio/battle-bgm.mp3");
+            int k = c.fight(player, target,*this);
+            audio.playMusic("../data/audio/sacred-garden-10377.mp3");
+            if(k==0){
+                clear();
+                mvprintw(0, 0, "You have been defeated! Press any key to exit.");
+                refresh();
+                getch();
             }
-        Player& player = static_cast<Player&>(entity);
-        Character* target_ptr = map.getTileAt(newx,newy)->getCharacter();
-        Enemy& target = static_cast<Enemy&>(*target_ptr);
-        add_log_message("Combat Triggered!");
-        audio.playMusic("../data/audio/battle-bgm.mp3");
-        int k = c.fight(player, target,*this);
-        audio.playMusic("../data/audio/sacred-garden-10377.mp3");
-        if(k==0){
-            clear();
-            mvprintw(0, 0, "You have been defeated! Press any key to exit.");
-            refresh();
-            getch();
-        }
-        else if(k==1){
-            add_log_message("You defeated the enemy");
-            vector<shared_ptr<Item>>* lootBox = new vector<shared_ptr<Item>>(target.getDropLoot());
-            
-            if (!lootBox->empty()) {
-                add_log_message("Loot menu opened...");
-                runLootMenu(player, *lootBox);
+            else if(k==1){
+                add_log_message("You defeated the enemy");
+                int questID = newTile->get_doQuest();
+                vector<shared_ptr<Item>>* lootBox = new vector<shared_ptr<Item>>(target.getDropLoot());
+                
                 if (!lootBox->empty()) {
-                    map.getTileAt(newx,newy)->setCharacter(nullptr);
-                    map.getTileAt(newx,newy)->setRequiredQuestCompleted(-1);
-                    map.getTileAt(newx,newy)->set_doQuest(-1);
-                    map.getTileAt(newx,newy)->setMapDisplayChar("◛"); 
-                    map.getTileAt(newx,newy)->setMiniMapDisplayChar("◛"); 
-                    
-                    map.getTileAt(newx,newy)->set_map_color_pair(5);
-                    map.getTileAt(newx,newy)->set_mini_map_color_pair(5); 
+                    add_log_message("Loot menu opened...");
+                    runLootMenu(player, *lootBox);
+                    if (!lootBox->empty()) {
+                        map.getTileAt(newx,newy)->setCharacter(nullptr);
+                        map.getTileAt(newx,newy)->setRequiredQuestCompleted(-1);
+                        map.getTileAt(newx,newy)->set_doQuest(-1);
+                        map.getTileAt(newx,newy)->setMapDisplayChar("◛"); 
+                        map.getTileAt(newx,newy)->setMiniMapDisplayChar("◛"); 
+                        
+                        map.getTileAt(newx,newy)->set_map_color_pair(5);
+                        map.getTileAt(newx,newy)->set_mini_map_color_pair(5); 
 
-                    map.getTileAt(newx,newy)->setLootOnTile(lootBox);
-                    map.getTileAt(newx,newy)->setIsWalkable(false);
+                        map.getTileAt(newx,newy)->setLootOnTile(lootBox);
+                        map.getTileAt(newx,newy)->setIsWalkable(false);
 
-                    add_log_message("You left some items behind.");
-                }
+                        add_log_message("You left some items behind.");
+                    }
+                    else {
+                        delete lootBox;
+                        map.getTileAt(newx,newy)->setIsWalkable(true);
+                        map.getTileAt(newx,newy)->setCharacter(nullptr);
+                        map.getTileAt(newx,newy)->set_map_color_pair(6);
+                        map.getTileAt(newx,newy)->set_mini_map_color_pair(6);
+                        map.getTileAt(newx,newy)->setMapDisplayChar(".");
+                        map.getTileAt(newx,newy)->setMiniMapDisplayChar(".");
+                        map.getTileAt(newx,newy)->setRequiredQuestCompleted(-1);
+                        map.getTileAt(newx,newy)->set_doQuest(-1);
+                        add_log_message("You looted everything.");
+                    }
+
+                } 
                 else {
+                    delete lootBox;
+                    add_log_message("The enemy dropped nothing.");
                     map.getTileAt(newx,newy)->setIsWalkable(true);
-                    map.getTileAt(newx,newy)->setCharacter(nullptr);
-                    map.getTileAt(newx,newy)->set_map_color_pair(6);
-                    map.getTileAt(newx,newy)->set_mini_map_color_pair(6);
-                    map.getTileAt(newx,newy)->setMapDisplayChar(".");
-                    map.getTileAt(newx,newy)->setMiniMapDisplayChar(".");
                     map.getTileAt(newx,newy)->setRequiredQuestCompleted(-1);
                     map.getTileAt(newx,newy)->set_doQuest(-1);
-                    add_log_message("You looted everything.");
+                    map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
+                    map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);
+                    map.getTileAt(entity.get_x(), entity.get_y())->set_mini_map_color_pair(6);
+                    map.getTileAt(newx,newy)->setCharacter(&entity);
+                    map.getTileAt(newx,newy)->setMiniMapDisplayChar("♞");
+                    map.getTileAt(entity.get_x(),entity.get_y())->setMiniMapDisplayChar(".");
+                    map.getTileAt(newx,newy)->setMapDisplayChar("♞");
+                    map.getTileAt(entity.get_x(),entity.get_y())->setMapDisplayChar(".");
+                    map.getTileAt(newx,newy)->set_map_color_pair(5);
+                    map.getTileAt(newx,newy)->set_mini_map_color_pair(5);
+                    entity.set_x(newx);
+                    entity.set_y(newy);
                 }
-
-            } 
-            else {
-                 add_log_message("The enemy dropped nothing.");
-                 map.getTileAt(newx,newy)->setIsWalkable(true);
-                map.getTileAt(newx,newy)->setRequiredQuestCompleted(-1);
-                map.getTileAt(newx,newy)->set_doQuest(-1);
-                map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
-                map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);
-                map.getTileAt(entity.get_x(), entity.get_y())->set_mini_map_color_pair(6);
-                map.getTileAt(newx,newy)->setCharacter(&entity);
-                map.getTileAt(newx,newy)->setMiniMapDisplayChar("♞");
-                map.getTileAt(entity.get_x(),entity.get_y())->setMiniMapDisplayChar(".");
-                map.getTileAt(newx,newy)->setMapDisplayChar("♞");
-                map.getTileAt(entity.get_x(),entity.get_y())->setMapDisplayChar(".");
-                map.getTileAt(newx,newy)->set_map_color_pair(5);
-                map.getTileAt(newx,newy)->set_mini_map_color_pair(5);
-                entity.set_x(newx);
-                entity.set_y(newy);
-            }
-            if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
-                quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
-            }
-            int questID = newTile->get_doQuest();
-            if (questID != -1) 
-            {
-                quest[questID] = true;
-                
-                std::vector<std::string> complete_lines;
-                
-                // --- This switch "uses" your complete_quest functions ---
-                switch (questID) {
-                    case 0: complete_lines = this->hattori.complete_quest_war_chief(); break;
-                    case 1: complete_lines = this->hattori.complete_quest_orc_raider(); break;
-                    case 2: complete_lines = this->hattori.complete_quest_infernal_imp(); break;
-                    case 3: complete_lines = this->hattori.complete_quest_golem(); break;
-                    case 4: complete_lines = this->hattori.complete_quest_necromancer(); break;
-                    case 5: complete_lines = this->hattori.complete_quest_final_boss(); break;
+                if (questID != -1) 
+                {
+                    quest[questID] = true;
+                    std::vector<std::string> complete_lines;
+                    switch (questID) {
+                        case 0: complete_lines = this->hattori.complete_quest_war_chief(); break;
+                        case 1: complete_lines = this->hattori.complete_quest_orc_raider(); break;
+                        case 2: complete_lines = this->hattori.complete_quest_infernal_imp(); break;
+                        case 3: complete_lines = this->hattori.complete_quest_golem(); break;
+                        case 4: complete_lines = this->hattori.complete_quest_necromancer(); break; 
+                        default: complete_lines = this->hattori.complete_quest_final_boss(); break;
+                    }
+                    play_dialogue(complete_lines,player,map);
                 }
-                play_dialogue(complete_lines,player,map);
+                
             }
-            if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
-                quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
+            else if(k==2){
+                add_log_message("You fled the battle!");
             }
-        }
-        else if(k==2){
-            add_log_message("You fled the battle!");
-        }
-        return;
+            return;
         }
     } 
     else if(map.getTileAt(newx,newy)->getBounds()) {

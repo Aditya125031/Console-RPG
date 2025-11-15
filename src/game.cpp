@@ -786,22 +786,22 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
             case -1:
                 break;
             case 0:                                                                                                                      // War Chief
-                show_dialogue_message("Hattori says you must prove your strength. Defeat the War Chief first.Meet Hattori at (46,13)."); // <-- FIXED
+                show_dialogue_message("Oracle says you must prove your strength. Defeat the War Chief first.Meet Oracle at (46,13)."); // <-- FIXED
                 break;
             case 1:                                                                            // Orc Raider
-                show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13)."); // <-- FIXED
+                show_dialogue_message("You are not powerful enough.Meet Oracle at (46,13)."); // <-- FIXED
                 break;
             case 2:
-                show_dialogue_message("The Golem's ancient magic is too strong. Complete other trials first.Meet Hattori at (46,13)."); // <-- FIXED
+                show_dialogue_message("The Golem's ancient magic is too strong. Complete other trials first.Meet Oracle at (46,13)."); // <-- FIXED
                 break;
             case 3:
-                show_dialogue_message("A dark aura repels you. You must complete Hattori's other tasks first.Meet Hattori at (46,13).");
+                show_dialogue_message("A dark aura repels you. You must complete Oracle's other tasks first.Meet Oracle at (46,13).");
                 break;
             case 4:                                                                                                                        // Final Boss
-                show_dialogue_message("The Citadel is sealed. Hattori says you must defeat the bosses to enter.Meet Hattori at (46,13)."); // <-- FIXED
+                show_dialogue_message("The Citadel is sealed. Oracle says you must defeat the bosses to enter.Meet Oracle at (46,13)."); // <-- FIXED
                 break;
             default:
-                show_dialogue_message("You are not powerful enough! Meet Hattori at (46,13)."); // <-- FIXED
+                show_dialogue_message("You are not powerful enough! Meet Oracle at (46,13)."); // <-- FIXED
                 break;
             }
             return; // Stop the move

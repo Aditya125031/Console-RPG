@@ -32,7 +32,14 @@ const unsigned int MAX_LOG_LINES = 10;
 
 void Game::show_dialogue_message(const std::string& message) {
     // This function just sets the message that will be drawn by the dashboard
-    current_dialogue_message = message;
+    int term_width, term_height;
+    getmaxyx(stdscr, term_height, term_width);
+    int dialogue_width = term_width - 10;
+    if (dialogue_width < 20) dialogue_width = 20;
+    std::vector<std::string> wrapped_lines = wrap_text(message, dialogue_width);
+    
+    // 2. Add the wrapped lines to the CORRECT vector
+    current_dialogue_lines.insert(current_dialogue_lines.end(),  wrapped_lines.begin(), wrapped_lines.end());
 }
 
 void Game::add_log_message(std::string message) {
@@ -46,7 +53,7 @@ void Game::add_log_message(std::string message) {
 // (Make sure you have the DisplayItem struct here)
 
 // Helper function to build the player's item list (same as before)
-std::vector<DisplayItem> buildPlayerItemList(Player& player) {
+std::vector<DisplayItem>Game:: buildPlayerItemList(Player& player) {
     std::vector<DisplayItem> itemMap;
 
     // Add Equipment
@@ -352,15 +359,6 @@ void Game::play_dialogue(const std::vector<std::string>& lines, Player& player, 
         // --- END OF NEW LOGIC ---
     }
 }
-
-
-void Game::add_log_message(std::string message) {
-    event_log.push_front(message);
-    while (event_log.size() > MAX_LOG_LINES) {
-        event_log.pop_back();
-    }
-}
-
 
 void Game::show_full_map(Map& map) {
     bool onFullMap = true;
@@ -736,8 +734,24 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
                     add_log_message("You looted everything.");
                 }
 
-            } else {
+            } 
+            else {
                  add_log_message("The enemy dropped nothing.");
+                 map.getTileAt(newx,newy)->setIsWalkable(true);
+                map.getTileAt(newx,newy)->setRequiredQuestCompleted(-1);
+                map.getTileAt(newx,newy)->set_doQuest(-1);
+                map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
+                map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);
+                map.getTileAt(entity.get_x(), entity.get_y())->set_mini_map_color_pair(6);
+                map.getTileAt(newx,newy)->setCharacter(&entity);
+                map.getTileAt(newx,newy)->setMiniMapDisplayChar("♞");
+                map.getTileAt(entity.get_x(),entity.get_y())->setMiniMapDisplayChar(".");
+                map.getTileAt(newx,newy)->setMapDisplayChar("♞");
+                map.getTileAt(entity.get_x(),entity.get_y())->setMapDisplayChar(".");
+                map.getTileAt(newx,newy)->set_map_color_pair(5);
+                map.getTileAt(newx,newy)->set_mini_map_color_pair(5);
+                entity.set_x(newx);
+                entity.set_y(newy);
             }
             if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
                 quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
@@ -758,24 +772,8 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
                     case 4: complete_lines = this->hattori.complete_quest_necromancer(); break;
                     case 5: complete_lines = this->hattori.complete_quest_final_boss(); break;
                 }
-\
                 play_dialogue(complete_lines,player,map);
             }
-            map.getTileAt(newx,newy)->setIsWalkable(true);
-            map.getTileAt(newx,newy)->setRequiredQuestCompleted(-1);
-                map.getTileAt(newx,newy)->set_doQuest(-1);
-            map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
-            map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);
-            map.getTileAt(entity.get_x(), entity.get_y())->set_mini_map_color_pair(6);
-            map.getTileAt(newx,newy)->setCharacter(&entity);
-            map.getTileAt(newx,newy)->setMiniMapDisplayChar("♞");
-            map.getTileAt(entity.get_x(),entity.get_y())->setMiniMapDisplayChar(".");
-            map.getTileAt(newx,newy)->setMapDisplayChar("♞");
-            map.getTileAt(entity.get_x(),entity.get_y())->setMapDisplayChar(".");
-            map.getTileAt(newx,newy)->set_map_color_pair(5);
-            map.getTileAt(newx,newy)->set_mini_map_color_pair(5);
-            entity.set_x(newx);
-            entity.set_y(newy);
             if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
                 quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
             }

@@ -718,46 +718,54 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
                         add_log_message("You looted everything.");
                     }
 
-                } 
-                else {
-                    delete lootBox;
-                    add_log_message("The enemy dropped nothing.");
-                    map.getTileAt(newx,newy)->setIsWalkable(true);
-                    map.getTileAt(newx,newy)->setRequiredQuestCompleted(-1);
-                    map.getTileAt(newx,newy)->set_doQuest(-1);
-                    map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
-                    map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);
-                    map.getTileAt(entity.get_x(), entity.get_y())->set_mini_map_color_pair(6);
-                    map.getTileAt(newx,newy)->setCharacter(&entity);
-                    map.getTileAt(newx,newy)->setMiniMapDisplayChar("♞");
-                    map.getTileAt(entity.get_x(),entity.get_y())->setMiniMapDisplayChar(".");
-                    map.getTileAt(newx,newy)->setMapDisplayChar("♞");
-                    map.getTileAt(entity.get_x(),entity.get_y())->setMapDisplayChar(".");
-                    map.getTileAt(newx,newy)->set_map_color_pair(5);
-                    map.getTileAt(newx,newy)->set_mini_map_color_pair(5);
-                    entity.set_x(newx);
-                    entity.set_y(newy);
-                }
-                if (questID != -1) 
-                {
-                    quest[questID] = true;
-                    std::vector<std::string> complete_lines;
-                    switch (questID) {
-                        case 0: complete_lines = this->hattori.complete_quest_war_chief(); break;
-                        case 1: complete_lines = this->hattori.complete_quest_orc_raider(); break;
-                        case 2: complete_lines = this->hattori.complete_quest_infernal_imp(); break;
-                        case 3: complete_lines = this->hattori.complete_quest_golem(); break;
-                        case 4: complete_lines = this->hattori.complete_quest_necromancer(); break; 
-                        default: complete_lines = this->hattori.complete_quest_final_boss(); break;
-                    }
-                    play_dialogue(complete_lines,player,map);
-                }
+            } else {
+                 add_log_message("The enemy dropped nothing.");
+            }
+            if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
+                quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
+            }
+            int questID = newTile->get_doQuest();
+            if (questID != -1) 
+            {
+                quest[questID] = true;
                 
+                std::vector<std::string> complete_lines;
+                
+                // --- This switch "uses" your complete_quest functions ---
+                switch (questID) {
+                    case 0: complete_lines = this->hattori.complete_quest_war_chief(); break;
+                    case 1: complete_lines = this->hattori.complete_quest_orc_raider(); break;
+                    case 2: complete_lines = this->hattori.complete_quest_infernal_imp(); break;
+                    case 3: complete_lines = this->hattori.complete_quest_golem(); break;
+                    case 4: complete_lines = this->hattori.complete_quest_necromancer(); break;
+                    case 5: complete_lines = this->hattori.complete_quest_final_boss(); break;
+                }
+\
+                play_dialogue(complete_lines,player,map);
             }
-            else if(k==2){
-                add_log_message("You fled the battle!");
+            map.getTileAt(newx,newy)->setIsWalkable(true);
+            map.getTileAt(newx,newy)->setRequiredQuestCompleted(-1);
+                map.getTileAt(newx,newy)->set_doQuest(-1);
+            map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
+            map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);
+            map.getTileAt(entity.get_x(), entity.get_y())->set_mini_map_color_pair(6);
+            map.getTileAt(newx,newy)->setCharacter(&entity);
+            map.getTileAt(newx,newy)->setMiniMapDisplayChar("♞");
+            map.getTileAt(entity.get_x(),entity.get_y())->setMiniMapDisplayChar(".");
+            map.getTileAt(newx,newy)->setMapDisplayChar("♞");
+            map.getTileAt(entity.get_x(),entity.get_y())->setMapDisplayChar(".");
+            map.getTileAt(newx,newy)->set_map_color_pair(5);
+            map.getTileAt(newx,newy)->set_mini_map_color_pair(5);
+            entity.set_x(newx);
+            entity.set_y(newy);
+            if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
+                quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
             }
-            return;
+        }
+        else if(k==2){
+            add_log_message("You fled the battle!");
+        }
+        return;
         }
     } 
     else if(map.getTileAt(newx,newy)->getBounds()) {

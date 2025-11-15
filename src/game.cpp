@@ -265,18 +265,23 @@ void Game::display_dashboard(Player& player, Map& map) {
     mvprintw(row, 0, " Class: %s", player.get_type_string().c_str());
     row++;
 
-    // 3. HP
-    mvprintw(row, 0, " HP:    ");
+    mvprintw(row, 0, " HP: ");
     attron(COLOR_PAIR(2));
     printw("%d/%d", player.get_health(), player.get_max_health());
     attroff(COLOR_PAIR(2));
     row++;
 
+    mvprintw(row, 0, " Attack: ");
+    attron(COLOR_PAIR(2));
+    printw("%d", player.get_attack_power());
+    attroff(COLOR_PAIR(2));
+    row++;  
+
     // 4. Mana
-    mvprintw(row, 0, " Mana:  ");
+    mvprintw(row, 0, " Mana: ");
     attron(COLOR_PAIR(1));
     // Note: Assuming get_mana() is current and you might need a get_max_mana() later
-    printw("%d / %d", player.get_mana(), player.get_max_mana());
+    printw("%d/%d", player.get_mana(), player.get_max_mana());
     attroff(COLOR_PAIR(1));
     row++;
     mvprintw(row++, 0, "────────────────────────────────────────────────────────");

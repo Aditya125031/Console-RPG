@@ -46,6 +46,7 @@ class Game
         void show_dialogue_message(const std::string& message); // <-- CORRECT
         void clear_dialogue_message();
         void play_dialogue(const std::vector<std::string>& lines, Player& player, Map& map);
+        std::vector<DisplayItem> buildPlayerItemList(Player& player);
         NPC hattori;
 };
 

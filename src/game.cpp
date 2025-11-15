@@ -33,7 +33,180 @@ void Game::show_dialogue_message(const std::string& message) {
     // This function just sets the message that will be drawn by the dashboard
     current_dialogue_message = message;
 }
+std::vector<DisplayItem>Game:: buildPlayerItemList(Player& player) {
+    std::vector<DisplayItem> itemMap;
 
+    // Add Equipment
+    if (player.inventory.equippedWeapon) {
+            itemMap.push_back({
+                player.inventory.equippedWeapon->get_item_name() + " (Equipped)",
+                "EQUIPPED_WEAPON", "WEAPON",player.inventory.equippedWeapon->get_item_description()
+            });
+        }
+        if (player.inventory.equippedArmor) {
+            itemMap.push_back({
+                player.inventory.equippedArmor->get_item_name() + " (Equipped)",
+                "EQUIPPED_ARMOR", "ARMOR",player.inventory.equippedArmor->get_item_description()
+            });
+        }
+
+        // 2. Add Bag Items (using public members)
+        if (player.inventory.inventoryWeapon) {
+            itemMap.push_back({
+                player.inventory.inventoryWeapon->get_item_name() + " (Bag)",
+                "INVENTORY_WEAPON", "WEAPON",player.inventory.inventoryWeapon->get_item_description()
+            });
+        }
+        if (player.inventory.inventoryArmor) {
+            itemMap.push_back({
+                player.inventory.inventoryArmor->get_item_name() + " (Bag)",
+                "INVENTORY_ARMOR", "ARMOR",player.inventory.inventoryArmor->get_item_description()
+            });
+        }
+        
+        // 3. Add Potions
+        for (const auto& pair : player.inventory.potionStorage) {
+            if(pair.second.quantity>0)
+            itemMap.push_back({
+                pair.first + " (x" + to_string(pair.second.quantity) + ")",
+                pair.first, "POTION", pair.second.itemPrototype->get_item_description()
+            });
+        }
+        
+    return itemMap;
+}
+
+std::vector<std::shared_ptr<Item>> Game::runLootMenu(Player& player, 
+                                                    std::vector<std::shared_ptr<Item>> lootBox) {
+    bool inLootMenu = true;
+    Game& world = *this; // For inventory functions
+
+    while (inLootMenu) {
+        clear();
+
+        // --- 1. DISPLAY LOOT BOX (LEFT COLUMN) [1-9] ---
+        mvprintw(0, 0, "--- LOOT BOX ---");
+        int maxLootDisplay = 9; // Only show 1-9
+        for (int i = 0; i < lootBox.size() && i < maxLootDisplay; ++i) {
+            mvprintw(i + 2, 0, " [%d] %s", i + 1, lootBox[i]->get_item_name().c_str());
+        }
+        if (lootBox.empty()) {
+            mvprintw(2, 0, " (Empty)");
+        }
+
+        // --- 2. DISPLAY PLAYER INVENTORY (RIGHT COLUMN) [a-z] ---
+        mvprintw(0, 35, "--- YOUR INVENTORY ---");
+        std::vector<DisplayItem> playerItems = buildPlayerItemList(player);
+        for (int i = 0; i < playerItems.size() && i < 26; ++i) {
+            mvprintw(i + 2, 35, " [%c] %s", 'a' + i, playerItems[i].displayName.c_str());
+        }
+
+        // --- 3. DISPLAY ACTIONS ---
+        int row = std::max(12, (int)playerItems.size() + 4);
+        mvprintw(row++, 0, "--- ACTIONS ---");
+        mvprintw(row++, 0, "(l) Loot from Crate");
+        mvprintw(row++, 0, "(d) Drop from Inventory");
+        mvprintw(row++, 0, "(q) Quit Looting");
+        mvprintw(row, 0, "Choice: ");
+        refresh();
+
+        int ch = getch();
+        switch (ch) {
+            case 'q':
+            case 'Q':
+                inLootMenu = false;
+                break;
+
+            // === LOOT FROM CRATE ===
+            case 'l':
+            case 'L': {
+                mvprintw(row + 1, 0, "Loot item number (1-9): ");
+                refresh();
+                int ch_loot = getch();
+                int index = ch_loot - '1'; // '1' -> 0
+
+                if (index >= 0 && index < lootBox.size()) {
+                    auto itemToTake = lootBox[index];
+                    bool success = player.inventory.addItem(itemToTake, 1, player, world);
+                    
+                    if (success) {
+                        lootBox.erase(lootBox.begin() + index); // Remove from loot box
+                    } else {
+                        mvprintw(row + 2, 0, "Inventory is full! Press any key...");
+                        getch(); // Pause
+                    }
+                } else {
+                    mvprintw(row + 2, 0, "Invalid number. Press any key...");
+                    getch(); // Pause
+                }
+                break;
+            }
+
+            // === DROP FROM INVENTORY ===
+            case 'd':
+            case 'D': {
+                mvprintw(row + 1, 0, "Drop item letter (a-z): ");
+                refresh();
+                int ch_drop = getch();
+                int index = ch_drop - 'a'; // 'a' -> 0
+
+                if (index >= 0 && index < playerItems.size()) {
+                    // --- Show confirmation screen ---
+                    DisplayItem itemToDrop = playerItems[index];
+                    clear();
+                    mvprintw(0, 0, "Drop %s?", itemToDrop.displayName.c_str());
+                    mvprintw(2, 0, "Description: %s", itemToDrop.description.c_str());
+                    mvprintw(4, 0, "(d) Drop");
+                    mvprintw(5, 0, "(c) Cancel");
+                    refresh();
+
+                    int ch_confirm = getch();
+                    if (ch_confirm == 'd' || ch_confirm == 'D') {
+                        // User confirmed. Call the remove functions.
+                        std::shared_ptr<Item> droppedItem = nullptr;
+                        
+                    if (itemToDrop.itemID == "EQUIPPED_WEAPON") {
+                            // 1. Copy the pointer
+                            droppedItem = player.inventory.equippedWeapon;
+                            // 2. Call your existing void function
+                            player.inventory.dropEquippedWeapon( world,player);
+                        } 
+                        else if (itemToDrop.itemID == "INVENTORY_WEAPON") {
+                            droppedItem = player.inventory.inventoryWeapon;
+                            player.inventory.dropInventoryWeapon(world);
+                        } 
+                        else if (itemToDrop.itemID == "EQUIPPED_ARMOR") {
+                            droppedItem = player.inventory.equippedArmor;
+                            player.inventory.dropEquippedArmor(world,player);
+                        } 
+                        else if (itemToDrop.itemID == "INVENTORY_ARMOR") {
+                            droppedItem = player.inventory.inventoryArmor;
+                            player.inventory.dropInventoryArmor(world);
+                        } 
+                        // --- OUR NEW LOGIC FOR POTIONS ---
+                        else if (itemToDrop.type == "POTION") {
+                            // Call the one new function
+                            droppedItem = player.inventory.removePotionForLoot(itemToDrop.itemID, world);
+                        }
+
+                        // If we successfully removed it, add it to the loot box
+                        if (droppedItem != nullptr) {
+                            lootBox.push_back(droppedItem);
+                        }
+                    }
+                    // If 'c' or anything else, do nothing and loop
+                } else {
+                    mvprintw(row + 2, 0, "Invalid letter. Press any key...");
+                    getch(); // Pause
+                }
+                break;
+            } // end case 'd'
+        } // end switch
+    } // end while
+
+    // Return whatever is left in the loot box
+    return lootBox;
+}
 void Game::clear_dialogue_message() {
     current_dialogue_lines.clear();
 }
@@ -513,9 +686,26 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
         }
         else if(k==1){
             add_log_message("You defeated the enemy");
+            auto lootBox = target.getDropLoot();
+            // --- 2. RUN THE LOOT MENU ---
+            if (!lootBox.empty()) {
+                add_log_message("Loot menu opened...");
+                
+                // Pass the lootBox by value (it gets moved in).
+                // The menu returns what's left.
+                std::vector<std::shared_ptr<Item>> remainingLoot = runLootMenu(player, std::move(lootBox));
+
+                // remainingLoot now holds whatever the player left behind.
+                // (Since we have "no tiles", these items are now gone)
+                if (!remainingLoot.empty()) {
+                    add_log_message("You left some items behind.");
+                }
+
+            } else {
+                 add_log_message("The enemy dropped nothing.");
+            }
             if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
                 quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
-            }
             int questID = newTile->get_doQuest();
             if (questID != -1) 
             {
@@ -535,48 +725,6 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
 \
                 play_dialogue(complete_lines,player,map);
             }
-            auto lootBox = target.getDropLoot();
-            // --- 2. RUN THE LOOT MENU ---
-            if (!lootBox.empty()) {
-                add_log_message("Loot menu opened...");
-                
-                // Pass the lootBox by value (it gets moved in).
-                // The menu returns what's left.
-                std::vector<std::shared_ptr<Item>> remainingLoot = runLootMenu(player, std::move(lootBox));
-
-                // remainingLoot now holds whatever the player left behind.
-                // (Since we have "no tiles", these items are now gone)
-                if (!remainingLoot.empty()) {
-                    add_log_message("You left some items behind.");
-                }
-
-            } else {
-                 add_log_message("The enemy dropped nothing.");
-            }
-            if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
-                quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
-            }
-            auto lootBox = target.getDropLoot();
-            // --- 2. RUN THE LOOT MENU ---
-            if (!lootBox.empty()) {
-                add_log_message("Loot menu opened...");
-                
-                // Pass the lootBox by value (it gets moved in).
-                // The menu returns what's left.
-                std::vector<std::shared_ptr<Item>> remainingLoot = runLootMenu(player, std::move(lootBox));
-
-                // remainingLoot now holds whatever the player left behind.
-                // (Since we have "no tiles", these items are now gone)
-                if (!remainingLoot.empty()) {
-                    add_log_message("You left some items behind.");
-                }
-
-            } else {
-                 add_log_message("The enemy dropped nothing.");
-            }
-            if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
-                quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
-            }
             map.getTileAt(newx,newy)->setIsWalkable(true);
             map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
             map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);
@@ -591,6 +739,7 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
             entity.set_x(newx);
             entity.set_y(newy);
         }
+    }
         else if(k==2){
             add_log_message("You fled the battle!");
         }

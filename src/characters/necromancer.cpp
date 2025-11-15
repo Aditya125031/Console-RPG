@@ -24,7 +24,7 @@ Necromancer::Necromancer(Player& player)
 
     if (playerType == "Swordsman") 
     {
-        dropLoot.push_back(make_shared<Shinketsu_Sword>());
+        dropLoot.push_back(make_shared<God_Slayer>());
     } else if (playerType == "Archer") 
     {
         dropLoot.push_back(make_shared<Void_Embrace>());

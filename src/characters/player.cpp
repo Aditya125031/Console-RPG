@@ -11,16 +11,14 @@ using namespace std;
 
 Player::Player(Game& game_world, std::string name, PlayerType type)
     : Character(name, 100, 10), 
-      world(game_world),  // <-- THIS LINE IS THE FIX
+      world(game_world),  
       type(type) 
 {
-    // The 'inventory' member is default-initialized automatically
-    
     switch (type) {
     
     case PlayerType::Swordsman:
-        this->health = 120;
-        this->attackPower = 15;
+        this->health = 1200;
+        this->attackPower = 145;
         this->mana = 20;
         this->regen_hp_step=16;
         this->regen_mana_step=30;
@@ -47,15 +45,11 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
     this->baseMaxHealth = this->health;
     this->baseAttackPower = this->attackPower;
     this->baseMaxMana = this->mana;
-
-    // 'printw' here is risky if ncurses isn't initialized yet,
-    // but we'll leave it for now.
     printw("A new %s named %s has arrived!\n", get_type_string().c_str(), this->name.c_str());
     this_thread::sleep_for(chrono::seconds(1));
     flushinp();
 }
 
-// ... (reset_stats, get_type_string, show_details all look fine) ...
 void Player::reset_stats() {
     this->attackPower = this->baseAttackPower;
     this->maxHealth = this->baseMaxHealth;
@@ -93,6 +87,7 @@ void Player::show_details() const {
     mvprintw(row++, 0, "Mana: %d / %d", this->mana, this->max_mana);
     mvprintw(row++, 0, "---------------------");
 }
+
 void Player::special_move(Character& enemy) 
 {
     std::shared_ptr<Weapon> current_weapon = this->inventory.equippedWeapon;
@@ -108,6 +103,7 @@ void Player::special_move(Character& enemy)
         }
     }
 }
+
 int Player::get_x() {
     return this->coord_x;
 }
@@ -139,15 +135,18 @@ void Player::add_mana(int amount) {
         this->mana = this->max_mana;
     }
 }
+
 void Player::modify_max_mana(int amount) {
     this->max_mana += amount;
     if (this->mana > this->max_mana) {
         this->mana = this->max_mana;
     }
 }
+
 void Player::modify_attack(int amount) {
     this->attackPower += amount;
 }
+
 int Player::get_mana() const {
     return this->mana;
 }
@@ -159,18 +158,21 @@ int Player::get_max_mana() const {
 int Player::get_attack_power() const {
     return this->attackPower; 
 }
+
 void Player::add_health(int amount) {
     this->health += amount;
     if (this->health > this->maxHealth) {
         this->health = this->maxHealth;
     }
 }
+
 void Player::modify_max_health(int amount) {
     this->maxHealth += amount;
     if (this->health > this->maxHealth) {
         this->health = this->maxHealth;
     }
 }
+
 std::chrono::steady_clock::time_point Player::get_normal_attack_ready() const {
     return this->normal_attack_ready;
 }
@@ -208,9 +210,8 @@ void Player::setSpecialAttackInterval(double sec) {
 double Player::getSpecialAttackInterval() const {
     return this->specialAttackInterval;
 }
+
 std::string Player::move(int x, int y, Map& map) {
-    // Implement movement logic here
-    // Return a string describing the movement result
     return "Moved to position (" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
 

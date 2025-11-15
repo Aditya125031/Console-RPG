@@ -10,29 +10,15 @@ LichLord::LichLord()
 }
 LichLord::LichLord(Player& player)
     // Final Boss stats
-    : Enemy("Lich Lord", 300, 20) 
+    : Enemy("Lich Lord", 300, 30) 
 {
     std::string playerType = player.get_type_string();
-
-    if (playerType == "Swordsman") 
-    {
-        dropLoot.push_back(make_shared<Shinketsu_Sword>());
-    } else if (playerType == "Archer") 
-    {
-        dropLoot.push_back(make_shared<Void_Embrace>());
-    } else if (playerType == "Mage") 
-    {
-        dropLoot.push_back(make_shared<Elder_Wand>()); 
-    }
     dialogue.push_back("You are a fool to challenge me.");
     dialogue.push_back("All your efforts are for nothing!");
     dialogue.push_back("I am eternal. You are... not.");
 }
-LichLord::~LichLord()
-{
-    // This empty body is all the linker needs
-    
-}
+LichLord::~LichLord(){}
+
 void LichLord::triggerDialogue() const {
     if (!dialogue.empty()) {
         std::cout << get_name() << "'s voice echoes in your mind: \"" << dialogue[rand() % dialogue.size()] << "\"\n";
@@ -40,9 +26,8 @@ void LichLord::triggerDialogue() const {
 }
 void LichLord::specialAbility(Character& target) {
     std::cout << get_name() << " raises his staff and casts 'Chain of Shadow'!\n";
-    // A multi-hit attack
-    int hits = (rand() % 3) + 2; // Hits 2 to 4 times
-    int damagePerHit = attackPower / 2; // 10 damage per hit
+    int hits = (rand() % 5) + 2; 
+    int damagePerHit = attackPower / 2;
     
     std::cout << "Bolts of dark energy leap towards you!\n";
     for (int i = 0; i < hits; ++i) {

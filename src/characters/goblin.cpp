@@ -17,17 +17,7 @@ Goblin::Goblin(Player& player)
     : Enemy("Goblin", 50, 8) 
 {
     std::string playerType = player.get_type_string();
-
-    if (playerType == "Swordsman") 
-    {
-        dropLoot.push_back(make_shared<Shinketsu_Sword>());
-    } else if (playerType == "Archer") 
-    {
-        dropLoot.push_back(make_shared<Void_Embrace>());
-    } else if (playerType == "Mage") 
-    {
-        dropLoot.push_back(make_shared<Elder_Wand>()); 
-    }
+    dropLoot.push_back(make_shared<Health_Potion>()); 
     dialogue.push_back("Shiny things for Grug!");
     dialogue.push_back("Me smash you!");
     dialogue.push_back("*screech*");

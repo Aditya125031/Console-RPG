@@ -18,13 +18,13 @@ InfernalImp::InfernalImp(Player& player)
 
     if (playerType == "Swordsman") 
     {
-        dropLoot.push_back(make_shared<Shinketsu_Sword>());
+        dropLoot.push_back(make_shared<Soul_Reaper>());
     } else if (playerType == "Archer") 
     {
-        dropLoot.push_back(make_shared<Void_Embrace>());
+        dropLoot.push_back(make_shared<Eclipse_Striker>());
     } else if (playerType == "Mage") 
     {
-        dropLoot.push_back(make_shared<Elder_Wand>()); 
+        dropLoot.push_back(make_shared<Orb_of_Avarice>()); 
     }
     dialogue.push_back("Burn, fleshling, burn!");
     dialogue.push_back("The Black Pit awaits!");

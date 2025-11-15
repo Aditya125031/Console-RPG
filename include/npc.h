@@ -7,10 +7,10 @@
 class NPC:public Character
 {
 private:
-    std::string name = "hattori";
+    std::string name = "Oracle";
 
 public:
-    NPC():Character("Hattori the Sage",100000,100000) {}
+    NPC():Character("Oracle",100000,100000) {}
     std::string getName() const 
     {
         return name;

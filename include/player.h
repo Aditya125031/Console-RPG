@@ -21,8 +21,8 @@ class Player : public Character {
 private:
     Game& world;
     PlayerType type;
-    double specialAttackInterval;
-    double normalAttackInterval;
+    double specialAttackInterval = 10;
+    double normalAttackInterval = 2;
 protected:
     int max_mana;
     int mana;

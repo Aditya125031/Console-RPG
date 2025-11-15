@@ -29,18 +29,30 @@ class AudioManager; // Forward declaration
 
 const unsigned int MAX_LOG_LINES = 10;
 
+
 void Game::show_dialogue_message(const std::string& message) {
     // This function just sets the message that will be drawn by the dashboard
     int term_width, term_height;
     getmaxyx(stdscr, term_height, term_width);
     int dialogue_width = term_width - 10;
     if (dialogue_width < 20) dialogue_width = 20;
-
     std::vector<std::string> wrapped_lines = wrap_text(message, dialogue_width);
     
     // 2. Add the wrapped lines to the CORRECT vector
     current_dialogue_lines.insert(current_dialogue_lines.end(),  wrapped_lines.begin(), wrapped_lines.end());
 }
+
+void Game::add_log_message(std::string message) {
+    event_log.push_front(message);
+    while (event_log.size() > MAX_LOG_LINES) {
+        event_log.pop_back();
+    }
+}
+
+// In Game.cpp
+// (Make sure you have the DisplayItem struct here)
+
+// Helper function to build the player's item list (same as before)
 std::vector<DisplayItem>Game:: buildPlayerItemList(Player& player) {
     std::vector<DisplayItem> itemMap;
 
@@ -84,8 +96,12 @@ std::vector<DisplayItem>Game:: buildPlayerItemList(Player& player) {
     return itemMap;
 }
 
-std::vector<std::shared_ptr<Item>> Game::runLootMenu(Player& player, 
-                                                    std::vector<std::shared_ptr<Item>> lootBox) {
+
+/**
+ * @brief This is the new (l)Loot / (d)Drop prompt-based loot menu.
+ */
+vector<shared_ptr<Item>> Game::runLootMenu(Player& player, 
+                                                    vector<shared_ptr<Item>>& lootBox) {
     bool inLootMenu = true;
     Game& world = *this; // For inventory functions
 
@@ -104,13 +120,13 @@ std::vector<std::shared_ptr<Item>> Game::runLootMenu(Player& player,
 
         // --- 2. DISPLAY PLAYER INVENTORY (RIGHT COLUMN) [a-z] ---
         mvprintw(0, 35, "--- YOUR INVENTORY ---");
-        std::vector<DisplayItem> playerItems = buildPlayerItemList(player);
+        vector<DisplayItem> playerItems = buildPlayerItemList(player);
         for (int i = 0; i < playerItems.size() && i < 26; ++i) {
             mvprintw(i + 2, 35, " [%c] %s", 'a' + i, playerItems[i].displayName.c_str());
         }
 
         // --- 3. DISPLAY ACTIONS ---
-        int row = std::max(12, (int)playerItems.size() + 4);
+        int row = max(12, (int)playerItems.size() + 4);
         mvprintw(row++, 0, "--- ACTIONS ---");
         mvprintw(row++, 0, "(l) Loot from Crate");
         mvprintw(row++, 0, "(d) Drop from Inventory");
@@ -171,7 +187,7 @@ std::vector<std::shared_ptr<Item>> Game::runLootMenu(Player& player,
                     int ch_confirm = getch();
                     if (ch_confirm == 'd' || ch_confirm == 'D') {
                         // User confirmed. Call the remove functions.
-                        std::shared_ptr<Item> droppedItem = nullptr;
+                        shared_ptr<Item> droppedItem = nullptr;
                         
                     if (itemToDrop.itemID == "EQUIPPED_WEAPON") {
                             // 1. Copy the pointer
@@ -260,7 +276,7 @@ void Game::display_dashboard(Player& player, Map& map) {
     mvprintw(row, 0, " Mana:  ");
     attron(COLOR_PAIR(1));
     // Note: Assuming get_mana() is current and you might need a get_max_mana() later
-    printw("%d / %d", player.get_mana(), player.get_mana());
+    printw("%d / %d", player.get_mana(), player.get_max_mana());
     attroff(COLOR_PAIR(1));
     row++;
     mvprintw(row++, 0, "────────────────────────────────────────────────────────");
@@ -343,15 +359,6 @@ void Game::play_dialogue(const std::vector<std::string>& lines, Player& player, 
         // --- END OF NEW LOGIC ---
     }
 }
-
-
-void Game::add_log_message(std::string message) {
-    event_log.push_front(message);
-    while (event_log.size() > MAX_LOG_LINES) {
-        event_log.pop_back();
-    }
-}
-
 
 void Game::show_full_map(Map& map) {
     bool onFullMap = true;
@@ -633,23 +640,26 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
             
             return; // Stop the move
         }
-        if (!newTile->getQuestStatus(quest))
-        {
+        if (!newTile->getQuestStatus(quest)) {
         
-            int enemyQuestID = newTile->get_doQuest();
+            int enemyQuestID = newTile->getRequiredQuestCompleted();
             switch (enemyQuestID) 
             {
+                case -1: break;
+                case 0: // War Chief
+                    show_dialogue_message("Hattori says you must prove your strength. Defeat the War Chief first.Meet Hattori at (46,13)."); // <-- FIXED
+                    break;
                 case 1: // Orc Raider
                     show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13)."); // <-- FIXED
                     break;
-                case 2: // Infernal Imp
-                    show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13))."); // <-- FIXED
-                    break;
-                case 3: 
+                case 2: 
                     show_dialogue_message("The Golem's ancient magic is too strong. Complete other trials first.Meet Hattori at (46,13)."); // <-- FIXED
                     break;
-                case 4: 
+                case 3: 
                     show_dialogue_message("A dark aura repels you. You must complete Hattori's other tasks first.Meet Hattori at (46,13).");
+                    break;
+                case 4: // Final Boss
+                    show_dialogue_message("The Citadel is sealed. Hattori says you must defeat the bosses to enter.Meet Hattori at (46,13)."); // <-- FIXED
                     break;
                 default:
                     show_dialogue_message("You are not powerful enough! Meet Hattori at (46,13)."); // <-- FIXED
@@ -657,90 +667,125 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
             }
             return; // Stop the move
         }
-        // --- IS IT AN ENEMY? (COMBAT CHECK) ---
-        Combat c;
-        Player& player = static_cast<Player&>(entity);
-        Character* target_ptr = map.getTileAt(newx,newy)->getCharacter();
-        Enemy& target = static_cast<Enemy&>(*target_ptr);
-        add_log_message("Combat Triggered!");
-        audio.playMusic("../data/audio/battle-bgm.mp3");
-        int k = c.fight(player, target,*this);
-        if(k==0){
-            clear();
-            mvprintw(0, 0, "You have been defeated! Press any key to exit.");
-            refresh();
-            getch();
-        }
-        else if(k==1)
-        {
-            add_log_message("You defeated the enemy");
-            auto lootBox = target.getDropLoot();
-            // --- 2. RUN THE LOOT MENU ---
-            if (!lootBox.empty()) {
-                add_log_message("Loot menu opened...");
-                
-                // Pass the lootBox by value (it gets moved in).
-                // The menu returns what's left.
-                std::vector<std::shared_ptr<Item>> remainingLoot = runLootMenu(player, std::move(lootBox));
-
-                // remainingLoot now holds whatever the player left behind.
-                // (Since we have "no tiles", these items are now gone)
-                if (!remainingLoot.empty()) {
-                    add_log_message("You left some items behind.");
-                }
-
-            } else {
-                 add_log_message("The enemy dropped nothing.");
+        else{
+            Combat c;
+            Player& player = static_cast<Player&>(entity);
+            Character* target_ptr = map.getTileAt(newx,newy)->getCharacter();
+            Enemy& target = static_cast<Enemy&>(*target_ptr);
+            add_log_message("Combat Triggered!");
+            audio.playMusic("../data/audio/battle-bgm.mp3");
+            int k = c.fight(player, target,*this);
+            audio.playMusic("../data/audio/sacred-garden-10377.mp3");
+            if(k==0){
+                clear();
+                mvprintw(0, 0, "You have been defeated! Press any key to exit.");
+                refresh();
+                getch();
             }
-            if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
-                quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
-            int questID = newTile->get_doQuest();
-            if (questID != -1) 
-            {
-                quest[questID] = true;
+            else if(k==1){
+                add_log_message("You defeated the enemy");
+                int questID = newTile->get_doQuest();
+                vector<shared_ptr<Item>>* lootBox = new vector<shared_ptr<Item>>(target.getDropLoot());
                 
-                std::vector<std::string> complete_lines;
-                
-                // --- This switch "uses" your complete_quest functions ---
-                switch (questID) {
-                    case 0: complete_lines = this->hattori.complete_quest_war_chief(); break;
-                    case 1: complete_lines = this->hattori.complete_quest_orc_raider(); break;
-                    case 2: complete_lines = this->hattori.complete_quest_infernal_imp(); break;
-                    case 3: complete_lines = this->hattori.complete_quest_golem(); break;
-                    case 4: complete_lines = this->hattori.complete_quest_necromancer(); break;
-                    case 5: complete_lines = this->hattori.complete_quest_final_boss(); break;
+                if (!lootBox->empty()) {
+                    add_log_message("Loot menu opened...");
+                    runLootMenu(player, *lootBox);
+                    if (!lootBox->empty()) {
+                        map.getTileAt(newx,newy)->setCharacter(nullptr);
+                        map.getTileAt(newx,newy)->setRequiredQuestCompleted(-1);
+                        map.getTileAt(newx,newy)->set_doQuest(-1);
+                        map.getTileAt(newx,newy)->setMapDisplayChar("◛"); 
+                        map.getTileAt(newx,newy)->setMiniMapDisplayChar("◛"); 
+                        
+                        map.getTileAt(newx,newy)->set_map_color_pair(5);
+                        map.getTileAt(newx,newy)->set_mini_map_color_pair(5); 
+
+                        map.getTileAt(newx,newy)->setLootOnTile(lootBox);
+                        map.getTileAt(newx,newy)->setIsWalkable(false);
+
+                        add_log_message("You left some items behind.");
+                    }
+                    else {
+                        delete lootBox;
+                        map.getTileAt(newx,newy)->setIsWalkable(true);
+                        map.getTileAt(newx,newy)->setCharacter(nullptr);
+                        map.getTileAt(newx,newy)->set_map_color_pair(6);
+                        map.getTileAt(newx,newy)->set_mini_map_color_pair(6);
+                        map.getTileAt(newx,newy)->setMapDisplayChar(".");
+                        map.getTileAt(newx,newy)->setMiniMapDisplayChar(".");
+                        map.getTileAt(newx,newy)->setRequiredQuestCompleted(-1);
+                        map.getTileAt(newx,newy)->set_doQuest(-1);
+                        add_log_message("You looted everything.");
+                    }
+
+                } 
+                else {
+                    delete lootBox;
+                    add_log_message("The enemy dropped nothing.");
+                    map.getTileAt(newx,newy)->setIsWalkable(true);
+                    map.getTileAt(newx,newy)->setRequiredQuestCompleted(-1);
+                    map.getTileAt(newx,newy)->set_doQuest(-1);
+                    map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
+                    map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);
+                    map.getTileAt(entity.get_x(), entity.get_y())->set_mini_map_color_pair(6);
+                    map.getTileAt(newx,newy)->setCharacter(&entity);
+                    map.getTileAt(newx,newy)->setMiniMapDisplayChar("♞");
+                    map.getTileAt(entity.get_x(),entity.get_y())->setMiniMapDisplayChar(".");
+                    map.getTileAt(newx,newy)->setMapDisplayChar("♞");
+                    map.getTileAt(entity.get_x(),entity.get_y())->setMapDisplayChar(".");
+                    map.getTileAt(newx,newy)->set_map_color_pair(5);
+                    map.getTileAt(newx,newy)->set_mini_map_color_pair(5);
+                    entity.set_x(newx);
+                    entity.set_y(newy);
                 }
-                play_dialogue(complete_lines,player,map);
+                if (questID != -1) 
+                {
+                    quest[questID] = true;
+                    std::vector<std::string> complete_lines;
+                    switch (questID) {
+                        case 0: complete_lines = this->hattori.complete_quest_war_chief(); break;
+                        case 1: complete_lines = this->hattori.complete_quest_orc_raider(); break;
+                        case 2: complete_lines = this->hattori.complete_quest_infernal_imp(); break;
+                        case 3: complete_lines = this->hattori.complete_quest_golem(); break;
+                        case 4: complete_lines = this->hattori.complete_quest_necromancer(); break; 
+                        default: complete_lines = this->hattori.complete_quest_final_boss(); break;
+                    }
+                    play_dialogue(complete_lines,player,map);
+                }
+                
             }
-            map.getTileAt(newx,newy)->setIsWalkable(true);
-            map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
-            map.getTileAt(entity.get_x(), entity.get_y())->set_map_color_pair(6);
-            map.getTileAt(entity.get_x(), entity.get_y())->set_mini_map_color_pair(6);
-            map.getTileAt(newx,newy)->setCharacter(&entity);
-            map.getTileAt(newx,newy)->setMiniMapDisplayChar("♞");
-            map.getTileAt(entity.get_x(),entity.get_y())->setMiniMapDisplayChar(".");
-            map.getTileAt(newx,newy)->setMapDisplayChar("♞");
-            map.getTileAt(entity.get_x(),entity.get_y())->setMapDisplayChar(".");
-            map.getTileAt(newx,newy)->set_map_color_pair(5);
-            map.getTileAt(newx,newy)->set_mini_map_color_pair(5);
-            entity.set_x(newx);
-            entity.set_y(newy);
+            else if(k==2){
+                add_log_message("You fled the battle!");
+            }
+            return;
         }
-    }
-    else if(k==2){
-        add_log_message("You fled the battle!");
-    }
-    audio.playMusic("../data/audio/sacred-garden-10377.mp3");
-    return;
-    }
-    // else if(map->getTileAt(newy,newx)->getItem()) { ... (Item handling)
-    //     // Your commented code here would also need to use curses
-    //     return;
-    // } 
+    } 
     else if(map.getTileAt(newx,newy)->getBounds()) {
         add_log_message("Do not venture outside the forest!");
         return;
     } 
+    else if(map.getTileAt(newx,newy)->getLootOnTile()!=nullptr){
+        Player& player = static_cast<Player&>(entity);
+        vector<shared_ptr<Item>>* lootBox = map.getTileAt(newx,newy)->getLootOnTile();
+        add_log_message("Loot menu opened...");
+        runLootMenu(player, *lootBox);
+
+        if (!lootBox->empty()) {
+            add_log_message("You left some items behind.");
+        }
+        else {
+            map.getTileAt(newx,newy)->setIsWalkable(true);
+            delete lootBox;
+            map.getTileAt(newx,newy)->setLootOnTile(nullptr);
+            map.getTileAt(newx,newy)->set_map_color_pair(6);
+            map.getTileAt(newx,newy)->set_mini_map_color_pair(6);
+            map.getTileAt(newx,newy)->setMapDisplayChar(".");
+            map.getTileAt(newx,newy)->setMiniMapDisplayChar(".");
+            add_log_message("You looted everything.");
+        }
+
+    }
+
     else if(map.getTileAt(newx,newy)->getIsWalkable()) {
         audio.playSFX("../data/audio/move-sfx.mp3");
         hpStepCount++;

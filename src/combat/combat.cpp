@@ -1,7 +1,7 @@
-#include "../../include/combat.hpp"
-#include "../../include/enemy.h"
-#include "../../extern/pdcurses/curses.h"
-#include"../../include/game.h"
+#include "../include/combat.hpp"
+#include "../include/enemy.h"
+#include "../extern/pdcurses/curses.h"
+#include"../include/game.h"
 
 #include <chrono>
 #include <thread>
@@ -15,6 +15,7 @@ void Combat::start() {
     mvprintw(0, 0, "=== Combat Started! ===");
     refresh();
     this_thread::sleep_for(milliseconds(700));
+    flushinp();
 }
 
 void Combat::end() {
@@ -22,14 +23,17 @@ void Combat::end() {
     refresh();
 }
 
-int Combat::fight(Player& p, Enemy& e,Game& world) {
+int Combat::fight(Player& p, Enemy& e, Game& world) {
     start();
 
-    // Setup curses
+    // 1. Setup curses & ENABLE MOUSE
     nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
     noecho();
     curs_set(0);
+    
+    // ENABLE MOUSE EVENTS (Click, Press, Release)
+    mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
 
     auto startTime = steady_clock::now();
     auto lastPlayerNormal = startTime;
@@ -41,14 +45,22 @@ int Combat::fight(Player& p, Enemy& e,Game& world) {
 
     // Cooldowns
     int playerNormalInterval = static_cast<int>(p.getNormalAttackInterval() * 1000);
-    int playerSpecialInterval = static_cast<int>(p.getSpecialAttackInterval() * 2000);
+    int playerSpecialInterval = static_cast<int>(p.getSpecialAttackInterval() * 1000);
     const int enemyIntervalMs = 2000; 
 
-    // --- HELPER: Draw the UI ---
-    // We define this lambda to keep the drawing logic consistent 
-    // regardless of whether we are idling or attacking.
-    auto drawCombatState = [&](std::string centralMsg) {
-        erase(); // Clear buffer
+    std::vector<std::string> combatLogs;
+
+    auto addLog = [&](std::string msg) {
+        combatLogs.push_back(msg);
+        if (combatLogs.size() > 4) { 
+            combatLogs.erase(combatLogs.begin());
+        }
+    };
+
+    auto drawCombatState = [&](std::string newMessage = "") {
+        if (!newMessage.empty()) addLog(newMessage);
+
+        erase(); 
 
         int maxW = COLS;
         int maxH = LINES;
@@ -56,20 +68,24 @@ int Combat::fight(Player& p, Enemy& e,Game& world) {
         int rightCenter = (maxW / 4) * 3;
         int msgRow = maxH / 2; 
 
-        // 1. Draw Player Stats (Left)
+        // === PLAYER ===
         mvprintw(2, leftCenter - 10, "=== PLAYER ===");
         mvprintw(3, leftCenter - 10, "%s", p.get_name().c_str());
         
-        // Health Bar Math
         float pH_pct = (float)p.get_health() / (float)p.get_max_health();
-        int pH_bars = (int)(pH_pct * 20); // 20 char bar
-        mvprintw(4, leftCenter - 10, "HP: [");
+        int pH_bars = (int)(pH_pct * 20);
+        int pColor = (pH_pct > 0.30f) ? 2 : 4; 
+
+        mvprintw(4, leftCenter - 10, "HP: ");
+        attron(COLOR_PAIR(pColor)); 
+        addch('[');
         for(int i=0; i<20; i++) {
             if(i < pH_bars) addch('|'); else addch(' ');
         }
-        printw("] %d/%d", p.get_health(), p.get_max_health());
+        addch(']');
+        attroff(COLOR_PAIR(pColor)); 
+        printw(" %d/%d", p.get_health(), p.get_max_health());
 
-        // Cooldown timers calculations (re-calculated here for display)
         auto now = steady_clock::now();
         auto sinceNorm = duration_cast<milliseconds>(now - lastPlayerNormal).count();
         auto sinceSpec = duration_cast<milliseconds>(now - lastPlayerSpecial).count();
@@ -79,33 +95,54 @@ int Combat::fight(Player& p, Enemy& e,Game& world) {
         mvprintw(6, leftCenter - 10, "Normal CD:  %.1fs", nCD);
         mvprintw(7, leftCenter - 10, "Special CD: %.1fs", sCD);
 
-        // 2. Draw Enemy Stats (Right)
+        // === ENEMY ===
+        attron(COLOR_PAIR(4)); 
         mvprintw(2, rightCenter - 10, "=== ENEMY ===");
         mvprintw(3, rightCenter - 10, "%s", e.get_name().c_str());
+        mvprintw(4, rightCenter - 10, "HP: ["); 
+        attroff(COLOR_PAIR(4));
 
         float eH_pct = (float)e.get_health() / (float)e.get_max_health();
         int eH_bars = (int)(eH_pct * 20);
-        mvprintw(4, rightCenter - 10, "HP: [");
+        
         for(int i=0; i<20; i++) {
             if(i < eH_bars) addch('|'); else addch(' ');
         }
-        printw("] %d/%d", e.get_health(), e.get_max_health());
 
-        // 3. Draw Central Message
-        if (!centralMsg.empty()) {
-            int msgLen = centralMsg.length();
-            int startCol = (maxW - msgLen) / 2;
-            // Draw a box or lines around the message for emphasis
-            mvprintw(msgRow - 2, startCol, std::string(msgLen, '-').c_str());
-            mvprintw(msgRow - 1, startCol, "%s", centralMsg.c_str());
-            mvprintw(msgRow, startCol, std::string(msgLen, '-').c_str());
+        attron(COLOR_PAIR(4)); 
+        addch(']'); 
+        attroff(COLOR_PAIR(4));
+        printw(" %d/%d", e.get_health(), e.get_max_health());
+
+        // === LOG ===
+        int startRow = msgRow - 2; 
+        int lineLen = 40;
+        int startCol = (maxW - lineLen) / 2;
+        
+        mvprintw(startRow - 1, startCol, "----------------------------------------");
+
+        for (size_t i = 0; i < combatLogs.size(); ++i) {
+            std::string txt = combatLogs[i];
+            int txtLen = txt.length();
+            int txtCol = (maxW - txtLen) / 2;
+            
+            if (i == combatLogs.size() - 1) {
+                attron(A_BOLD);
+                mvprintw(startRow + i, txtCol, "%s", txt.c_str());
+                attroff(A_BOLD);
+            } else {
+                mvprintw(startRow + i, txtCol, "%s", txt.c_str());
+            }
         }
+        
+        mvprintw(startRow + 4, startCol, "----------------------------------------");
 
-        // 4. Draw Menu (Bottom Left)
-        mvprintw(maxH - 4, 2, "[ CONTROLS ]");
-        mvprintw(maxH - 3, 2, "[L] Normal Attack");
-        mvprintw(maxH - 2, 2, "[R] Special Attack");
-        mvprintw(maxH - 1, 2, "[F] Flee Battle");
+        // === MENU (Updated) ===
+        mvprintw(maxH - 5, 2, "[ CONTROLS ]");
+        mvprintw(maxH - 4, 2, "[L-CLICK] Normal Attack");
+        mvprintw(maxH - 3, 2, "[R-CLICK] Special Attack");
+        mvprintw(maxH - 2, 2, "[SPACE]   Flee Battle");
+        mvprintw(maxH - 1, 2, "[I]       Inventory");
 
         refresh();
     };
@@ -113,70 +150,75 @@ int Combat::fight(Player& p, Enemy& e,Game& world) {
     while (p.isAlive() && e.isAlive()) {
         auto now = steady_clock::now();
         int ch = getch();
-        
-        // === PLAYER FLEE ===
-        if (ch == 'f' || ch == 'F') {
+        MEVENT event; // Structure to hold mouse data
+
+        // === PLAYER FLEE (Spacebar) ===
+        if (ch == ' ') { 
             drawCombatState(p.get_name() + " flees from battle!");
             this_thread::sleep_for(milliseconds(1000));
+            flushinp();
             fled = true;
             break;
         }
+        
+        // === INVENTORY ===
         if (ch == 'i' || ch == 'I') {
-            // 1. PAUSE: Switch to blocking input for the inventory menu
             nodelay(stdscr, FALSE);
-            
-            // 2. RUN: Call the Game's menu function
-             world.runInventoryMenu(p, world);
-            
-            // 3. RESUME: Switch back to non-blocking for combat
+            world.runInventoryMenu(p, world);
             nodelay(stdscr, TRUE);
             noecho();
             curs_set(0);
-
-            
-                if (!p.isAlive()) break; // Check if player died (e.g., used bad item?)
-            continue; // Continue to redraw UI
-        }
-        // === PLAYER NORMAL ATTACK ===
-        if (ch == 'l' || ch == 'L') {
-            auto sinceNormal = duration_cast<milliseconds>(now - lastPlayerNormal).count();
-            if (sinceNormal >= playerNormalInterval) {
-                e.take_damage(p.getAttackPower());
-                lastPlayerNormal = now;
-                
-                // Update UI with message
-                char msg[100];
-                snprintf(msg, sizeof(msg), "%s strikes %s (Normal)!", p.get_name().c_str(), e.get_name().c_str());
-                drawCombatState(std::string(msg));
-                
-                this_thread::sleep_for(milliseconds(700));
-            } else {
-                char msg[100];
-                double left = (playerNormalInterval - sinceNormal) / 1000.0;
-                snprintf(msg, sizeof(msg), "Normal attack not ready! (%.1fs)", left);
-                drawCombatState(std::string(msg));
-                this_thread::sleep_for(milliseconds(300));
-            }
+            mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL); // Re-enable mouse just in case
+            if (!p.isAlive()) break; 
+            continue; 
         }
 
-        // === PLAYER SPECIAL ATTACK ===
-        if (ch == 'r' || ch == 'R') {
-            auto sinceSpecial = duration_cast<milliseconds>(now - lastPlayerSpecial).count();
-            if (sinceSpecial >= playerSpecialInterval) {
-                p.special_move(e);
-                lastPlayerSpecial = now;
+        // === MOUSE INPUT HANDLING ===
+        if (ch == KEY_MOUSE) {
+            if (nc_getmouse(&event) == OK) {
+                
+                // === LEFT CLICK (Normal Attack) ===
+                if (event.bstate & BUTTON1_CLICKED) {
+                    auto sinceNormal = duration_cast<milliseconds>(now - lastPlayerNormal).count();
+                    if (sinceNormal >= playerNormalInterval) {
+                        e.take_damage(p.getAttackPower());
+                        lastPlayerNormal = now;
+                        
+                        char msg[100];
+                        snprintf(msg, sizeof(msg), "%s strikes %s!", p.get_name().c_str(), e.get_name().c_str());
+                        drawCombatState(std::string(msg));
+                        
+                        this_thread::sleep_for(milliseconds(700));
+                        flushinp(); // Flush buffer to prevent accidental double clicks
+                    } else {
+                        char msg[100];
+                        double left = (playerNormalInterval - sinceNormal) / 1000.0;
+                        snprintf(msg, sizeof(msg), "Normal not ready! (%.1fs)", left);
+                        drawCombatState(std::string(msg));
+                    }
+                }
 
-                char msg[100];
-                snprintf(msg, sizeof(msg), "%s uses SPECIAL move on %s!", p.get_name().c_str(), e.get_name().c_str());
-                drawCombatState(std::string(msg));
+                // === RIGHT CLICK (Special Attack) ===
+                // Note: Button 3 is usually Right Click in Curses
+                else if (event.bstate & BUTTON3_CLICKED) {
+                    auto sinceSpecial = duration_cast<milliseconds>(now - lastPlayerSpecial).count();
+                    if (sinceSpecial >= playerSpecialInterval) {
+                        p.special_move(e);
+                        lastPlayerSpecial = now;
 
-                this_thread::sleep_for(milliseconds(900));
-            } else {
-                char msg[100];
-                double left = (playerSpecialInterval - sinceSpecial) / 1000.0;
-                snprintf(msg, sizeof(msg), "Special move recharging! (%.1fs)", left);
-                drawCombatState(std::string(msg));
-                this_thread::sleep_for(milliseconds(300));
+                        char msg[100];
+                        snprintf(msg, sizeof(msg), "%s uses SPECIAL!", p.get_name().c_str());
+                        drawCombatState(std::string(msg));
+
+                        this_thread::sleep_for(milliseconds(900));
+                        flushinp();
+                    } else {
+                        char msg[100];
+                        double left = (playerSpecialInterval - sinceSpecial) / 1000.0;
+                        snprintf(msg, sizeof(msg), "Special recharging! (%.1fs)", left);
+                        drawCombatState(std::string(msg));
+                    }
+                }
             }
         }
 
@@ -210,13 +252,11 @@ int Combat::fight(Player& p, Enemy& e,Game& world) {
                 }
             }
             lastEnemyAction = now;
-            this_thread::sleep_for(milliseconds(800));
+            this_thread::sleep_for(milliseconds(400));
         }
 
         // === IDLE STATE UPDATE ===
-        // If no buttons pressed and no enemy action, we still redraw 
-        // to update the cooldown timers in real-time.
-        drawCombatState(""); // No message, just HUD update
+        drawCombatState(""); 
         this_thread::sleep_for(milliseconds(100));
     }
 
@@ -237,6 +277,7 @@ int Combat::fight(Player& p, Enemy& e,Game& world) {
 
     drawCombatState(endMsg);
     this_thread::sleep_for(milliseconds(2000));
+    flushinp();
     end();
 
     nodelay(stdscr, FALSE);

@@ -19,9 +19,9 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
     switch (type) {
     
     case PlayerType::Swordsman:
-        this->health = 150;
-        this->attackPower = 15;
-        this->mana = 20;
+        this->health = 1500;
+        this->attackPower = 150;
+        this->mana = 200;
         break;
 
     case PlayerType::Archer:

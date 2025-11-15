@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <thread>
 #include <chrono>
+#include <sstream>
 #include "../extern/pdcurses/curses.h"  
 // REMOVE: #include <iostream>
 // REMOVE: #include <windows.h>
@@ -28,18 +29,11 @@ class AudioManager; // Forward declaration
 
 const unsigned int MAX_LOG_LINES = 10;
 
-void Game::add_log_message(std::string message) {
-    event_log.push_front(message);
-    while (event_log.size() > MAX_LOG_LINES) {
-        event_log.pop_back();
-    }
+void Game::show_dialogue_message(const std::string& message) {
+    // This function just sets the message that will be drawn by the dashboard
+    current_dialogue_message = message;
 }
-
-// In Game.cpp
-// (Make sure you have the DisplayItem struct here)
-
-// Helper function to build the player's item list (same as before)
-std::vector<DisplayItem> buildPlayerItemList(Player& player) {
+std::vector<DisplayItem>Game:: buildPlayerItemList(Player& player) {
     std::vector<DisplayItem> itemMap;
 
     // Add Equipment
@@ -82,10 +76,6 @@ std::vector<DisplayItem> buildPlayerItemList(Player& player) {
     return itemMap;
 }
 
-
-/**
- * @brief This is the new (l)Loot / (d)Drop prompt-based loot menu.
- */
 std::vector<std::shared_ptr<Item>> Game::runLootMenu(Player& player, 
                                                     std::vector<std::shared_ptr<Item>> lootBox) {
     bool inLootMenu = true;
@@ -217,6 +207,9 @@ std::vector<std::shared_ptr<Item>> Game::runLootMenu(Player& player,
     // Return whatever is left in the loot box
     return lootBox;
 }
+void Game::clear_dialogue_message() {
+    current_dialogue_lines.clear();
+}
 void Game::display_dashboard(Player& player, Map& map) {
     clear(); 
     int term_width = 0;
@@ -280,12 +273,77 @@ void Game::display_dashboard(Player& player, Map& map) {
     int minimap_height = 17;
     int minimap_width = 29;
     map.get_minimap_view(player, minimap_width, minimap_height, event_log);
-
-    mvprintw(term_height - 3, 0, " CONTROLS: (W/A/S/D) Move | (M) Full Map | (Q) Quit to Village");
+    mvprintw(term_height - 3, 0, " CONTROLS: (W/A/S/D) Move | (M) Full Map | (Q) Quit to Village | (I) Inventory ");
     mvprintw(term_height - 2, 0, " Your Location: (%d, %d)", player.get_y(), player.get_x());
-    
+    int dialogue_Y_line = 35;
+    int i = 0;
+    for (const std::string& line : current_dialogue_lines) 
+    {
+        // Center each line individually
+        int start_x = (term_width - line.length()) / 2;
+        if (start_x < 0) {
+            start_x = 0; 
+        }
+        mvprintw(dialogue_Y_line + i, start_x, line.c_str());
+        i++; 
+    }
     refresh();
 }
+std::vector<std::string> Game::wrap_text(const std::string& text, int max_width) {
+    std::vector<std::string> lines;
+    std::stringstream ss(text);
+    std::string word;
+    std::string current_line;
+
+    while (ss >> word) {
+        // Check if the new word fits on the current line
+        if (current_line.empty() || current_line.length() + word.length() + 1 <= max_width) {
+            if (!current_line.empty()) {
+                current_line += " ";
+            }
+            current_line += word;
+        } else {
+            // Word doesn't fit, so push the current line and start a new one
+            lines.push_back(current_line);
+            current_line = word;
+        }
+    }
+    // Add the last line
+    if (!current_line.empty()) {
+        lines.push_back(current_line);
+    }
+    return lines;
+}
+void Game::play_dialogue(const std::vector<std::string>& lines, Player& player, Map& map)
+{
+    
+    int term_width, term_height;
+    getmaxyx(stdscr, term_height, term_width);
+
+    int dialogue_width = term_width - 10;
+    if (dialogue_width < 20) dialogue_width = 20; 
+    std::vector<std::string> all_wrapped_lines;
+    for (const std::string& original_line : lines) {
+        std::vector<std::string> wrapped = wrap_text(original_line, dialogue_width);
+        all_wrapped_lines.insert(all_wrapped_lines.end(), wrapped.begin(), wrapped.end());
+    }
+
+    for (const std::string& line : all_wrapped_lines) {
+        current_dialogue_lines.push_back(line); 
+        display_dashboard(player, map); 
+        getch(); 
+        // --- END OF NEW LOGIC ---
+    }
+}
+
+
+void Game::add_log_message(std::string message) {
+    event_log.push_front(message);
+    while (event_log.size() > MAX_LOG_LINES) {
+        event_log.pop_back();
+    }
+}
+
 
 void Game::show_full_map(Map& map) {
     bool onFullMap = true;
@@ -434,22 +492,22 @@ void Game::explore_forest(Player& player, Map& map, vector<bool>& quest, AudioMa
         switch(input) {
             case 'w':
             case 'W':
-                move_character(player, 0, -1, map, quest, audio);
+                move_character(player, 0, -1, map, quest, audio,player);
                 break;
 
             case 's':
             case 'S':
-                move_character(player, 0, 1, map, quest, audio);
+                move_character(player, 0, 1, map, quest, audio,player);
                 break;
 
             case 'a':
             case 'A':
-                move_character(player, -1, 0, map, quest, audio);
+                move_character(player, -1, 0, map, quest, audio,player);
                 break;
 
             case 'd':
             case 'D':
-                move_character(player, 1, 0, map, quest, audio);
+                move_character(player, 1, 0, map, quest, audio,player);
                 break;
 
             case 'm':
@@ -526,15 +584,85 @@ void Game::game_loop(Player& player, AudioManager& audio) {
         }
     }
 }
-
-void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool>& quest, AudioManager& audio) {
-    int newx=entity.get_x()+y;
-    int newy=entity.get_y()+x;
-    if(map.getTileAt(newx,newy)->getCharacter() != nullptr) {
-        if(map.getTileAt(newx,newy)->get_isNPC()){
-            Character* npc_ptr = map.getTileAt(newx,newy)->getCharacter();
-            NPC& npc = static_cast<NPC&>(*npc_ptr);
-            npc.interact(quest);
+void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool>& quest, AudioManager& audio, Player& player) {
+    int newx = entity.get_x() + y;
+    int newy = entity.get_y() + x;
+    Tile* newTile = map.getTileAt(newx, newy);
+    Tile* oldTile = map.getTileAt(entity.get_x(), entity.get_y());
+    clear_dialogue_message();
+    // --- 1. Check for Character on New Tile ---
+    if (newTile->getCharacter() != nullptr) {
+        clear_dialogue_message();
+        
+        Character* charOnTile = newTile->getCharacter();
+        NPC* hattori_ptr = dynamic_cast<NPC*>(charOnTile);
+        if (!newTile->getQuestStatus(quest)) {
+        
+        int enemyQuestID = newTile->get_doQuest();
+        switch (enemyQuestID) 
+        {
+            case 0: // War Chief
+                show_dialogue_message("Hattori says you must prove your strength. Defeat the War Chief first.Meet Hattori at (46,13)."); // <-- FIXED
+                break;
+            case 1: // Orc Raider
+                show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13)."); // <-- FIXED
+                break;
+            case 2: // Infernal Imp
+                show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13))."); // <-- FIXED
+                break;
+            case 3: 
+                show_dialogue_message("The Golem's ancient magic is too strong. Complete other trials first.Meet Hattori at (46,13)."); // <-- FIXED
+                break;
+            case 4: 
+                show_dialogue_message("A dark aura repels you. You must complete Hattori's other tasks first.Meet Hattori at (46,13).");
+                break;
+            case 5: // Final Boss
+                show_dialogue_message("The Citadel is sealed. Hattori says you must defeat the bosses to enter.Meet Hattori at (46,13)."); // <-- FIXED
+                break;
+            default:
+                show_dialogue_message("You are not powerful enough! Meet Hattori at (46,13)."); // <-- FIXED
+                break;
+        }
+        return; // Stop the move
+    }
+        if (hattori_ptr) {
+            clear_dialogue_message();
+            std::vector<std::string> dialogue_lines;
+            if (!quest[0]) { 
+                dialogue_lines = hattori_ptr->give_quest_war_chief();
+            } 
+            else if (!quest[1]) { 
+                dialogue_lines = hattori_ptr->give_quest_orc_raider();
+            }
+            else if (!quest[2]) { 
+                dialogue_lines = hattori_ptr->give_quest_infernal_imp();
+            }
+            else if (!quest[3]) { // <-- FIXED
+                dialogue_lines = hattori_ptr->give_quest_golem();
+            }
+            else if (!quest[4]) { // <-- FIXED
+                dialogue_lines = hattori_ptr->give_quest_necromancer();
+            }
+            else if (quest[3] && quest[4]) {
+                dialogue_lines = hattori_ptr->give_quest_final_boss();
+            }
+            else if (quest[5]) {
+                 dialogue_lines = {hattori.getName() + ": 'You have saved us all, hero. Thank you.'" };
+            }
+            else {
+                dialogue_lines = {hattori.getName() + ": 'Be strong, warrior. Great trials await.'" };
+            }
+        
+            play_dialogue(dialogue_lines,player,map);
+            
+            return; // Stop the move
+        }
+        // --- IS IT AN ENEMY? (COMBAT CHECK) ---
+        Combat c;
+        if (!newTile->getQuestStatus(quest)) {
+            // (Your existing quest-gate logic is good)
+            int enemyQuestID = newTile->get_doQuest();
+            // ... (your switch statement for "not powerful enough") ...
             return;
         }
         else{
@@ -578,6 +706,24 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
             }
             if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
                 quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
+            int questID = newTile->get_doQuest();
+            if (questID != -1) 
+            {
+                quest[questID] = true;
+                
+                std::vector<std::string> complete_lines;
+                
+                // --- This switch "uses" your complete_quest functions ---
+                switch (questID) {
+                    case 0: complete_lines = this->hattori.complete_quest_war_chief(); break;
+                    case 1: complete_lines = this->hattori.complete_quest_orc_raider(); break;
+                    case 2: complete_lines = this->hattori.complete_quest_infernal_imp(); break;
+                    case 3: complete_lines = this->hattori.complete_quest_golem(); break;
+                    case 4: complete_lines = this->hattori.complete_quest_necromancer(); break;
+                    case 5: complete_lines = this->hattori.complete_quest_final_boss(); break;
+                }
+\
+                play_dialogue(complete_lines,player,map);
             }
             map.getTileAt(newx,newy)->setIsWalkable(true);
             map.getTileAt(entity.get_x(), entity.get_y())->setCharacter(nullptr);
@@ -593,6 +739,7 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
             entity.set_x(newx);
             entity.set_y(newy);
         }
+    }
         else if(k==2){
             add_log_message("You fled the battle!");
         }

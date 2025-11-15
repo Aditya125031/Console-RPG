@@ -14,9 +14,7 @@ protected:
 
 public:
     Character(std::string name, int health, int attackPower);
-    
-    virtual ~Character() = default;
-
+    virtual ~Character() {}
     void take_damage(int damage);
     bool isAlive() const; 
     void move(int dx, int dy);

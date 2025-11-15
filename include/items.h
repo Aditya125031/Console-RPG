@@ -36,8 +36,23 @@ class Item
 
 class Equipables : public Item
 {
+    protected:
+            bool equipped=false;
     public:
-        virtual ~Equipables() = default;
+            void equip()
+            {
+                equipped=true;
+            }
+
+            void unequip()
+            {
+                equipped=false;
+            }
+
+            bool is_equipped() const
+            {
+                return equipped;
+            }
 };
 
 class Weapon : public Equipables

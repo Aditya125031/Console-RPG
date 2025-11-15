@@ -32,6 +32,8 @@ class Game
         std::string current_dialogue_message = "";
         std::vector<std::string> current_dialogue_lines;
         std::vector<std::string> wrap_text(const std::string& text, int max_width);
+        int hpStepCount = 0;
+        int manaStepCount = 0;
     public:
         void game_loop(Player& player, AudioManager& audio);
         void display_welcome_message();
@@ -42,12 +44,12 @@ class Game
         void move_character(Character&, int, int, Map&, vector<bool>&, AudioManager& audio,Player& player);
         void runItemActionMenu(DisplayItem, Player&, Game&);
         void runInventoryMenu(Player&, Game&);
-        std::vector<std::shared_ptr<Item>>runLootMenu(Player& player, std::vector<std::shared_ptr<Item>> lootBox);
         void show_dialogue_message(const std::string& message); // <-- CORRECT
         void clear_dialogue_message();
         void play_dialogue(const std::vector<std::string>& lines, Player& player, Map& map);
         std::vector<DisplayItem> buildPlayerItemList(Player& player);
         NPC hattori;
+        std::vector<std::shared_ptr<Item>>runLootMenu(Player& player, std::vector<std::shared_ptr<Item>>& lootBox);
 };
 
 

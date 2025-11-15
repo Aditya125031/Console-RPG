@@ -30,8 +30,8 @@ protected:
     int baseAttackPower;
     int baseMaxMana;
     int stamina;
-    int regen_hp_step;
-    int regen_mana_step;
+    int regen_hp_time;
+    int regen_mana_time;
     std::chrono::steady_clock::time_point normal_attack_ready;
     std::chrono::steady_clock::time_point special_attack_ready;
     std::chrono::steady_clock::time_point next_mana_regen;
@@ -69,10 +69,10 @@ Inventory inventory;
     double getSpecialAttackInterval() const;
     double getNormalAttackInterval() const;
 
-    int getHPRegenStep();
-    void setHPRegenStep(int);
-    int getManaRegenStep();
-    void setManaRegenStep(int);
+    int getHPRegenTime();
+    void setHPRegenTime(int);
+    int getManaRegenTime();
+    void setManaRegenTime(int);
 };
 
 #endif

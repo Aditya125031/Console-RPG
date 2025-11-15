@@ -311,7 +311,7 @@ void Eclipse_Striker::special_attack(Player& player, Character& enemy, Game& wor
             return;
         }
 
-        int damage = player.get_attack_power() * 2.0;
+        int damage = player.get_attack_power() * 1.75;
         enemy.take_damage(damage);
         player.use_mana(20);
         player.add_health(10);

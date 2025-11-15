@@ -13,10 +13,9 @@ protected:
     std::vector<std::string> dialogue;
     int speed;
     std::chrono::steady_clock::time_point normal_attack_ready;
-    std::vector<Item> dropLoot;
+   vector<shared_ptr<Item>>  dropLoot;
 public:
     Enemy(std::string name, int health, int attackPower); 
-    virtual std::vector<Item> getLoot(const Player& player) const;
     virtual ~Enemy() = default;
     std::string get_name() const; 
     std::chrono::steady_clock::time_point getNormalAttackReady() const;
@@ -25,4 +24,5 @@ public:
     void setNormalAttackCooldown(float seconds);
     virtual void specialAbility(Character& target){};
     virtual void triggerDialogue() const {};
+    vector<shared_ptr<Item>> getDropLoot() const { return dropLoot; }
 };

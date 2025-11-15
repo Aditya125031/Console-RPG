@@ -38,6 +38,7 @@ class Game
         void move_character(Character&, int, int, Map&, vector<bool>&, AudioManager& audio);
         void runItemActionMenu(DisplayItem, Player&, Game&);
         void runInventoryMenu(Player&, Game&);
+        std::vector<std::shared_ptr<Item>>runLootMenu(Player& player, std::vector<std::shared_ptr<Item>> lootBox);
 };
 
 #endif

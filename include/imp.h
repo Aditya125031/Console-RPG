@@ -4,6 +4,6 @@
 class Imp : public Enemy {
 public:
     Imp(); // Constructor
-    std::vector<Item> getLoot(const Player& player) const override;
+    Imp(Player& player);
     void triggerDialogue() const override;
 };

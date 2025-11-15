@@ -1,6 +1,7 @@
 #include "../../include/combat.hpp"
 #include "../../include/enemy.h"
 #include "../../extern/pdcurses/curses.h"
+#include"../../include/game.h"
 
 #include <chrono>
 #include <thread>
@@ -20,7 +21,8 @@ void Combat::end() {
     mvprintw(2, 0, "\n=== Combat Ended! ===");
     refresh();
 }
-int Combat::fight(Player& p, Enemy& e) {
+
+int Combat::fight(Player& p, Enemy& e,Game& world) {
     start();
 
     // Setup curses for non-blocking input
@@ -59,7 +61,22 @@ int Combat::fight(Player& p, Enemy& e) {
             fled = true;
             break;
         }
+        if (ch == 'i' || ch == 'I') {
+            // 1. PAUSE: Switch to blocking input for the inventory menu
+            nodelay(stdscr, FALSE);
+            
+            // 2. RUN: Call the Game's menu function
+             world.runInventoryMenu(p, world);
+            
+            // 3. RESUME: Switch back to non-blocking for combat
+            nodelay(stdscr, TRUE);
+            noecho();
+            curs_set(0);
 
+            
+                if (!p.isAlive()) break; // Check if player died (e.g., used bad item?)
+            continue; // Continue to redraw UI
+        }
         // === PLAYER NORMAL ATTACK ===
         if (ch == 'l' || ch == 'L') {
             auto sinceNormal = duration_cast<milliseconds>(now - lastPlayerNormal).count();

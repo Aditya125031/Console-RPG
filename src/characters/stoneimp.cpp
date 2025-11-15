@@ -12,23 +12,26 @@ StoneImp::StoneImp()
     dialogue.push_back("Flesh is weak. Stone is eternal.");
     dialogue.push_back("You cannot break me.");
 }
-std::vector<Item> StoneImp::getLoot(const Player& player) const
+StoneImp::StoneImp(Player& player)
+    // High health, low attack
+    : Enemy("Stone Imp", 80, 5) 
 {
-    std::vector<Item> allLoot = Enemy::getLoot(player);
-
-    std::string playerType = player.get_type_string();
+     std::string playerType = player.get_type_string();
 
     if (playerType == "Swordsman") 
     {
-        allLoot.push_back(Shinketsu_Sword()); 
+        dropLoot.push_back(make_shared<Shinketsu_Sword>());
     } else if (playerType == "Archer") 
     {
-        allLoot.push_back(Void_Embrace()); 
+        dropLoot.push_back(make_shared<Void_Embrace>());
     } else if (playerType == "Mage") 
     {
-        allLoot.push_back(Elder_Wand()); 
+        dropLoot.push_back(make_shared<Elder_Wand>()); 
     }
-    return allLoot;
+    originalAttackPower = attackPower; // Store initial attack power
+    dialogue.push_back("*rumble*...");
+    dialogue.push_back("Flesh is weak. Stone is eternal.");
+    dialogue.push_back("You cannot break me.");
 }
 void StoneImp::triggerDialogue() const {
      if (!dialogue.empty()) {

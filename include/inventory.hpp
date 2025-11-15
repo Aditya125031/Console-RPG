@@ -114,6 +114,7 @@ public:
      * @return A map of Potion Name -> Quantity
      */
     std::map<std::string, int> getUsablePotions() const;
+    std::shared_ptr<Usables> removePotionForLoot(const std::string& potionName, Game& world);
 };
 
 #endif // INVENTORY_H

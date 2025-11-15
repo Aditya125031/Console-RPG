@@ -69,7 +69,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
 
-            Character* goblin = new Goblin();
+            Character* goblin = new Goblin(player);
             m_characterOnTile = goblin;
             m_isWalkable = false;
         }
@@ -80,7 +80,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
 
-            Character* imp = new Imp();
+            Character* imp = new Imp(player);
             m_characterOnTile = imp;
             m_isWalkable = false;
         }
@@ -91,7 +91,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
 
-            Character* orc = new Orc();
+            Character* orc = new Orc(player);
             m_characterOnTile = orc;
             m_isWalkable = false;
         }
@@ -102,7 +102,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
 
-            Character* gg = new GiantGoblin();
+            Character* gg = new GiantGoblin(player);
             m_characterOnTile = gg;
             m_isWalkable = false;
         }
@@ -113,7 +113,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
 
-            Character* simp = new StoneImp();
+            Character* simp = new StoneImp(player);
             m_characterOnTile = simp;
             m_isWalkable = false;
         }
@@ -122,7 +122,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_miniMapDisplayChar = "Ö";
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
-            Character* warchief = new GoblinWarChief();
+            Character* warchief = new GoblinWarChief(player);
             m_characterOnTile = warchief;
             m_isWalkable = false;
             doQuest=0;
@@ -132,7 +132,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_miniMapDisplayChar = "Ö";
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
-            Character* orc = new OrcRaider();
+            Character* orc = new OrcRaider(player);
             m_characterOnTile = orc;
             requiredQuestCompleted = 0;
             m_isWalkable = false;
@@ -143,7 +143,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_miniMapDisplayChar = "⚜";
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
-            Character* golem = new BoneGolem();
+            Character* golem = new BoneGolem(player);
             m_characterOnTile = golem;
             requiredQuestCompleted = 1;
             m_isWalkable = false;
@@ -154,7 +154,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_miniMapDisplayChar = "Ö";
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
-            Character* infimp = new InfernalImp();
+            Character* infimp = new InfernalImp(player);
             m_characterOnTile = infimp;
             requiredQuestCompleted = 2;
             m_isWalkable = false;
@@ -165,7 +165,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_miniMapDisplayChar = "⚜";
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
-            Character* golem = new BoneGolem();
+            Character* golem = new BoneGolem(player);
             m_characterOnTile = golem;
             requiredQuestCompleted = 3;
             m_isWalkable = false;
@@ -176,7 +176,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_miniMapDisplayChar = "♛";
             m_colorPairMap = 6;
             m_colorPairMiniMap = 5; 
-            Character* lichlord = new LichLord();
+            Character* lichlord = new LichLord(player);
             m_characterOnTile = lichlord;
             requiredQuestCompleted = 4;
             m_isWalkable = false;

@@ -13,7 +13,8 @@ std::vector<std::string> NPC::give_quest_war_chief() {
 std::vector<std::string> NPC::give_quest_orc_raider() {
     std::string prefix = getName() + ": ";
     return {
-        prefix + "'Orc Raiders are plundering the trade road to the south west. Find their hidden camp in the foothills and dispense justice. It's time we cleared them out.'"
+        prefix + "'Orc Raiders are plundering the trade road to the south west. Find their hidden camp in the foothills and dispense justice.'",
+        prefix + "'It's time we cleared them out.'",
     };
 }
 
@@ -27,14 +28,16 @@ std::vector<std::string> NPC::give_quest_infernal_imp(){
 std::vector<std::string> NPC::give_quest_necromancer() {
     std::string prefix = getName() + ": ";
     return {
-        prefix + "'This is a dark omen. A **Necromancer** is defiling the ancient crypts to the west (102,19). This evil must be stopped before he raises an army of the dead and threatens the entire region. This is a top priority.'"
+        prefix + "'This is a dark omen. A **Necromancer** is defiling the ancient crypts to the west.'",
+        prefix + "'This evil must be stopped before he raises an army of the dead and threatens the entire region. This is a top priority.'"
     };
 }
 
 std::vector<std::string> NPC::give_quest_golem() {
     std::string prefix = getName() + ": ";
     return {
-        prefix + "'The earth itself groans. A **Stone Golem**, a relic of a forgotten age, has awakened in the southern quarry. It is a force of pure destruction. This is not a hunt, warrior... this is a battle for survival. It must be stopped.'"
+        prefix + "'The earth itself groans. A **Stone Golem**, a relic of a forgotten age, has awakened in the southern quarry.'",
+        prefix + "'It is a force of pure destruction. This is not a hunt, warrior... this is a battle for survival. It must be stopped.'"
     };
 }
 

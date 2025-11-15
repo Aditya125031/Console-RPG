@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <thread>
 #include <chrono>
+#include <sstream>
 #include "../extern/pdcurses/curses.h"  
 // REMOVE: #include <iostream>
 // REMOVE: #include <windows.h>
@@ -34,211 +35,7 @@ void Game::show_dialogue_message(const std::string& message) {
 }
 
 void Game::clear_dialogue_message() {
-    // This function clears the message
-    current_dialogue_message = "";
-}
-void Game::play_dialogue(const std::vector<std::string>& lines) {
-    
-    // Loop through each line of dialogue
-    for (const std::string& line : lines) {
-        
-        show_dialogue_message(line); 
-        
-        refresh(); 
-        
-        getch(); 
-    }
-    
-    // When the dialogue is over, clear the message line
-}
-void Game::add_log_message(std::string message) {
-    event_log.push_front(message);
-    while (event_log.size() > MAX_LOG_LINES) {
-        event_log.pop_back();
-    }
-}
-
-// In Game.cpp
-// (Make sure you have the DisplayItem struct here)
-
-// Helper function to build the player's item list (same as before)
-std::vector<DisplayItem> buildPlayerItemList(Player& player) {
-    std::vector<DisplayItem> itemMap;
-
-    // Add Equipment
-    if (player.inventory.equippedWeapon) {
-            itemMap.push_back({
-                player.inventory.equippedWeapon->get_item_name() + " (Equipped)",
-                "EQUIPPED_WEAPON", "WEAPON",player.inventory.equippedWeapon->get_item_description()
-            });
-        }
-        if (player.inventory.equippedArmor) {
-            itemMap.push_back({
-                player.inventory.equippedArmor->get_item_name() + " (Equipped)",
-                "EQUIPPED_ARMOR", "ARMOR",player.inventory.equippedArmor->get_item_description()
-            });
-        }
-
-        // 2. Add Bag Items (using public members)
-        if (player.inventory.inventoryWeapon) {
-            itemMap.push_back({
-                player.inventory.inventoryWeapon->get_item_name() + " (Bag)",
-                "INVENTORY_WEAPON", "WEAPON",player.inventory.inventoryWeapon->get_item_description()
-            });
-        }
-        if (player.inventory.inventoryArmor) {
-            itemMap.push_back({
-                player.inventory.inventoryArmor->get_item_name() + " (Bag)",
-                "INVENTORY_ARMOR", "ARMOR",player.inventory.inventoryArmor->get_item_description()
-            });
-        }
-        
-        // 3. Add Potions
-        for (const auto& pair : player.inventory.potionStorage) {
-            if(pair.second.quantity>0)
-            itemMap.push_back({
-                pair.first + " (x" + to_string(pair.second.quantity) + ")",
-                pair.first, "POTION", pair.second.itemPrototype->get_item_description()
-            });
-        }
-        
-    return itemMap;
-}
-
-
-/**
- * @brief This is the new (l)Loot / (d)Drop prompt-based loot menu.
- */
-std::vector<std::shared_ptr<Item>> Game::runLootMenu(Player& player, 
-                                                    std::vector<std::shared_ptr<Item>> lootBox) {
-    bool inLootMenu = true;
-    Game& world = *this; // For inventory functions
-
-    while (inLootMenu) {
-        clear();
-
-        // --- 1. DISPLAY LOOT BOX (LEFT COLUMN) [1-9] ---
-        mvprintw(0, 0, "--- LOOT BOX ---");
-        int maxLootDisplay = 9; // Only show 1-9
-        for (int i = 0; i < lootBox.size() && i < maxLootDisplay; ++i) {
-            mvprintw(i + 2, 0, " [%d] %s", i + 1, lootBox[i]->get_item_name().c_str());
-        }
-        if (lootBox.empty()) {
-            mvprintw(2, 0, " (Empty)");
-        }
-
-        // --- 2. DISPLAY PLAYER INVENTORY (RIGHT COLUMN) [a-z] ---
-        mvprintw(0, 35, "--- YOUR INVENTORY ---");
-        std::vector<DisplayItem> playerItems = buildPlayerItemList(player);
-        for (int i = 0; i < playerItems.size() && i < 26; ++i) {
-            mvprintw(i + 2, 35, " [%c] %s", 'a' + i, playerItems[i].displayName.c_str());
-        }
-
-        // --- 3. DISPLAY ACTIONS ---
-        int row = std::max(12, (int)playerItems.size() + 4);
-        mvprintw(row++, 0, "--- ACTIONS ---");
-        mvprintw(row++, 0, "(l) Loot from Crate");
-        mvprintw(row++, 0, "(d) Drop from Inventory");
-        mvprintw(row++, 0, "(q) Quit Looting");
-        mvprintw(row, 0, "Choice: ");
-        refresh();
-
-        int ch = getch();
-        switch (ch) {
-            case 'q':
-            case 'Q':
-                inLootMenu = false;
-                break;
-
-            // === LOOT FROM CRATE ===
-            case 'l':
-            case 'L': {
-                mvprintw(row + 1, 0, "Loot item number (1-9): ");
-                refresh();
-                int ch_loot = getch();
-                int index = ch_loot - '1'; // '1' -> 0
-
-                if (index >= 0 && index < lootBox.size()) {
-                    auto itemToTake = lootBox[index];
-                    bool success = player.inventory.addItem(itemToTake, 1, player, world);
-                    
-                    if (success) {
-                        lootBox.erase(lootBox.begin() + index); // Remove from loot box
-                    } else {
-                        mvprintw(row + 2, 0, "Inventory is full! Press any key...");
-                        getch(); // Pause
-                    }
-                } else {
-                    mvprintw(row + 2, 0, "Invalid number. Press any key...");
-                    getch(); // Pause
-                }
-                break;
-            }
-
-            // === DROP FROM INVENTORY ===
-            case 'd':
-            case 'D': {
-                mvprintw(row + 1, 0, "Drop item letter (a-z): ");
-                refresh();
-                int ch_drop = getch();
-                int index = ch_drop - 'a'; // 'a' -> 0
-
-                if (index >= 0 && index < playerItems.size()) {
-                    // --- Show confirmation screen ---
-                    DisplayItem itemToDrop = playerItems[index];
-                    clear();
-                    mvprintw(0, 0, "Drop %s?", itemToDrop.displayName.c_str());
-                    mvprintw(2, 0, "Description: %s", itemToDrop.description.c_str());
-                    mvprintw(4, 0, "(d) Drop");
-                    mvprintw(5, 0, "(c) Cancel");
-                    refresh();
-
-                    int ch_confirm = getch();
-                    if (ch_confirm == 'd' || ch_confirm == 'D') {
-                        // User confirmed. Call the remove functions.
-                        std::shared_ptr<Item> droppedItem = nullptr;
-                        
-                    if (itemToDrop.itemID == "EQUIPPED_WEAPON") {
-                            // 1. Copy the pointer
-                            droppedItem = player.inventory.equippedWeapon;
-                            // 2. Call your existing void function
-                            player.inventory.dropEquippedWeapon( world,player);
-                        } 
-                        else if (itemToDrop.itemID == "INVENTORY_WEAPON") {
-                            droppedItem = player.inventory.inventoryWeapon;
-                            player.inventory.dropInventoryWeapon(world);
-                        } 
-                        else if (itemToDrop.itemID == "EQUIPPED_ARMOR") {
-                            droppedItem = player.inventory.equippedArmor;
-                            player.inventory.dropEquippedArmor(world,player);
-                        } 
-                        else if (itemToDrop.itemID == "INVENTORY_ARMOR") {
-                            droppedItem = player.inventory.inventoryArmor;
-                            player.inventory.dropInventoryArmor(world);
-                        } 
-                        // --- OUR NEW LOGIC FOR POTIONS ---
-                        else if (itemToDrop.type == "POTION") {
-                            // Call the one new function
-                            droppedItem = player.inventory.removePotionForLoot(itemToDrop.itemID, world);
-                        }
-
-                        // If we successfully removed it, add it to the loot box
-                        if (droppedItem != nullptr) {
-                            lootBox.push_back(droppedItem);
-                        }
-                    }
-                    // If 'c' or anything else, do nothing and loop
-                } else {
-                    mvprintw(row + 2, 0, "Invalid letter. Press any key...");
-                    getch(); // Pause
-                }
-                break;
-            } // end case 'd'
-        } // end switch
-    } // end while
-
-    // Return whatever is left in the loot box
-    return lootBox;
+    current_dialogue_lines.clear();
 }
 void Game::display_dashboard(Player& player, Map& map) {
     clear(); 
@@ -303,16 +100,77 @@ void Game::display_dashboard(Player& player, Map& map) {
     int minimap_height = 17;
     int minimap_width = 29;
     map.get_minimap_view(player, minimap_width, minimap_height, event_log);
-
-    mvprintw(term_height - 3, 0, " CONTROLS: (W/A/S/D) Move | (M) Full Map | (Q) Quit to Village");
+    mvprintw(term_height - 3, 0, " CONTROLS: (W/A/S/D) Move | (M) Full Map | (Q) Quit to Village | (I) Inventory ");
     mvprintw(term_height - 2, 0, " Your Location: (%d, %d)", player.get_y(), player.get_x());
     int dialogue_Y_line = 35;
-    int dialogue_X_start = 33;
-    if (!current_dialogue_message.empty()) {
-        mvprintw(dialogue_Y_line, dialogue_X_start, current_dialogue_message.c_str());
+    int i = 0;
+    for (const std::string& line : current_dialogue_lines) 
+    {
+        // Center each line individually
+        int start_x = (term_width - line.length()) / 2;
+        if (start_x < 0) {
+            start_x = 0; 
+        }
+        mvprintw(dialogue_Y_line + i, start_x, line.c_str());
+        i++; 
     }
     refresh();
 }
+std::vector<std::string> Game::wrap_text(const std::string& text, int max_width) {
+    std::vector<std::string> lines;
+    std::stringstream ss(text);
+    std::string word;
+    std::string current_line;
+
+    while (ss >> word) {
+        // Check if the new word fits on the current line
+        if (current_line.empty() || current_line.length() + word.length() + 1 <= max_width) {
+            if (!current_line.empty()) {
+                current_line += " ";
+            }
+            current_line += word;
+        } else {
+            // Word doesn't fit, so push the current line and start a new one
+            lines.push_back(current_line);
+            current_line = word;
+        }
+    }
+    // Add the last line
+    if (!current_line.empty()) {
+        lines.push_back(current_line);
+    }
+    return lines;
+}
+void Game::play_dialogue(const std::vector<std::string>& lines, Player& player, Map& map)
+{
+    
+    int term_width, term_height;
+    getmaxyx(stdscr, term_height, term_width);
+
+    int dialogue_width = term_width - 10;
+    if (dialogue_width < 20) dialogue_width = 20; 
+    std::vector<std::string> all_wrapped_lines;
+    for (const std::string& original_line : lines) {
+        std::vector<std::string> wrapped = wrap_text(original_line, dialogue_width);
+        all_wrapped_lines.insert(all_wrapped_lines.end(), wrapped.begin(), wrapped.end());
+    }
+
+    for (const std::string& line : all_wrapped_lines) {
+        current_dialogue_lines.push_back(line); 
+        display_dashboard(player, map); 
+        getch(); 
+        // --- END OF NEW LOGIC ---
+    }
+}
+
+
+void Game::add_log_message(std::string message) {
+    event_log.push_front(message);
+    while (event_log.size() > MAX_LOG_LINES) {
+        event_log.pop_back();
+    }
+}
+
 
 void Game::show_full_map(Map& map) {
     bool onFullMap = true;
@@ -461,22 +319,22 @@ void Game::explore_forest(Player& player, Map& map, vector<bool>& quest, AudioMa
         switch(input) {
             case 'w':
             case 'W':
-                move_character(player, 0, -1, map, quest, audio);
+                move_character(player, 0, -1, map, quest, audio,player);
                 break;
 
             case 's':
             case 'S':
-                move_character(player, 0, 1, map, quest, audio);
+                move_character(player, 0, 1, map, quest, audio,player);
                 break;
 
             case 'a':
             case 'A':
-                move_character(player, -1, 0, map, quest, audio);
+                move_character(player, -1, 0, map, quest, audio,player);
                 break;
 
             case 'd':
             case 'D':
-                move_character(player, 1, 0, map, quest, audio);
+                move_character(player, 1, 0, map, quest, audio,player);
                 break;
 
             case 'm':
@@ -553,15 +411,15 @@ void Game::game_loop(Player& player, AudioManager& audio) {
         }
     }
 }
-
-void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool>& quest, AudioManager& audio) {
+void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool>& quest, AudioManager& audio, Player& player) {
     int newx = entity.get_x() + y;
     int newy = entity.get_y() + x;
     Tile* newTile = map.getTileAt(newx, newy);
     Tile* oldTile = map.getTileAt(entity.get_x(), entity.get_y());
-
+    clear_dialogue_message();
     // --- 1. Check for Character on New Tile ---
     if (newTile->getCharacter() != nullptr) {
+        clear_dialogue_message();
         
         Character* charOnTile = newTile->getCharacter();
         NPC* hattori_ptr = dynamic_cast<NPC*>(charOnTile);
@@ -571,30 +429,31 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
         switch (enemyQuestID) 
         {
             case 0: // War Chief
-                show_dialogue_message("Hattori says you must prove your strength. Defeat the War Chief first.Meet Hattori at (X,X)."); // <-- FIXED
+                show_dialogue_message("Hattori says you must prove your strength. Defeat the War Chief first.Meet Hattori at (46,13)."); // <-- FIXED
                 break;
             case 1: // Orc Raider
-                show_dialogue_message("You are not powerful enough.Meet Hattori at (X,X)."); // <-- FIXED
+                show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13)."); // <-- FIXED
                 break;
             case 2: // Infernal Imp
-                show_dialogue_message("You are not powerful enough.Meet Hattori at (X,X)."); // <-- FIXED
+                show_dialogue_message("You are not powerful enough.Meet Hattori at (46,13))."); // <-- FIXED
                 break;
             case 3: 
-                show_dialogue_message("The Golem's ancient magic is too strong. Complete other trials first.Meet Hattori at (X,X)."); // <-- FIXED
+                show_dialogue_message("The Golem's ancient magic is too strong. Complete other trials first.Meet Hattori at (46,13)."); // <-- FIXED
                 break;
             case 4: 
-                show_dialogue_message("A dark aura repels you. You must complete Hattori's other tasks first.Meet Hattori at (X,X).");
+                show_dialogue_message("A dark aura repels you. You must complete Hattori's other tasks first.Meet Hattori at (46,13).");
                 break;
             case 5: // Final Boss
-                show_dialogue_message("The Citadel is sealed. Hattori says you must defeat the bosses to enter.Meet Hattori at (X,X)."); // <-- FIXED
+                show_dialogue_message("The Citadel is sealed. Hattori says you must defeat the bosses to enter.Meet Hattori at (46,13)."); // <-- FIXED
                 break;
             default:
-                show_dialogue_message("You are not powerful enough! Meet Hattori at (X,X)."); // <-- FIXED
+                show_dialogue_message("You are not powerful enough! Meet Hattori at (46,13)."); // <-- FIXED
                 break;
         }
         return; // Stop the move
     }
         if (hattori_ptr) {
+            clear_dialogue_message();
             std::vector<std::string> dialogue_lines;
             if (!quest[0]) { 
                 dialogue_lines = hattori_ptr->give_quest_war_chief();
@@ -611,7 +470,7 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
             else if (!quest[4]) { // <-- FIXED
                 dialogue_lines = hattori_ptr->give_quest_necromancer();
             }
-            else if (quest[3] && quest[4] && !quest[5]) {
+            else if (quest[3] && quest[4]) {
                 dialogue_lines = hattori_ptr->give_quest_final_boss();
             }
             else if (quest[5]) {
@@ -621,7 +480,7 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
                 dialogue_lines = {hattori.getName() + ": 'Be strong, warrior. Great trials await.'" };
             }
         
-            play_dialogue(dialogue_lines);
+            play_dialogue(dialogue_lines,player,map);
             
             return; // Stop the move
         }
@@ -658,7 +517,8 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
                 quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
             }
             int questID = newTile->get_doQuest();
-            if (questID != -1) {
+            if (questID != -1) 
+            {
                 quest[questID] = true;
                 
                 std::vector<std::string> complete_lines;
@@ -672,9 +532,29 @@ void Game::move_character(Character& entity, int x, int y, Map& map, vector<bool
                     case 4: complete_lines = this->hattori.complete_quest_necromancer(); break;
                     case 5: complete_lines = this->hattori.complete_quest_final_boss(); break;
                 }
+\
+                play_dialogue(complete_lines,player,map);
+            }
+            auto lootBox = target.getDropLoot();
+            // --- 2. RUN THE LOOT MENU ---
+            if (!lootBox.empty()) {
+                add_log_message("Loot menu opened...");
+                
+                // Pass the lootBox by value (it gets moved in).
+                // The menu returns what's left.
+                std::vector<std::shared_ptr<Item>> remainingLoot = runLootMenu(player, std::move(lootBox));
 
-                // Play the completion dialogue
-                play_dialogue(complete_lines);
+                // remainingLoot now holds whatever the player left behind.
+                // (Since we have "no tiles", these items are now gone)
+                if (!remainingLoot.empty()) {
+                    add_log_message("You left some items behind.");
+                }
+
+            } else {
+                 add_log_message("The enemy dropped nothing.");
+            }
+            if(map.getTileAt(newx,newy)->get_doQuest()!=-1){
+                quest[map.getTileAt(newx,newy)->get_doQuest()]=true;
             }
             auto lootBox = target.getDropLoot();
             // --- 2. RUN THE LOOT MENU ---

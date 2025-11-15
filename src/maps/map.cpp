@@ -27,7 +27,7 @@ Map::Map(Player& player,vector<bool>& quest, int width, int height, string filen
     loadFromFile(filename, quest, player);
 }
 
-void Map::get_minimap_view(Player& player, int view_width, int view_height, deque<string>& event_log) {
+int Map::get_minimap_view(Player& player, int view_width, int view_height, deque<string>& event_log) {
     int player_x = player.get_x();
     int player_y = player.get_y(); 
 
@@ -78,7 +78,7 @@ void Map::get_minimap_view(Player& player, int view_width, int view_height, dequ
 
     int total_visual_width = map_section_width + 1; 
     int content_height = num_rows + 2; 
-    
+    int total_visual_game_width = map_section_width + 1 + log_section_width + 2;
     int top_offset = 1; 
     
     int top_start_row = top_offset + max(0, (term_height - top_offset - content_height) / 2);
@@ -115,6 +115,7 @@ void Map::get_minimap_view(Player& player, int view_width, int view_height, dequ
     }
 
     mvprintw(current_row++, left_start_col, "%s", border_bottom.c_str());
+    return total_visual_game_width;
 }
 
 bool Map::loadFromFile(const string& filename, vector<bool>& quest, Player& player) {

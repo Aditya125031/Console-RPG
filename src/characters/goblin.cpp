@@ -16,7 +16,7 @@ Goblin::Goblin(): Enemy("goblin",50,8)
 Goblin::Goblin(Player& player)
     : Enemy("Goblin", 50, 8) 
 {
-     std::string playerType = player.get_type_string();
+    std::string playerType = player.get_type_string();
 
     if (playerType == "Swordsman") 
     {

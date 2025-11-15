@@ -90,7 +90,7 @@ void Player::show_details() const {
     mvprintw(row++, 0, "Type: %s", get_type_string().c_str());
     mvprintw(row++, 0, "Health: %d / %d", this->health, this->maxHealth);
     mvprintw(row++, 0, "Attack Power: %d", this->attackPower);
-    mvprintw(row++, 0, "Mana: %d", this->mana);
+    mvprintw(row++, 0, "Mana: %d / %d", this->mana, this->max_mana);
     mvprintw(row++, 0, "---------------------");
 }
 void Player::special_move(Character& enemy) 

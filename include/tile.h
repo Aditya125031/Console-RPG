@@ -17,6 +17,7 @@ using namespace std;
 
 class Player;
 class Goblin;
+class Inventory;
 class Tile{
     public:
         Tile();
@@ -26,9 +27,7 @@ class Tile{
         string getMapDisplayChar() ;
         bool getIsWalkable() ;
         Character* getCharacter() ;
-        //Item* getItem() const;
         void setCharacter(Character* character);
-        //void setItem(Item* item);
         void setMiniMapDisplayChar(string);
         void setMapDisplayChar(string);
         void setIsWalkable(bool);
@@ -37,14 +36,18 @@ class Tile{
         void setBounds(bool);
         bool getBounds();
         bool getQuestStatus(vector<bool>& quest);
-        void seQuestStatus(bool);
+        void setQuestStatus(bool);
         int get_map_color_pair() ;
         void set_map_color_pair(int) ;
         int get_mini_map_color_pair() ;
         void set_mini_map_color_pair(int) ;
         int get_doQuest();
         void set_doQuest(int);
+        int getRequiredQuestCompleted();
+        void setRequiredQuestCompleted(int);
         bool get_isNPC();
+        vector<std::shared_ptr<Item>>* getLootOnTile();
+        void setLootOnTile(vector<std::shared_ptr<Item>>* loot);
         
 
     private:
@@ -53,7 +56,7 @@ class Tile{
         bool m_isWalkable;           
         Character* m_characterOnTile; 
         int requiredQuestCompleted;
-        // Item* m_itemOnTile;   
+        vector<std::shared_ptr<Item>>* m_lootOnTile;   
         bool outOfBounds;
         int m_colorPairMiniMap;
         int m_colorPairMap;
@@ -61,4 +64,4 @@ class Tile{
         bool isNPC;
     };
 
-#endif 
+#endif

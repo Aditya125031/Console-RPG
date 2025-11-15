@@ -22,24 +22,24 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
         this->health = 120;
         this->attackPower = 15;
         this->mana = 20;
-        this->regen_hp_step=16;
-        this->regen_mana_step=30;
+        this->regen_hp_time=5;
+        this->regen_mana_time=10;
         break;
 
     case PlayerType::Archer:
         this->health = 100;
         this->attackPower = 12;
         this->mana = 60;
-        this->regen_hp_step=20;
-        this->regen_mana_step=20;
+        this->regen_hp_time=8;
+        this->regen_mana_time=8;
         break;
 
     case PlayerType::Mage:
         this->health = 80;
         this->attackPower = 8;
         this->mana = 100;
-        this->regen_hp_step=24;
-        this->regen_mana_step=12;
+        this->regen_hp_time=10;
+        this->regen_mana_time=5;
         break;
     }
     this->maxHealth = this->health;
@@ -214,18 +214,18 @@ std::string Player::move(int x, int y, Map& map) {
     return "Moved to position (" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
 
- int Player::getHPRegenStep(){
-    return regen_hp_step;
+ int Player::getHPRegenTime(){
+    return regen_hp_time;
  }
 
- void Player::setHPRegenStep(int a){
-    regen_hp_step=a;
+ void Player::setHPRegenTime(int a){
+    regen_hp_time=a;
  }
 
- int Player::getManaRegenStep(){
-    return regen_mana_step;
+ int Player::getManaRegenTime(){
+    return regen_mana_time;
  }
 
- void Player::setManaRegenStep(int a){
-    regen_mana_step=a;
+ void Player::setManaRegenTime(int a){
+    regen_mana_time=a;
  }

@@ -32,8 +32,8 @@ class Game
         std::string current_dialogue_message = "";
         std::vector<std::string> current_dialogue_lines;
         std::vector<std::string> wrap_text(const std::string& text, int max_width);
-        int hpStepCount = 0;
-        int manaStepCount = 0;
+        std::chrono::steady_clock::time_point lastHpRegenTime;
+        std::chrono::steady_clock::time_point lastManaRegenTime;
     public:
         void game_loop(Player& player, AudioManager& audio);
         void display_welcome_message();

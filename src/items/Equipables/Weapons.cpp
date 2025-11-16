@@ -16,6 +16,20 @@ using namespace std;
 //     return weapon_description;
 // }
 
+double Weapon::cool()
+{
+    return weapon_cooldown;
+}
+
+double Weapon::sa_cool()
+{
+    return special_cooldown;
+}
+
+string Weapon:: get_sd() 
+{
+    return special_description;
+}
 int Weapon::get_weapon_attack()
 {
     return extra_attack;

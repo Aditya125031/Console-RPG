@@ -137,6 +137,12 @@ std::vector<std::shared_ptr<Item>> Game::runLootMenu(Player& player,
 
                 if (index >= 0 && index < lootBox.size()) {
                     auto itemToTake = lootBox[index];
+                    clear();
+                    mvprintw(0,0,"Item Description: %s", itemToTake->get_item_description().c_str());
+                    mvprintw(1,0,"Enter Y for YES");
+                    mvprintw(2,0,"Press Any Other Key for NO");
+                    char choice=getch();
+                    if(choice=='Y'||choice=='y'){
                     bool success = player.inventory.addItem(itemToTake, 1, player, world);
                     
                     if (success) {
@@ -145,6 +151,7 @@ std::vector<std::shared_ptr<Item>> Game::runLootMenu(Player& player,
                         mvprintw(row + 2, 0, "Inventory is full! Press any key...");
                         getch(); // Pause
                     }
+                refresh();}
                 } else {
                     mvprintw(row + 2, 0, "Invalid number. Press any key...");
                     getch(); // Pause

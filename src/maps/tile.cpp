@@ -294,3 +294,4 @@ void Tile::set_doQuest(int a){
 bool Tile::get_isNPC(){
     return isNPC;
 }
+

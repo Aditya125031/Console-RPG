@@ -50,6 +50,7 @@ class Game
         std::vector<DisplayItem> buildPlayerItemList(Player& player);
         NPC hattori;
         std::vector<std::shared_ptr<Item>>runLootMenu(Player& player, std::vector<std::shared_ptr<Item>>& lootBox);
+        bool showGameOverScreen();
 };
 
 

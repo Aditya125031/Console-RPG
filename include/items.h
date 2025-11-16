@@ -72,6 +72,7 @@ class Weapon : public Equipables
         {
         }
         int special=false;
+        string get_sd();
         int get_weapon_attack();
         int get_weapon_mana();
         bool can_use();
@@ -83,6 +84,8 @@ class Weapon : public Equipables
         void weapon_apply_effects(Player& player, Game& world);
         void weapon_remove_effects(Player& player, Game& world);
         virtual void special_attack(Player& player,Character& enemy,Game& world){};
+        double cool();
+        double sa_cool();
 };
 
 class Armor : public Equipables

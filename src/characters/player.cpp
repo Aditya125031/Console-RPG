@@ -1,45 +1,52 @@
 // Player.cpp
 #include "../include/map.h"
 #include "../include/tile.h"
-#include"../include/player.h"
-#include"../include/inventory.hpp"
-#include"../include/items.h"
+#include "../include/player.h"
+#include "../include/inventory.hpp"
+#include "../include/items.h"
 #include "../extern/pdcurses/curses.h"
-#include"../include/game.h"
+#include "../include/game.h"
 
 using namespace std;
 
-Player::Player(Game& game_world, std::string name, PlayerType type)
-    : Character(name, 100, 10), 
-      world(game_world),  // <-- THIS LINE IS THE FIX
-      type(type) 
+Player::Player(Game &game_world, std::string name, PlayerType type)
+    : Character(name, 100, 10),
+      world(game_world), // <-- THIS LINE IS THE FIX
+      type(type)
 {
     // The 'inventory' member is default-initialized automatically
-    
-    switch (type) {
-    
+
+    switch (type)
+    {
+
     case PlayerType::Swordsman:
         this->health = 120;
         this->attackPower = 15;
         this->mana = 20;
-        this->regen_hp_time=5;
-        this->regen_mana_time=10;
+        this->regen_hp_time = 5;
+        this->regen_mana_time = 10;
+        this->inventory.equippedWeapon = make_shared<Shinketsu_Sword>();
+        this->inventory.equippedArmor = make_shared<Runeforged_Armor>();
         break;
 
     case PlayerType::Archer:
         this->health = 100;
         this->attackPower = 12;
         this->mana = 60;
-        this->regen_hp_time=8;
-        this->regen_mana_time=8;
+        this->regen_hp_time = 8;
+        this->regen_mana_time = 8;
+        this->inventory.equippedWeapon = make_shared<Silent_Death>();
+        this->inventory.equippedArmor = make_shared<Lunar_Veil>();
         break;
 
     case PlayerType::Mage:
         this->health = 80;
         this->attackPower = 8;
         this->mana = 100;
-        this->regen_hp_time=10;
-        this->regen_mana_time=5;
+        this->regen_hp_time = 10;
+        this->regen_mana_time = 5;
+        this->inventory.equippedWeapon = make_shared<Novice_Wand>();
+        this->inventory.equippedArmor = make_shared<Mystic_Veil>();
         break;
     }
     this->maxHealth = this->health;
@@ -56,34 +63,40 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
 }
 
 // ... (reset_stats, get_type_string, show_details all look fine) ...
-void Player::reset_stats() {
+void Player::reset_stats()
+{
     this->attackPower = this->baseAttackPower;
     this->maxHealth = this->baseMaxHealth;
     this->max_mana = this->baseMaxMana;
 
-    if (this->health > this->maxHealth) {
+    if (this->health > this->maxHealth)
+    {
         this->health = this->maxHealth;
     }
 
-    if (this->mana > this->max_mana) {
+    if (this->mana > this->max_mana)
+    {
         this->mana = this->max_mana;
     }
 }
 
-std::string Player::get_type_string() const {
-    switch (this->type) {
-        case PlayerType::Swordsman:
-            return "Swordsman";
-        case PlayerType::Archer:
-            return "Archer";
-        case PlayerType::Mage:
-            return "Mage";
-        default:
-            return "Unknown";
+std::string Player::get_type_string() const
+{
+    switch (this->type)
+    {
+    case PlayerType::Swordsman:
+        return "Swordsman";
+    case PlayerType::Archer:
+        return "Archer";
+    case PlayerType::Mage:
+        return "Mage";
+    default:
+        return "Unknown";
     }
 }
 
-void Player::show_details() const {
+void Player::show_details() const
+{
     int row = 0;
     mvprintw(row++, 0, "---------------------");
     mvprintw(row++, 0, "Name: %s", this->name.c_str());
@@ -93,139 +106,206 @@ void Player::show_details() const {
     mvprintw(row++, 0, "Mana: %d / %d", this->mana, this->max_mana);
     mvprintw(row++, 0, "---------------------");
 }
-void Player::special_move(Character& enemy) 
+void Player::special_move(Character &enemy)
 {
     std::shared_ptr<Weapon> current_weapon = this->inventory.equippedWeapon;
-    
-    if (current_weapon) 
+
+    if (current_weapon)
     {
-        
-        if (current_weapon->special) {
+
+        if (current_weapon->special)
+        {
             current_weapon->special_attack(*this, enemy, this->world);
         }
-        else {
+        else
+        {
             this->world.add_log_message("Your " + current_weapon->get_item_name() + " does not have a special move.");
         }
     }
 }
-int Player::get_x() {
+int Player::get_x()
+{
     return this->coord_x;
 }
 
-int Player::get_y() {
+int Player::get_y()
+{
     return this->coord_y;
 }
 
-void Player::set_x(int a) {
+void Player::set_x(int a)
+{
     this->coord_x = a;
 }
 
-void Player::set_y(int a) {
+void Player::set_y(int a)
+{
     this->coord_y = a;
 }
 
-void Player::use_mana(int amount) {
-    if (this->mana < amount) 
+void Player::use_mana(int amount)
+{
+    if (this->mana < amount)
     {
         this->mana = 0;
     }
 }
 
-void Player::add_mana(int amount) {
+void Player::add_mana(int amount)
+{
     this->mana += amount;
-    
-    if (this->mana > this->max_mana) 
+
+    if (this->mana > this->max_mana)
     {
         this->mana = this->max_mana;
     }
 }
-void Player::modify_max_mana(int amount) {
+void Player::modify_max_mana(int amount)
+{
     this->max_mana += amount;
-    if (this->mana > this->max_mana) {
+    if (this->mana > this->max_mana)
+    {
         this->mana = this->max_mana;
     }
 }
-void Player::modify_attack(int amount) {
+void Player::modify_attack(int amount)
+{
     this->attackPower += amount;
 }
-int Player::get_mana() const {
+int Player::get_mana() const
+{
     return this->mana;
 }
 
-int Player::get_max_mana() const {
+int Player::get_max_mana() const
+{
     return this->max_mana;
 }
 
-int Player::get_attack_power() const {
-    return this->attackPower; 
+int Player::get_attack_power() const
+{
+    return this->attackPower;
 }
-void Player::add_health(int amount) {
+void Player::add_health(int amount)
+{
     this->health += amount;
-    if (this->health > this->maxHealth) {
+    if (this->health > this->maxHealth)
+    {
         this->health = this->maxHealth;
     }
 }
-void Player::modify_max_health(int amount) {
+void Player::modify_max_health(int amount)
+{
     this->maxHealth += amount;
-    if (this->health > this->maxHealth) {
+    if (this->health > this->maxHealth)
+    {
         this->health = this->maxHealth;
     }
 }
-std::chrono::steady_clock::time_point Player::get_normal_attack_ready() const {
+std::chrono::steady_clock::time_point Player::get_normal_attack_ready() const
+{
     return this->normal_attack_ready;
 }
 
-std::chrono::steady_clock::time_point Player::get_special_attack_ready() const {
+std::chrono::steady_clock::time_point Player::get_special_attack_ready() const
+{
     return this->special_attack_ready;
 }
 
-void Player::set_normal_attack_cooldown(float seconds) {
-    this->normal_attack_ready = std::chrono::steady_clock::now() + 
-        std::chrono::microseconds(static_cast<int>(seconds * 1000000));
+void Player::set_normal_attack_cooldown(float seconds)
+{
+    this->normal_attack_ready = std::chrono::steady_clock::now() +
+                                std::chrono::microseconds(static_cast<int>(seconds * 1000000));
 }
 
-void Player::set_special_attack_cooldown(float seconds) {
-    this->special_attack_ready = std::chrono::steady_clock::now() + 
-        std::chrono::microseconds(static_cast<int>(seconds * 2500000));
+void Player::set_special_attack_cooldown(float seconds)
+{
+    this->special_attack_ready = std::chrono::steady_clock::now() +
+                                 std::chrono::microseconds(static_cast<int>(seconds * 2500000));
 }
 
-void Player::update_mana_regen(std::chrono::steady_clock::time_point current_time) {
-    (void)current_time; 
+void Player::update_mana_regen(std::chrono::steady_clock::time_point current_time)
+{
+    (void)current_time;
 }
 
-void Player::setNormalAttackInterval(double sec) {
+void Player::setNormalAttackInterval(double sec)
+{
     this->normalAttackInterval = sec;
 }
 
-double Player::getNormalAttackInterval() const {
+double Player::getNormalAttackInterval() const
+{
     return this->normalAttackInterval;
 }
 
-void Player::setSpecialAttackInterval(double sec) {
+void Player::setSpecialAttackInterval(double sec)
+{
     this->specialAttackInterval = sec;
 }
 
-double Player::getSpecialAttackInterval() const {
+double Player::getSpecialAttackInterval() const
+{
     return this->specialAttackInterval;
 }
-std::string Player::move(int x, int y, Map& map) {
+std::string Player::move(int x, int y, Map &map)
+{
     // Implement movement logic here
     // Return a string describing the movement result
     return "Moved to position (" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
 
- int Player::getHPRegenTime(){
+int Player::getHPRegenTime()
+{
     return regen_hp_time;
- }
+}
 
- void Player::setHPRegenTime(int a){
-    regen_hp_time=a;
- }
+void Player::setHPRegenTime(int a)
+{
+    regen_hp_time = a;
+}
 
- int Player::getManaRegenTime(){
+int Player::getManaRegenTime()
+{
     return regen_mana_time;
- }
+}
 
- void Player::setManaRegenTime(int a){
-    regen_mana_time=a;
- }
+void Player::setManaRegenTime(int a)
+{
+    regen_mana_time = a;
+}
+
+void Player::set_health(int amt)
+{
+    health = amt;
+}
+
+Player &Player::operator=(const Player &other)
+{
+    if (this == &other)
+    {
+        return *this;
+    }
+    Character::operator=(other);
+
+    this->type = other.type;
+    this->inventory = other.inventory; 
+
+    this->max_mana = other.max_mana;
+    this->mana = other.mana;
+    this->baseMaxHealth = other.baseMaxHealth;
+    this->baseAttackPower = other.baseAttackPower;
+    this->baseMaxMana = other.baseMaxMana;
+    this->stamina = other.stamina;
+
+    this->regen_hp_time = other.regen_hp_time;
+    this->regen_mana_time = other.regen_mana_time;
+    this->specialAttackInterval = other.specialAttackInterval;
+    this->normalAttackInterval = other.normalAttackInterval;
+
+    this->normal_attack_ready = other.normal_attack_ready;
+    this->special_attack_ready = other.special_attack_ready;
+    this->next_mana_regen = other.next_mana_regen;
+
+    return *this;
+}

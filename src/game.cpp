@@ -64,24 +64,24 @@ std::vector<DisplayItem> Game::buildPlayerItemList(Player &player)
     if (player.inventory.equippedWeapon)
     {
         itemMap.push_back({player.inventory.equippedWeapon->get_item_name() + " (Equipped)",
-                           "EQUIPPED_WEAPON", "WEAPON", player.inventory.equippedWeapon->get_item_description()});
+                           "EQUIPPED_WEAPON", "WEAPON", player.inventory.equippedWeapon->get_item_description() + " \nExtra Attack : " + to_string(player.inventory.equippedWeapon->get_weapon_attack()) + "\nExtra Mana : " + to_string(player.inventory.equippedWeapon->get_weapon_mana()) + "\nSpecial Description : " + player.inventory.equippedWeapon->get_sd() + "\n"});
     }
     if (player.inventory.equippedArmor)
     {
         itemMap.push_back({player.inventory.equippedArmor->get_item_name() + " (Equipped)",
-                           "EQUIPPED_ARMOR", "ARMOR", player.inventory.equippedArmor->get_item_description()});
+                           "EQUIPPED_ARMOR", "ARMOR", player.inventory.equippedArmor->get_item_description() + " \nExtra Health : " + to_string(player.inventory.equippedArmor->get_armor_health()) + "\nExtra Mana : " + to_string(player.inventory.equippedArmor->get_armor_mana()) + "\n"});
     }
 
     // 2. Add Bag Items (using public members)
     if (player.inventory.inventoryWeapon)
     {
         itemMap.push_back({player.inventory.inventoryWeapon->get_item_name() + " (Bag)",
-                           "INVENTORY_WEAPON", "WEAPON", player.inventory.inventoryWeapon->get_item_description()});
+                           "INVENTORY_WEAPON", "WEAPON", player.inventory.inventoryWeapon->get_item_description() + " \nExtra Attack : " + to_string(player.inventory.inventoryWeapon->get_weapon_attack()) + "\nExtra Mana : " + to_string(player.inventory.inventoryWeapon->get_weapon_mana()) + "\nSpecial Description : " + player.inventory.inventoryWeapon->get_sd() + "\n"});
     }
     if (player.inventory.inventoryArmor)
     {
         itemMap.push_back({player.inventory.inventoryArmor->get_item_name() + " (Bag)",
-                           "INVENTORY_ARMOR", "ARMOR", player.inventory.inventoryArmor->get_item_description()});
+                           "INVENTORY_ARMOR", "ARMOR", player.inventory.inventoryArmor->get_item_description() + " \nExtra Health : " + to_string(player.inventory.inventoryArmor->get_armor_health()) + "\nExtra Mana : " + to_string(player.inventory.inventoryArmor->get_armor_mana()) + "\n"});
     }
 
     // 3. Add Potions
@@ -89,7 +89,7 @@ std::vector<DisplayItem> Game::buildPlayerItemList(Player &player)
     {
         if (pair.second.quantity > 0)
             itemMap.push_back({pair.first + " (x" + to_string(pair.second.quantity) + ")",
-                               pair.first, "POTION", pair.second.itemPrototype->get_item_description()});
+                               pair.first, "POTION", pair.second.itemPrototype->get_item_description() + "\nHeal Amount : " + to_string(pair.second.itemPrototype->get_usable_health()) + "\nRestores Mana : " + to_string(pair.second.itemPrototype->get_usable_mana()) + "\n"});
     }
 
     return itemMap;
@@ -257,6 +257,115 @@ void Game::clear_dialogue_message()
 {
     current_dialogue_lines.clear();
 }
+
+bool Game::showGameOverScreen()
+{
+    // Ensure we are in blocking mode for the menu
+    nodelay(stdscr, FALSE);
+    curs_set(0); // Hide cursor
+
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+
+    // ASCII Art for "DEFEATED"
+    // We will print this in RED/BOLD
+    const std::vector<std::string> title = {
+        "  ____   _____ _____  _____     _   _____ _____  ____  ",
+        " |  _ \\ | ____|  ___|| ____|   / \\ |_   _| ____||  _ \\ ",
+        " | | | ||  _| | |_   |  _|    / _ \\  | | |  _|  | | | |",
+        " | |_| || |___|  _|  | |___  / ___ \\ | | | |___ | |_| |",
+        " |____/ |_____|_|    |_____|/_/   \\_\\|_| |_____||____/ ",
+        "                                                  ",
+        "           O N C E    A G A I N . . .             "};
+
+    int startY = (rows / 2) - 8;
+    int startX = (cols - title[0].length()) / 2;
+
+    // Menu Options
+    const std::string options[2] = {
+        "Retry from Last Checkpoint",
+        "Exit Game"};
+    int choice = 0;
+
+    while (true)
+    {
+        clear();
+
+        // --- DRAW BLOOD BORDER ---
+        attron(COLOR_PAIR(4)); // Red
+        for (int x = 0; x < cols; x++)
+        {
+            mvaddch(0, x, ACS_CKBOARD);
+            mvaddch(rows - 1, x, ACS_CKBOARD);
+        }
+        for (int y = 0; y < rows; y++)
+        {
+            mvaddch(y, 0, ACS_CKBOARD);
+            mvaddch(y, cols - 1, ACS_CKBOARD);
+        }
+        attroff(COLOR_PAIR(4));
+
+        // --- DRAW TITLE ---
+        // Use COLOR_PAIR(4) (Red) and A_BOLD for the "Bloody" look
+        attron(COLOR_PAIR(4) | A_BOLD);
+        for (size_t i = 0; i < title.size(); ++i)
+        {
+            mvprintw(startY + i, startX, "%s", title[i].c_str());
+        }
+        attroff(COLOR_PAIR(4) | A_BOLD);
+
+        // --- DRAW MENU ---
+        int menuY = startY + title.size() + 4;
+        for (int i = 0; i < 2; ++i)
+        {
+            int optLen = options[i].length();
+            int optX = (cols - optLen) / 2;
+
+            if (i == choice)
+            {
+                // Highlight selected option (Reverse video or White on Red)
+                attron(A_REVERSE | A_BOLD);
+                mvprintw(menuY + (i * 2), optX - 2, "> %s <", options[i].c_str());
+                attroff(A_REVERSE | A_BOLD);
+            }
+            else
+            {
+                // Dim unselected option
+                mvprintw(menuY + (i * 2), optX, "%s", options[i].c_str());
+            }
+        }
+
+        refresh();
+
+        // --- INPUT HANDLING ---
+        int ch = getch();
+        switch (ch)
+        {
+        case 'w':
+        case 'W':
+        case KEY_UP:
+            choice--;
+            if (choice < 0)
+                choice = 1;
+            break;
+        case 's':
+        case 'S':
+        case KEY_DOWN:
+            choice++;
+            if (choice > 1)
+                choice = 0;
+            break;
+        case 10:  // Enter Key
+        case ' ': // Spacebar
+            if (choice == 0)
+                return true; // Retry
+            else
+                return false; // Exit
+            break;
+        }
+    }
+}
+
 void Game::display_dashboard(Player &player, Map &map)
 {
     clear();
@@ -441,11 +550,11 @@ void Game::runItemActionMenu(DisplayItem selectedItem, Player &player, Game &wor
     // "Use" text changes based on item type
     if (selectedItem.type == "WEAPON" || selectedItem.type == "ARMOR")
     {
-        printw("(e) Equip / Swap\n");
+        printw("(e or u) Equip / Swap\n");
     }
     else if (selectedItem.type == "POTION")
     {
-        printw("(u) Use\n");
+        printw("(e or u) Use\n");
     }
 
     printw("(d) Drop\n");
@@ -618,38 +727,46 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
         int input = getch();
 
         // 3. IF NO INPUT: Sleep briefly and Loop again to update Regen
-        if (input == ERR) {
+        if (input == ERR)
+        {
             napms(50); // PDCurses specific sleep (50ms). Saves CPU.
-            continue; 
+            continue;
         }
 
         // 4. INPUT DETECTED! SWITCH TO BLOCKING MODE IMMEDIATELY.
-        // This fixes the Loot System. Any function called below 
+        // This fixes the Loot System. Any function called below
         // will now wait for input normally.
-        nodelay(stdscr, FALSE); 
+        nodelay(stdscr, FALSE);
 
         switch (input)
         {
-        case 'w': case 'W':
+        case 'w':
+        case 'W':
             move_character(player, 0, -1, map, quest, audio, player);
             break;
-        case 's': case 'S':
+        case 's':
+        case 'S':
             move_character(player, 0, 1, map, quest, audio, player);
             break;
-        case 'a': case 'A':
+        case 'a':
+        case 'A':
             move_character(player, -1, 0, map, quest, audio, player);
             break;
-        case 'd': case 'D':
+        case 'd':
+        case 'D':
             move_character(player, 1, 0, map, quest, audio, player);
             break;
-        case 'm': case 'M':
+        case 'm':
+        case 'M':
             show_full_map(map);
             break;
-        case 'q': case 'Q':
+        case 'q':
+        case 'Q':
             add_log_message("You return to the village.");
             inForest = false;
             break;
-        case 'i': case 'I':
+        case 'i':
+        case 'I':
             runInventoryMenu(player, *this);
             break;
         default:
@@ -657,7 +774,8 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
         }
 
         // 5. ACTION COMPLETE. SWITCH BACK TO NON-BLOCKING (REAL-TIME)
-        if (inForest) {
+        if (inForest)
+        {
             nodelay(stdscr, TRUE);
         }
     }
@@ -728,6 +846,8 @@ void Game::game_loop(Player &player, AudioManager &audio)
 }
 void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool> &quest, AudioManager &audio, Player &player)
 {
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
     int newx = entity.get_x() + y;
     int newy = entity.get_y() + x;
     Tile *newTile = map.getTileAt(newx, newy);
@@ -785,10 +905,10 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
             {
             case -1:
                 break;
-            case 0:                                                                                                                      // War Chief
+            case 0:                                                                                                                    // War Chief
                 show_dialogue_message("Oracle says you must prove your strength. Defeat the War Chief first.Meet Oracle at (46,13)."); // <-- FIXED
                 break;
-            case 1:                                                                            // Orc Raider
+            case 1:                                                                           // Orc Raider
                 show_dialogue_message("You are not powerful enough.Meet Oracle at (46,13)."); // <-- FIXED
                 break;
             case 2:
@@ -797,7 +917,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
             case 3:
                 show_dialogue_message("A dark aura repels you. You must complete Oracle's other tasks first.Meet Oracle at (46,13).");
                 break;
-            case 4:                                                                                                                        // Final Boss
+            case 4:                                                                                                                      // Final Boss
                 show_dialogue_message("The Citadel is sealed. Oracle says you must defeat the bosses to enter.Meet Oracle at (46,13)."); // <-- FIXED
                 break;
             default:
@@ -808,6 +928,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
         }
         else
         {
+            Player checkpointState = player;
             Combat c;
             Player &player = static_cast<Player &>(entity);
             Character *target_ptr = map.getTileAt(newx, newy)->getCharacter();
@@ -816,12 +937,32 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
             audio.playMusic("../data/audio/battle-bgm.mp3");
             int k = c.fight(player, target, *this);
             audio.playMusic("../data/audio/sacred-garden-10377.mp3");
+
             if (k == 0)
             {
-                clear();
-                mvprintw(0, 0, "You have been defeated! Press any key to exit.");
-                refresh();
-                getch();
+                // Show the bloody screen
+                bool retry = showGameOverScreen();
+
+                if (retry)
+                {
+                    newTile->getCharacter()->take_damage((-1) * (newTile->getCharacter()->get_max_health() - newTile->getCharacter()->get_health()));
+                    player = checkpointState;
+                    if (player.get_health() < player.get_max_health() * 0.2)
+                    {
+                        player.set_health(player.get_max_health() * 0.2);
+                    }
+                    show_dialogue_message("Fate grants you another chance...");
+                    return;
+                }
+                else
+                {
+                    // === OPTION 2: EXIT ===
+                    clear();
+                    mvprintw(rows / 2, (cols - 20) / 2, "Farewell, fallen hero...");
+                    refresh();
+                    napms(2000); // Wait 2 seconds
+                    exit(0);     // Close the program
+                }
             }
             else if (k == 1)
             {
@@ -913,6 +1054,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
             }
             else if (k == 2)
             {
+                newTile->getCharacter()->take_damage((-1) * (newTile->getCharacter()->get_max_health() - newTile->getCharacter()->get_health()));
                 add_log_message("You fled the battle!");
             }
             return;

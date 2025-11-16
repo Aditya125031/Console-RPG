@@ -170,7 +170,7 @@ class God_Slayer : public Weapon
             weapon_cooldown = 1.7;
             code=1;
             special=true;
-            special_description = "Deals 1.75x damage and heals 30 health. Mana cost: 15";
+            special_description = "Deals 2.5x damage and heals 30 health. Mana cost: 15";
         }
         
         void special_attack(Player& player, Character& enemy, Game& world) override;
@@ -187,6 +187,8 @@ class Orb_of_Avarice : public Weapon
             extra_weapon_mana = 45;
             weapon_cooldown=2.0;
             code=1;
+            special=true;
+            special_description="Deals 2.0x damage and heals 20 health. Mana cost: 30";
         }
         void special_attack(Player& player, Character& enemy, Game& world) override;
 };
@@ -226,8 +228,10 @@ class Eclipse_Striker : public Weapon
             item_name = "Eclipse Striker";
             extra_attack=15;
             extra_weapon_mana=10;
-            weapon_cooldown=1.5;
+            weapon_cooldown=1.75;
             code=1;
+            special=true;
+            special_description="Deals 1.75x damage and heals 10 health. Mana cost: 20";
         }
         void special_attack(Player& player, Character& enemy, Game& world) override;
 };
@@ -244,7 +248,7 @@ class Void_Embrace : public Weapon
             weapon_cooldown=2.0;
             code=1;
             special=true;
-            special_description="Deals 2.0x damage and heals 20 health. Mana cost: 25";
+            special_description="Deals void damage based on health percentage: Above 75% health: 1.5x | 35-75% health: 2.0x | Below 35% health: 2.5x (gains 15 health) | Mana cost: 25";
         }
 
         void special_attack(Player& player, Character& enemy, Game& world) override;

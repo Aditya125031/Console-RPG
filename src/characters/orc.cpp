@@ -17,18 +17,9 @@ void Orc::triggerDialogue() const
 Orc::Orc(Player& player)
     : Enemy("Orc",120,18)  
 {
-     std::string playerType = player.get_type_string();
-
-    if (playerType == "Swordsman") 
-    {
-        dropLoot.push_back(make_shared<Shinketsu_Sword>());
-    } else if (playerType == "Archer") 
-    {
-        dropLoot.push_back(make_shared<Void_Embrace>());
-    } else if (playerType == "Mage") 
-    {
-        dropLoot.push_back(make_shared<Elder_Wand>()); 
-    }
+    std::string playerType = player.get_type_string();
+    dropLoot.push_back(make_shared<Mana_Potion>()); 
+    dropLoot.push_back(make_shared<Health_Potion>()); 
     dialogue.push_back("Smash the weakling!");
     dialogue.push_back("Meat's back on the menu!");
     dialogue.push_back("I'll crush your bones!");

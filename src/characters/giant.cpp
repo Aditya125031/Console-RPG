@@ -19,7 +19,7 @@ GiantGoblin::GiantGoblin(Player& player)
         dropLoot.push_back(make_shared<Shinketsu_Sword>());
     } else if (playerType == "Archer") 
     {
-        dropLoot.push_back(make_shared<Void_Embrace>());
+        dropLoot.push_back(make_shared<Silent_Death>());
     } else if (playerType == "Mage") 
     {
         dropLoot.push_back(make_shared<Elder_Wand>()); 

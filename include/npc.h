@@ -10,7 +10,7 @@ private:
     std::string name = "Oracle";
 
 public:
-    NPC():Character("Oracle the Sage",100000,100000) {}
+    NPC():Character("Oracle",100000,100000) {}
     std::string getName() const 
     {
         return name;

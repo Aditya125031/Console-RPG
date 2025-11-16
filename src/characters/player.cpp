@@ -9,19 +9,16 @@
 
 using namespace std;
 
-Player::Player(Game &game_world, std::string name, PlayerType type)
-    : Character(name, 100, 10),
-      world(game_world), // <-- THIS LINE IS THE FIX
-      type(type)
+Player::Player(Game& game_world, std::string name, PlayerType type)
+    : Character(name, 100, 10), 
+      world(game_world),  
+      type(type) 
 {
-    // The 'inventory' member is default-initialized automatically
-
-    switch (type)
-    {
-
+    switch (type) {
+    
     case PlayerType::Swordsman:
-        this->health = 120;
-        this->attackPower = 15;
+        this->health = 1200;
+        this->attackPower = 145;
         this->mana = 20;
         this->regen_hp_time = 5;
         this->regen_mana_time = 10;
@@ -54,17 +51,12 @@ Player::Player(Game &game_world, std::string name, PlayerType type)
     this->baseMaxHealth = this->health;
     this->baseAttackPower = this->attackPower;
     this->baseMaxMana = this->mana;
-
-    // 'printw' here is risky if ncurses isn't initialized yet,
-    // but we'll leave it for now.
     printw("A new %s named %s has arrived!\n", get_type_string().c_str(), this->name.c_str());
     this_thread::sleep_for(chrono::seconds(1));
     flushinp();
 }
 
-// ... (reset_stats, get_type_string, show_details all look fine) ...
-void Player::reset_stats()
-{
+void Player::reset_stats() {
     this->attackPower = this->baseAttackPower;
     this->maxHealth = this->baseMaxHealth;
     this->max_mana = this->baseMaxMana;
@@ -106,7 +98,8 @@ void Player::show_details() const
     mvprintw(row++, 0, "Mana: %d / %d", this->mana, this->max_mana);
     mvprintw(row++, 0, "---------------------");
 }
-void Player::special_move(Character &enemy)
+
+void Player::special_move(Character& enemy) 
 {
     std::shared_ptr<Weapon> current_weapon = this->inventory.equippedWeapon;
 
@@ -248,10 +241,9 @@ double Player::getSpecialAttackInterval() const
 {
     return this->specialAttackInterval;
 }
-std::string Player::move(int x, int y, Map &map)
+
+std::string Player::move(int x, int y, Map& map) 
 {
-    // Implement movement logic here
-    // Return a string describing the movement result
     return "Moved to position (" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
 

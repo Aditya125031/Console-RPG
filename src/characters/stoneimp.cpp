@@ -20,13 +20,13 @@ StoneImp::StoneImp(Player& player)
 
     if (playerType == "Swordsman") 
     {
-        dropLoot.push_back(make_shared<Shinketsu_Sword>());
+        dropLoot.push_back(make_shared<Shadowhide_Armor>());
     } else if (playerType == "Archer") 
     {
-        dropLoot.push_back(make_shared<Void_Embrace>());
+        dropLoot.push_back(make_shared<Phantom_Hide>());
     } else if (playerType == "Mage") 
     {
-        dropLoot.push_back(make_shared<Elder_Wand>()); 
+        dropLoot.push_back(make_shared<Mystic_Veil>()); 
     }
     originalAttackPower = attackPower; // Store initial attack power
     dialogue.push_back("*rumble*...");

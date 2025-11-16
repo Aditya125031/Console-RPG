@@ -193,8 +193,8 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                 clear();
                 mvprintw(0, 0, "Drop %s?", itemToDrop.displayName.c_str());
                 mvprintw(2, 0, "Description: %s", itemToDrop.description.c_str());
-                mvprintw(4, 0, "(d) Drop");
-                mvprintw(5, 0, "(c) Cancel");
+                mvprintw(6, 0, "(d) Drop");
+                mvprintw(7, 0, "(c) Cancel");
                 refresh();
 
                 int ch_confirm = getch();

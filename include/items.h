@@ -19,6 +19,7 @@ class Item
     protected:
         string item_name="";
         string item_description="";
+        string item_use="";
         int code=0;
 
     public:
@@ -57,12 +58,13 @@ class Equipables : public Item
 class Weapon : public Equipables
 {
     protected:
-            int extra_attack=0;
-            int extra_weapon_mana=0;
-            double weapon_cooldown=0.0;
-            std::chrono::steady_clock::time_point last_use;
-            std::chrono::steady_clock::time_point sa_last_use;
-            double special_cooldown=5.0;
+        int extra_attack=0;
+        int extra_weapon_mana=0;
+        double weapon_cooldown=0.0;
+        std::chrono::steady_clock::time_point last_use;
+        std::chrono::steady_clock::time_point sa_last_use;
+        double special_cooldown=5.0;
+        string special_description="This weapon does not have a special attack.";
 
     public:
         Weapon() : last_use(std::chrono::steady_clock::now()), 
@@ -70,6 +72,7 @@ class Weapon : public Equipables
         {
         }
         int special=false;
+        string get_sd();
         int get_weapon_attack();
         int get_weapon_mana();
         bool can_use();
@@ -77,9 +80,12 @@ class Weapon : public Equipables
         void update_last_use();
         void update_sa_last_use();
         double get_cooldown();
+        double get_sa_cooldown();
         void weapon_apply_effects(Player& player, Game& world);
         void weapon_remove_effects(Player& player, Game& world);
         virtual void special_attack(Player& player,Character& enemy,Game& world){};
+        double cool();
+        double sa_cool();
 };
 
 class Armor : public Equipables
@@ -121,13 +127,13 @@ class Shinketsu_Sword : public Weapon
         }
 };
 
-class Omenvein : public Weapon
+class Iron_Sword : public Weapon
 {
     public:
-        Omenvein()
+        Iron_Sword()
         {
-            item_description = "Its draw is the first sign of the end , a sword that foretells doom with every swing.";
-            item_name = "Omenvein";
+            item_description = "A basic Iron word. Reliable and sturdy, perfect for novice adventurers.";
+            item_name = "Iron Sword";
             extra_attack = 5;
             weapon_cooldown = 2.0;
             code=1;
@@ -146,6 +152,7 @@ class Soul_Reaper : public Weapon
             weapon_cooldown = 2.0;
             code = 1;
             special = true;
+            special_description ="Below 40% health: 2.5x damage (costs 10 health) | Above 40% health: 2.0x damage (costs 20 health) | Mana cost: 12";
         }
         
         void special_attack(Player& player, Character& enemy, Game& world) override;
@@ -163,6 +170,7 @@ class God_Slayer : public Weapon
             weapon_cooldown = 1.7;
             code=1;
             special=true;
+            special_description = "Deals 2.5x damage and heals 30 health. Mana cost: 15";
         }
         
         void special_attack(Player& player, Character& enemy, Game& world) override;
@@ -177,6 +185,22 @@ class Orb_of_Avarice : public Weapon
             item_name = "Orb of Avarice";
             extra_attack = 10;
             extra_weapon_mana = 45;
+            weapon_cooldown=2.0;
+            code=1;
+            special=true;
+            special_description="Deals 2.0x damage and heals 20 health. Mana cost: 30";
+        }
+        void special_attack(Player& player, Character& enemy, Game& world) override;
+};
+
+class Wooden_Bow : public Weapon
+{
+    public:
+        Wooden_Bow()
+        {
+            item_description = "A simple bow made from sturdy oak, perfect for beginners learning the art of archery.";
+            item_name = "Wooden Bow";
+            extra_attack=4;
             weapon_cooldown=2.0;
             code=1;
         }
@@ -204,9 +228,12 @@ class Eclipse_Striker : public Weapon
             item_name = "Eclipse Striker";
             extra_attack=15;
             extra_weapon_mana=10;
-            weapon_cooldown=1.5;
+            weapon_cooldown=1.75;
             code=1;
+            special=true;
+            special_description="Deals 1.75x damage and heals 10 health. Mana cost: 20";
         }
+        void special_attack(Player& player, Character& enemy, Game& world) override;
 };
 
 class Void_Embrace : public Weapon
@@ -221,9 +248,23 @@ class Void_Embrace : public Weapon
             weapon_cooldown=2.0;
             code=1;
             special=true;
+            special_description="Deals void damage based on health percentage: Above 75% health: 1.5x | 35-75% health: 2.0x | Below 35% health: 2.5x (gains 15 health) | Mana cost: 25";
         }
 
         void special_attack(Player& player, Character& enemy, Game& world) override;
+};
+
+class Novice_Wand : public Weapon
+{
+    public:
+        Novice_Wand()
+        {
+            item_description = "A basic wand for aspiring mages, channeling modest magical energies.";
+            item_name = "Novice Wand";
+            extra_attack = 3;
+            weapon_cooldown=2.5;
+            code=1;
+        }
 };
 
 class Elder_Wand : public Weapon
@@ -252,6 +293,7 @@ class Oblivion_Shard : public Weapon
             weapon_cooldown = 2.5;
             code = 1;
             special = true;
+            special_description="Above 70% mana: 2.0x damage | 40-70% mana: 2.5x damage | Below 40% mana: 3.0x damage (takes 15 self-damage) | Mana cost: 45";
         }
         
         void special_attack(Player& player, Character& enemy, Game& world) override;
@@ -294,6 +336,19 @@ class Dragon_Armor : public Armor
         }
 };
 
+class Mystic_Veil : public Armor
+{
+    public:
+        Mystic_Veil()
+        {
+            item_description = "A veil woven from mystical energies, enhancing both health and mana regeneration.";
+            item_name = "Mystic Veil";
+            armor_health = 15;
+            armor_mana = 30;
+            code=2;
+        }
+};
+
 class Void_Cloak : public Armor
 {
     public:
@@ -317,6 +372,45 @@ class Aether_Robe : public Armor
             armor_health = 35;
             armor_mana = 70;
             code=2;
+        }
+};
+
+class Phantom_Hide: public Armor
+{
+    public:
+        Phantom_Hide()
+        {
+            item_description = " Armor crafted from the elusive phantom beasts, offering a balance of health and mana enhancement.";
+            item_name = "Phantom Hide";
+            armor_health = 30;
+            armor_mana = 15;
+            code = 2;
+        }
+};
+
+class Lunar_Veil : public Armor
+{
+    public:
+        Lunar_Veil()
+        {
+            item_description = "Blackened leather armor that drinks the light, perfect for those who hunt from the shadows with silent arrows.";
+            item_name = "Lunar Veil";
+            armor_health = 45;
+            armor_mana = 25;
+            code = 2;
+        }
+};
+
+class Divine_Aegis : public Armor
+{
+    public:
+        Divine_Aegis()
+        {
+            item_description = " Armor blessed by celestial forces, providing exceptional protection and mana regeneration for the wielder.";
+            item_name = "Divine Aegis";
+            armor_health = 55;
+            armor_mana = 35;
+            code = 2;
         }
 };
 

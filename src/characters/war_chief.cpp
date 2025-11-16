@@ -21,12 +21,18 @@ GoblinWarChief::GoblinWarChief(Player& player)
     if (playerType == "Swordsman") 
     {
         dropLoot.push_back(make_shared<Shinketsu_Sword>());
+        dropLoot.push_back(make_shared<Angel_Blessings>());
+        dropLoot.push_back(make_shared<Dragon_Breath>());
     } else if (playerType == "Archer") 
     {
         dropLoot.push_back(make_shared<Void_Embrace>());
+        dropLoot.push_back(make_shared<Angel_Blessings>());
+        dropLoot.push_back(make_shared<Dragon_Breath>());
     } else if (playerType == "Mage") 
     {
         dropLoot.push_back(make_shared<Elder_Wand>()); 
+        dropLoot.push_back(make_shared<Angel_Blessings>());
+        dropLoot.push_back(make_shared<Dragon_Breath>());
     }
     dialogue.push_back("For the Boss! Attack!");
     dialogue.push_back("You'll make a fine trophy!");

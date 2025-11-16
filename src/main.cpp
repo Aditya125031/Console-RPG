@@ -41,7 +41,7 @@ Player create_player(Game& game_world) {
     mvprintw(3, 0, "Choose your class:");
     mvprintw(4, 0, "1. Swordsman");
     mvprintw(5, 0, "2. Archer");
-    mvprintw(6, 0, "3. Mage:");
+    mvprintw(6, 0, "3. Mage");
     mvprintw(8, 0, "Enter choice (1-3): ");
     
     // ⭐️ FIX: Temporarily enable line buffering for scanw

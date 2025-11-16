@@ -16,6 +16,20 @@ using namespace std;
 //     return weapon_description;
 // }
 
+double Weapon::cool()
+{
+    return weapon_cooldown;
+}
+
+double Weapon::sa_cool()
+{
+    return special_cooldown;
+}
+
+string Weapon:: get_sd() 
+{
+    return special_description;
+}
 int Weapon::get_weapon_attack()
 {
     return extra_attack;
@@ -59,24 +73,31 @@ double Weapon::get_cooldown()
     return remaining>0 ? remaining : 0;
 }
 
+double Weapon::get_sa_cooldown()
+{
+    auto now = std::chrono::steady_clock::now();
+    auto dif = std::chrono::duration_cast<std::chrono::duration<double>>(now-sa_last_use);
+    double remaining=dif.count()-special_cooldown;
+
+    return remaining>0 ? remaining : 0;
+}
+
 void Weapon::weapon_apply_effects(Player& player, Game& world)
 {
+    int old_mana = player.get_max_mana();
     player.modify_attack(extra_attack);
     world.add_log_message("Attack Power : " + to_string(player.get_attack_power()));
     player.modify_max_mana(extra_weapon_mana);
-    world.add_log_message("Max Mana : " + to_string(player.get_max_mana()));
-    world.add_log_message("Current Mana: " + to_string(player.get_mana()) + 
-                        "/" + to_string(player.get_max_mana()));
+    world.add_log_message("Max Mana :  " + to_string(old_mana) + " -> " + to_string(player.get_max_mana()));
 }
 
 void Weapon::weapon_remove_effects(Player& player, Game& world)
 {
+    int old_mana = player.get_max_mana();
     player.modify_attack(-extra_attack);
     world.add_log_message("Attack Power : " + to_string(player.get_attack_power()));
     player.modify_max_mana(-extra_weapon_mana);
-    world.add_log_message("Max Mana : " + to_string(player.get_max_mana()));
-    world.add_log_message("Current Mana: " + to_string(player.get_mana()) + 
-                        "/" + to_string(player.get_max_mana()));
+    world.add_log_message("Max Mana :  " + to_string(old_mana) + " -> " + to_string(player.get_max_mana()));
 }
 
 void Soul_Reaper::special_attack(Player& player, Character& enemy, Game& world)
@@ -85,7 +106,7 @@ void Soul_Reaper::special_attack(Player& player, Character& enemy, Game& world)
     {
         if(!can_use_special())
         {
-            double remaining = get_cooldown();
+            double remaining = get_sa_cooldown();
             world.add_log_message("Soul Reaper's special attack is on cooldown. " + to_string(remaining) + " seconds remaining.");
             return;
         }
@@ -100,7 +121,7 @@ void Soul_Reaper::special_attack(Player& player, Character& enemy, Game& world)
         
         if (health_percentage < 0.4) 
         {
-            damage_multiplier = 2.5;
+            damage_multiplier = 2.75;
             world.add_log_message("Desperate times! Soul Reaper resonates with your fading vitality...");
             player.add_health(-10);
         } 
@@ -122,14 +143,13 @@ void Soul_Reaper::special_attack(Player& player, Character& enemy, Game& world)
     }
 }
 
-// God Slayer implementation
 void God_Slayer::special_attack(Player& player, Character& enemy, Game& world)
 {
     if(special==true)
     {
         if(!can_use_special())
         {
-            double remaining = get_cooldown();
+            double remaining = get_sa_cooldown();
             world.add_log_message("God Slayer's special attack is on cooldown. " + to_string(remaining) + " seconds remaining.");
             return;
         }
@@ -140,7 +160,7 @@ void God_Slayer::special_attack(Player& player, Character& enemy, Game& world)
             return;
         }
 
-        int damage = player.get_attack_power() * 1.75;
+        int damage = player.get_attack_power() * 2.5;
         enemy.take_damage(damage);
         player.use_mana(15);
         player.add_health(30);
@@ -152,49 +172,74 @@ void God_Slayer::special_attack(Player& player, Character& enemy, Game& world)
     }
 }
 
-// Void Embrace implementation
 void Void_Embrace::special_attack(Player& player, Character& enemy, Game& world)
 {
     if(special==true)
     {
         if(!can_use_special())
         {
-            double remaining = get_cooldown();
-            world.add_log_message("Void Embrace's special attack is on cooldown. " + to_string(remaining) + " seconds remaining.");
+            double remaining = get_sa_cooldown();
+            world.add_log_message("The Void stirs impatiently... " + to_string(remaining) + " seconds until it can embrace again.");
             return;
         }
 
-        if(player.get_mana()<25)
+        if(player.get_mana() < 25)
         {
-            world.add_log_message("Not enough mana to perform Void Embrace's special attack.");
+            world.add_log_message("The Void Embrace hungers for more void energy... 25 required to awaken its embrace.");
             return;
         }
+        
+        double health_percentage = (double)player.get_health() / player.get_max_health();
+        double void_multiplier;
+        string void_technique;
+        
+        if (health_percentage > 0.75) 
+        {
+            void_multiplier = 1.5;
+            void_technique = "VOID'S WHISPER";
+            world.add_log_message("The Void gently stirs... " + void_technique + " manifests!");
+        } 
+        else if (health_percentage > 0.35) 
+        {
+            void_multiplier = 2.0;
+            void_technique = "ABYSSAL FLAMES";
+            world.add_log_message("Desperation fuels the darkness... " + void_technique + " emerges from the depths!");
+            player.add_health(5);
+            world.add_log_message("The Void grants 5 additional health for your resilience.");
+        }
+        else 
+        {
+            void_multiplier = 2.5;
+            void_technique = "ATOMIC VOID";
+            world.add_log_message("At death's door, you unleash " + void_technique + "! The Void consumes all!");
+            player.add_health(15);
+            world.add_log_message("The Void essence seeps into you, you gained 15 health.");
+        }
 
-        int damage = player.get_attack_power() * 2.0; 
-        enemy.take_damage(damage);
-        player.use_mana(50);
-        player.add_health(30); 
+        int base_damage = player.get_attack_power();
+        int total_damage = base_damage * void_multiplier;
+        enemy.take_damage(total_damage);
+        player.use_mana(25);
 
-        world.add_log_message("Void Embrace's special attack unleashed! Dealt " + to_string(damage) + " damage to the enemy.");
-        world.add_log_message("Player healed for 20 health.");
+        world.add_log_message("Dealt " + to_string(total_damage) + " void damage.");
+        world.add_log_message("Mana consumed: 25, Remaining: " + to_string(player.get_health()) + "/" + to_string(player.get_max_health()));
 
         update_sa_last_use();
     }
 }
 
-// Oblivion Shard implementation
 void Oblivion_Shard::special_attack(Player& player, Character& enemy, Game& world)
 {
     if(special == true)
     {
         if(!can_use_special())
         {
-            double remaining = get_cooldown();
+            double remaining = get_sa_cooldown();
             world.add_log_message("The Oblivion Shard's special attack is on cooldown. " + to_string(remaining) + " seconds remaining.");
             return;
         }
 
-        if(player.get_mana() < 45)
+        if(player.get_mana() < 35)
         {
             world.add_log_message("The Shard demands more soul-energy.");
             return;
@@ -225,10 +270,68 @@ void Oblivion_Shard::special_attack(Player& player, Character& enemy, Game& worl
         int damage = base_damage * damage_multiplier;
         
         enemy.take_damage(damage);
-        player.use_mana(45);
+        player.use_mana(35);
 
         world.add_log_message("Oblivion deals " + to_string(damage) + " damage!");
         world.add_log_message("Mana consumed: 45, Remaining: " + to_string(player.get_mana()) + "/" + to_string(player.get_max_mana()));
+        
+        update_sa_last_use();
+    }
+}
+
+void Orb_of_Avarice::special_attack(Player& player, Character& enemy, Game& world)
+{
+    if(special==true)
+    {
+        if(!can_use_special())
+        {
+            double remaining = get_sa_cooldown();
+            world.add_log_message("Orb of Avarice's special attack is on cooldown. " + to_string(remaining) + " seconds remaining.");
+            return;
+        }
+
+        if(player.get_mana()<30)
+        {
+            world.add_log_message("Not enough mana to perform Orb of Avarice's special attack.");
+            return;
+        }
+
+        int damage = player.get_attack_power() * 2.0;
+        enemy.take_damage(damage);
+        player.use_mana(30);
+        player.add_health(15);
+
+        world.add_log_message("Orb of Avarice's 'GREED'S FURY' unleashed! Dealt " + to_string(damage) + " damage to the enemy.");
+        world.add_log_message("Player restored 15 health.");
+        
+        update_sa_last_use();
+    }
+}
+
+void Eclipse_Striker::special_attack(Player& player, Character& enemy, Game& world)
+{
+    if(special==true)
+    {
+        if(!can_use_special())
+        {
+            double remaining = get_sa_cooldown();
+            world.add_log_message("Eclipse Striker's special attack is on cooldown. " + to_string(remaining) + " seconds remaining.");
+            return;
+        }
+
+        if(player.get_mana()<20)
+        {
+            world.add_log_message("Not enough mana to perform Eclipse Striker's special attack.");
+            return;
+        }
+
+        int damage = player.get_attack_power() * 1.75;
+        enemy.take_damage(damage);
+        player.use_mana(20);
+        player.add_health(10);
+
+        world.add_log_message("Eclipse Striker's 'SOLAR FLARE' unleashed! Dealt " + to_string(damage) + " damage to the enemy.");
+        world.add_log_message("Player healed for 15 health.");
         
         update_sa_last_use();
     }

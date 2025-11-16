@@ -28,8 +28,7 @@ Tile::Tile() {}
 
 Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y)
     : m_isWalkable(true), m_characterOnTile(nullptr), outOfBounds(false), requiredQuestCompleted(-1),
-        doQuest(-1), isNPC(false)
-    //   ,m_itemOnTile(nullptr), 
+        doQuest(-1), isNPC(false), m_lootOnTile(nullptr)
     { 
         if(displayChar=="."){
             m_mapDisplayChar = m_miniMapDisplayChar = ".";
@@ -138,17 +137,6 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_isWalkable = false;
             doQuest=1;
         }
-        else if(displayChar=="QBGLM1"){
-            m_mapDisplayChar = "."; 
-            m_miniMapDisplayChar = "⚜";
-            m_colorPairMap = 6;
-            m_colorPairMiniMap = 4; 
-            Character* golem = new BoneGolem(player);
-            m_characterOnTile = golem;
-            requiredQuestCompleted = 1;
-            m_isWalkable = false;
-            doQuest=2;
-        }
         else if(displayChar=="QII3"){
             m_mapDisplayChar = "."; 
             m_miniMapDisplayChar = "Ö";
@@ -156,6 +144,17 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMiniMap = 4; 
             Character* infimp = new InfernalImp(player);
             m_characterOnTile = infimp;
+            requiredQuestCompleted = 1;
+            m_isWalkable = false;
+            doQuest=2;
+        }
+        else if(displayChar=="QBGLM1"){
+            m_mapDisplayChar = "."; 
+            m_miniMapDisplayChar = "⚜";
+            m_colorPairMap = 6;
+            m_colorPairMiniMap = 4; 
+            Character* golem = new BoneGolem(player);
+            m_characterOnTile = golem;
             requiredQuestCompleted = 2;
             m_isWalkable = false;
             doQuest=3;
@@ -165,8 +164,8 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_miniMapDisplayChar = "⚜";
             m_colorPairMap = 6;
             m_colorPairMiniMap = 4; 
-            Character* golem = new BoneGolem(player);
-            m_characterOnTile = golem;
+            Character* necm= new Necromancer(player);
+            m_characterOnTile =necm;
             requiredQuestCompleted = 3;
             m_isWalkable = false;
             doQuest=4;
@@ -221,23 +220,9 @@ Character* Tile::getCharacter() {
     return m_characterOnTile;
 }
 
-// Getter for the item pointer
-// Item* Tile::getItem() const {
-//     return m_itemOnTile;
-// }
-
 void Tile::setCharacter(Character* character) {
     m_characterOnTile = character;
 }
-
-// Setter for the item pointer
-// void Tile::setItem(Item* item) {
-//     m_itemOnTile = item;
-// }
-
-// void Tile::setQuest() {
-//     m_reqQuest->isCompleted()=true;
-// }
 
 void Tile::setBounds(bool status) {
     outOfBounds = status;
@@ -274,7 +259,7 @@ void Tile::set_map_color_pair(int a){
     m_colorPairMap=a;
 }
 
-void Tile::seQuestStatus(bool status){
+void Tile::setQuestStatus(bool status){
     requiredQuestCompleted=status;
 }
 
@@ -295,3 +280,18 @@ bool Tile::get_isNPC(){
     return isNPC;
 }
 
+
+vector<std::shared_ptr<Item>>* Tile::getLootOnTile(){
+    return m_lootOnTile;
+}
+void Tile::setLootOnTile(vector<std::shared_ptr<Item>>* loot){
+    m_lootOnTile=loot;
+}
+
+int Tile::getRequiredQuestCompleted(){
+    return requiredQuestCompleted;
+}
+
+void Tile::setRequiredQuestCompleted(int a){
+    requiredQuestCompleted=a;
+}

@@ -1,67 +1,94 @@
+// in NPC.cpp
 #include "NPC.h"
-#include <iostream>
-#include <vector>
-void NPC::give_quest_war_chief() {
-    std::cout << getName() << ": 'A brutal War Chief has taken over the northern stronghold (37,5). He's a problem that needs handling. Show him our strength.'" << std::endl;
+#include <vector> 
+#include <string>  
+
+std::vector<std::string> NPC::give_quest_war_chief() {
+    std::string prefix = getName() + ": ";
+    return {
+        prefix + "'A brutal War Chief has taken over the northern stronghold . He's a problem that needs handling. Show him our strength.'"
+    };
 }
 
-void NPC::give_quest_orc_raider() {
-    std::cout << getName() << ": 'Orc Raiders are plundering the trade road to the east (9,27) . Find their hidden camp in the foothills and dispense justice. It's time we cleared them out.'" << std::endl;
+std::vector<std::string> NPC::give_quest_orc_raider() {
+    std::string prefix = getName() + ": ";
+    return {
+        prefix + "'Orc Raiders are plundering the trade road to the south west. Find their hidden camp in the foothills and dispense justice.'",
+        prefix + "'It's time we cleared them out.'",
+    };
 }
 
-void NPC::give_quest_infernal_imp(){
-    std::cout << getName() << ": 'I've had reports of an Infernal Imp near the old volcano (71,17). Vile, cunning creatures. Go... and be careful. Don't let it fool you.'" << std::endl;
+std::vector<std::string> NPC::give_quest_infernal_imp(){
+    std::string prefix = getName() + ": ";
+    return {
+        prefix + "'I've had reports of an Infernal Imp towards north east. Vile, cunning creatures. Go... and be careful. Don't let it fool you.'"
+    };
 }
 
-void NPC::give_quest_necromancer() {
-    std::cout << getName() << ": 'This is a dark omen. A **Necromancer** is defiling the ancient crypts to the west (102,19). This evil must be stopped before he raises an army of the dead and threatens the entire region. This is a top priority.'" << std::endl;
+std::vector<std::string> NPC::give_quest_necromancer() {
+    std::string prefix = getName() + ": ";
+    return {
+        prefix + "'This is a dark omen. A **Necromancer** is defiling the ancient crypts to the west.'",
+        prefix + "'This evil must be stopped before he raises an army of the dead and threatens the entire region. This is a top priority.'"
+    };
 }
 
-void NPC::give_quest_golem() {
-    std::cout << getName() << ": 'The earth itself groans. A **Stone Golem**, a relic of a forgotten age, has awakened in the southern quarry (56,33). It is a force of pure destruction. This is not a hunt, warrior... this is a battle for survival. It must be stopped.'" << std::endl;
-}
-void NPC::complete_quest_war_chief() {
-    std::cout << getName() << ": 'So, the War Chief is defeated. Good. You have done the village a service. Well done, warrior.'" << std::endl;
-}
-
-void NPC::complete_quest_orc_raider() {
-    std::cout << getName() << ": 'The trade road is clear? Hmph. You are efficient. Take this for your trouble.'" << std::endl;
+std::vector<std::string> NPC::give_quest_golem() {
+    std::string prefix = getName() + ": ";
+    return {
+        prefix + "'The earth itself groans. A **Stone Golem**, a relic of a forgotten age, has awakened in the southern quarry.'",
+        prefix + "'It is a force of pure destruction. This is not a hunt, warrior... this is a battle for survival. It must be stopped.'"
+    };
 }
 
-void NPC::complete_quest_infernal_imp() {
-    std::cout << getName() << ": 'You've dealt with the Imp? Good riddance. I trust you weren't outsmarted by that little fiend.'" << std::endl;
+std::vector<std::string> NPC::give_quest_final_boss() {
+    std::string prefix = getName() + ": ";
+    return {
+        prefix + "'You have overcome every trial. The Golem... the Necromancer... I... I scarcely believed it possible.'",
+        prefix + "'But the source of this darkness remains. The one who pulls the strings.'",
+        prefix + "'His name is **Malakor the Shadow Lord**, and he waits for you in the castle'",
+        prefix + "'This is the end, warrior. This is the final battle. Go. End this nightmare. For all of us.'"
+    };
 }
 
-void NPC::complete_quest_necromancer() {
-    std::cout << getName() << ": 'The Necromancer... is gone? You have done the impossible. You have lifted a shadow that could have consumed us all. The entire region owes you a great debt.'" << std::endl;
+std::vector<std::string> NPC::complete_quest_war_chief() {
+    std::string prefix = getName() + ": ";
+    return {
+        prefix + "'So, the War Chief is defeated. Good. You have done the village a service. Well done, warrior.'"
+    };
 }
 
-void NPC::complete_quest_golem() {
-    std::cout << getName() << ": 'You... stopped the Golem? To stand against such power and prevail... Your strength is truly legendary. I... I am in your debt. We are all in your debt.'" << std::endl;
+std::vector<std::string> NPC::complete_quest_orc_raider() {
+    std::string prefix = getName() + ": ";
+    return {
+        prefix + "'The trade road is clear? Hmph. You are efficient. Take this for your trouble.'"
+    };
 }
 
-void NPC::interact(vector<bool>& questStatus) {
-    if (questStatus[4]) {
-        complete_quest_necromancer();
-        //give_quest_final_boss();
-    } 
-    else if (questStatus[3]) {
-        complete_quest_infernal_imp();
-        give_quest_necromancer();
-    } 
-    else if (questStatus[2]) {
-        complete_quest_golem();
-        give_quest_infernal_imp();
-    } 
-    else if (questStatus[1]) {
-        complete_quest_orc_raider();
-        give_quest_golem();
-    } 
-    else if (questStatus[0]) {
-        complete_quest_war_chief();
-        give_quest_orc_raider();
-    } 
-    else {
-        give_quest_war_chief();
-    }
+std::vector<std::string> NPC::complete_quest_infernal_imp() {
+    std::string prefix = getName() + ": ";
+    return {
+        prefix + "'You've dealt with the Imp? Good riddance. I trust you weren't outsmarted by that little fiend.'"
+    };
+}
+
+std::vector<std::string> NPC::complete_quest_necromancer() {
+    std::string prefix = getName() + ": ";
+    return {
+        prefix + "'The Necromancer... is gone? You have done the impossible. You have lifted a shadow that could have consumed us all. The entire region owes you a great debt.'"
+    };
+}
+std::vector<std::string> NPC::complete_quest_golem() {
+    std::string prefix = getName() + ": ";
+    return {
+        prefix + "'You... stopped the Golem? To stand against such power and prevail... Your strength is truly legendary. I... I am in your debt. We are all in your debt.'"
+    };
+}
+std::vector<std::string> NPC::complete_quest_final_boss() {
+    std::string prefix = getName() + ": ";
+    return {
+        prefix + "'...He is... gone? ...The shadows... they're... receding.'",
+        prefix + "'You've done it. You have truly done it. The world is saved. I... I have no words left.'",
+        prefix + "'Thank you, hero. You have earned your rest... and our eternal gratitude.'"
+    };
 }

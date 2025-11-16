@@ -27,7 +27,7 @@ public:
 
     // Renders the current map state to the console.
     void render();
-    void get_minimap_view(Player& player, int view_width, int view_height, deque<string>&);
+    int get_minimap_view(Player& player, int view_width, int view_height, deque<string>&);
     // ## Getters ##
     // Safely gets a pointer to the tile at a specific coordinate.
     Tile* getTileAt(int x, int y);

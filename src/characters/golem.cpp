@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 BoneGolem::BoneGolem()
-    : Enemy("Bone Golem", 280, 20) 
+    : Enemy("Bone Golem", 350, 35) 
 {
     
     dialogue.push_back("*CLACK... CLACK... RATTLE*");
@@ -18,13 +18,17 @@ BoneGolem::BoneGolem(Player& player)
 
     if (playerType == "Swordsman") 
     {
-        dropLoot.push_back(make_shared<Shinketsu_Sword>());
+        dropLoot.push_back(make_shared<Dragon_Armor>());
+        dropLoot.push_back(make_shared<Elixir_Of_Life>());
     } else if (playerType == "Archer") 
     {
-        dropLoot.push_back(make_shared<Void_Embrace>());
+        dropLoot.push_back(make_shared<Divine_Aegis>());
+        dropLoot.push_back(make_shared<Angel_Blessings>());
+        dropLoot.push_back(make_shared<Dragon_Breath>());
     } else if (playerType == "Mage") 
     {
-        dropLoot.push_back(make_shared<Elder_Wand>()); 
+        dropLoot.push_back(make_shared<Aether_Robe>()); 
+        dropLoot.push_back(make_shared<Aether_Elixir>());
     }
     dialogue.push_back("*CLACK... CLACK... RATTLE*");
     dialogue.push_back("*A hollow moan...*");
@@ -40,11 +44,11 @@ void BoneGolem::specialAbility(Character& target) {
     std::cout << get_name() << " uses 'Grave Harvest'!" << std::endl;
     std::cout << "It launches jagged bones at you and pulls in dark energy!\n";
 
-    int damage_amount = 35;
+    int damage_amount = 55;
     std::cout << get_name() << " strikes you for " << damage_amount << " damage!\n";
     target.take_damage(damage_amount);
 
-    int heal_amount = 70;
+    int heal_amount = 140;
     
     if (this->health < this->maxHealth) 
     {

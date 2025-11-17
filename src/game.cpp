@@ -28,7 +28,169 @@ using namespace std;
 class AudioManager; // Forward declaration
 
 const unsigned int MAX_LOG_LINES = 10;
+struct CreditLine {
+    std::string text;
+    int color_pair; // 0 for default, or a specific defined pair
+    bool bold;
+};
+void Game::run_credits() {
+    clear();
+    int term_height, term_width;
+    getmaxyx(stdscr, term_height, term_width);
 
+    // COLOR KEY:
+    // 1: White (Standard/Borders)
+    // 2: Red   (Title)
+    // 3: Cyan  (Headers)
+    // 4: Yellow (Names)
+    // 5: Green (Thanks)
+
+    std::vector<CreditLine> credits = {
+        {"", 0, false},
+        {"==================================", 1, true},
+        {"      THE DEFEATED      ", 2, true},
+        {"==================================", 1, true},
+        {"", 0, false},
+        
+        // --- DESIGN ---
+        {"--- GAME DESIGN ---", 3, true},
+        {"[ Team 7 ]", 4, false},
+        {"", 0, false},
+
+        // --- CHARACTERS ---
+        {"--- CHARACTERS ---", 3, true},
+        {"[ Aditya (Spartan) ]", 4, false},
+        {"", 0, false},
+
+        // --- MAPS ---
+        {"--- MAP ---", 3, true},
+        {"[ Shuvam (Feonex) ]", 4, false},
+        {"", 0, false},
+
+        // --- INVENTORY ---
+        {"--- INVENTORY ---", 3, true},
+        {"[ Mukund (Magnus Kalicharan)) ]", 4, false},
+        {"", 0, false},
+
+        // --- ITEMS ---
+        {"--- ITEMS ---", 3, true},
+        {"[ Arunoday (The_fool) ]", 4, false},
+        {"", 0, false},
+
+        // --- COMBAT ---
+        {"--- COMBAT ---", 3, true},
+        {"[ Ambadas (Locked_in)]", 4, false},
+        {"", 0, false},
+
+        // --- SPECIAL THANKS ---
+        {"--- SPECIAL THANKS ---", 3, true},
+        {"PDCurses Team", 5, false},
+        {"StackOverflow", 5, false},
+        {"Gemini", 5, false},
+        {"", 0, false},
+        
+        {"==================================", 1, true},
+        {"THANKS FOR PLAYING!", 2, true},
+        {"==================================", 1, true},
+        {"", 0, false}
+    };
+
+    curs_set(0); // Hide cursor
+    nodelay(stdscr, TRUE); // Non-blocking input
+
+    int total_lines = credits.size();
+    int start_row = term_height; 
+
+    // --- SCROLL LOOP ---
+    for (int offset = 0; offset < term_height + total_lines; ++offset) {
+        clear();
+
+        for (int i = 0; i < total_lines; ++i) {
+            int row = start_row + i - offset;
+
+            // Draw only if within screen bounds
+            if (row >= 0 && row < term_height) {
+                std::string text = credits[i].text;
+                int col = (term_width - text.length()) / 2;
+                if (col < 0) col = 0;
+
+                // Apply styles
+                if (credits[i].bold) attron(A_BOLD);
+                if (credits[i].color_pair > 0) attron(COLOR_PAIR(credits[i].color_pair));
+
+                mvprintw(row, col, "%s", text.c_str());
+
+                // Remove styles
+                if (credits[i].bold) attroff(A_BOLD);
+                if (credits[i].color_pair > 0) attroff(COLOR_PAIR(credits[i].color_pair));
+            }
+        }
+
+        refresh();
+
+        // Check if user pressed a key to skip
+        int ch = getch();
+        if (ch != ERR) break; 
+
+        // Control scroll speed (120ms per line move)
+        std::this_thread::sleep_for(std::chrono::milliseconds(180));
+    }
+
+    // --- EXIT SCREEN ---
+    nodelay(stdscr, FALSE);
+    clear();
+    std::string exit_msg = "F A R E W E L L   R O S E N    H E R O.";
+    mvprintw(term_height / 2, (term_width - exit_msg.length()) / 2, "%s", exit_msg.c_str());
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    std::string prompt = "[ Press any key to continue ]";
+    mvprintw(rows - 2, (cols - prompt.length()) / 2, "%s", prompt.c_str());
+    refresh();
+    getch(); // Wait for input
+    curs_set(1); // Restore cursor
+}
+void Game::play_cinematic_dialogue(const std::vector<std::string> &lines)
+{
+    clear(); // Clear the whole screen (Black background)
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+
+    // 1. Wrap text to ensure it fits on screen
+    int max_width = cols - 10; // Leave some padding
+    std::vector<std::string> wrapped_lines;
+    for (const std::string &line : lines)
+    {
+        std::vector<std::string> temp = wrap_text(line, max_width);
+        wrapped_lines.insert(wrapped_lines.end(), temp.begin(), temp.end());
+    }
+
+    // 2. Calculate starting Y position to center the block vertically
+    int start_y = (rows - wrapped_lines.size()) / 2;
+
+    // 3. Print lines
+    attron(A_BOLD);
+    for (int i = 0; i < wrapped_lines.size(); ++i)
+    {
+        int text_len = wrapped_lines[i].length();
+        int start_x = (cols - text_len) / 2; // Center horizontally
+        mvprintw(start_y + i, start_x, "%s", wrapped_lines[i].c_str());
+        if(getch())
+        {
+            continue; // Skip waiting if a key is pressed
+        }
+    }
+    attroff(A_BOLD);
+
+    // 4. Print "Continue" prompt at the bottom
+    std::string prompt = "[ Press any key to continue ]";
+    mvprintw(rows - 2, (cols - prompt.length()) / 2, "%s", prompt.c_str());
+
+    refresh();
+    
+    // 5. Wait for user input
+    nodelay(stdscr, FALSE); // Ensure blocking input
+    getch();
+}
 void Game::show_dialogue_message(const std::string &message)
 {
     // This function just sets the message that will be drawn by the dashboard
@@ -792,7 +954,7 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
 void Game::game_loop(Player &player, AudioManager &audio)
 {
     clear();
-    vector<bool> quest(5, false);
+    vector<bool> quest(6, false);
     Map stage1(player, quest, 153, 37, "../data/map/map.txt");
     printw("\n--- You find your way to a nearby village to rest. ---\n");
     bool isGameRunning = true;
@@ -1050,8 +1212,12 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
                     case 4:
                         complete_lines = this->hattori.complete_quest_necromancer();
                         break;
-                    default:
+                    case 5:
                         complete_lines = this->hattori.complete_quest_final_boss();
+                        play_cinematic_dialogue(complete_lines);
+                        run_credits();
+                        exit(0); 
+                        return;
                         break;
                     }
                     play_dialogue(complete_lines, player, map);

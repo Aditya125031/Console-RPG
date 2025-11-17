@@ -179,6 +179,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_characterOnTile = lichlord;
             requiredQuestCompleted = 4;
             m_isWalkable = false;
+            doQuest=5;
         }
         else if(displayChar=="NPC"){
             m_mapDisplayChar = "!"; 

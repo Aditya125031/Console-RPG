@@ -35,6 +35,7 @@ class Game
         std::chrono::steady_clock::time_point lastHpRegenTime;
         std::chrono::steady_clock::time_point lastManaRegenTime;
     public:
+        void run_credits();
         void game_loop(Player& player, AudioManager& audio);
         void display_welcome_message();
         void explore_forest(Player& player, Map& map, vector<bool>& quest, AudioManager& audio);
@@ -46,6 +47,7 @@ class Game
         void runInventoryMenu(Player&, Game&);
         void show_dialogue_message(const std::string& message); // <-- CORRECT
         void clear_dialogue_message();
+        void play_cinematic_dialogue(const std::vector<std::string> &lines);
         void play_dialogue(const std::vector<std::string>& lines, Player& player, Map& map);
         std::vector<DisplayItem> buildPlayerItemList(Player& player);
         NPC hattori;

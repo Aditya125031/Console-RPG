@@ -5,7 +5,7 @@
 
 StoneImp::StoneImp()
     // High health, low attack
-    : Enemy("Stone Imp", 80, 5) 
+    : Enemy("Stone Imp", 90, 9) 
 {
     originalAttackPower = attackPower; // Store initial attack power
     dialogue.push_back("*rumble*...");

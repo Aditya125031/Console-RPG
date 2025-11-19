@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 InfernalImp::InfernalImp()
-    : Enemy("Infernal Imp", 60, 18) 
+    : Enemy("Infernal Imp", 160, 20) 
 {
     dialogue.push_back("Burn, fleshling, burn!");
     dialogue.push_back("The Black Pit awaits!");

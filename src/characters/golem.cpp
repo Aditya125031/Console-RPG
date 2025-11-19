@@ -12,7 +12,7 @@ BoneGolem::BoneGolem()
     dialogue.push_back("*A hollow moan...*");
 }
 BoneGolem::BoneGolem(Player& player)
-    : Enemy("Bone Golem", 280, 20) 
+    : Enemy("Bone Golem", 350, 20) 
 {
      std::string playerType = player.get_type_string();
 

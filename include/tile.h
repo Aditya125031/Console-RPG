@@ -1,5 +1,3 @@
-// tile.h
-
 #ifndef TILE_H
 #define TILE_H
 
@@ -10,7 +8,7 @@
 #include<cmath>
 #include <limits>
 #include <chrono>
-#include <cstdlib> // Required for std::system
+#include <cstdlib> /
 #include "../include/character.h"
 #include "../include/items.h"
 using namespace std;

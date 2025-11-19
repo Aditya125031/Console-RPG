@@ -54,14 +54,14 @@ std::vector<std::string> NPC::give_quest_final_boss() {
 std::vector<std::string> NPC::complete_quest_war_chief() {
     std::string prefix = getName() + ": ";
     return {
-        prefix + "So, the War Chief is defeated. Good. You have done the village a service. Well done, warrior.'"
+        prefix + "So, the War Chief is defeated. Good. You have done the village a service. Well done, warrior."
     };
 }
 
 std::vector<std::string> NPC::complete_quest_orc_raider() {
     std::string prefix = getName() + ": ";
     return {
-        prefix + "The trade road is clear? Hmph. You are efficient. Take this for your trouble.'"
+        prefix + "The trade road is clear? Hmph. You are efficient. Take this for your trouble."
     };
 }
 

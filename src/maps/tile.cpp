@@ -281,6 +281,7 @@ bool Tile::get_isNPC(){
     return isNPC;
 }
 
+
 vector<std::shared_ptr<Item>>* Tile::getLootOnTile(){
     return m_lootOnTile;
 }

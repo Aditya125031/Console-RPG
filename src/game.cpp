@@ -264,34 +264,55 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
         case 'l':
         case 'L':
         {
-            mvprintw(row + 1, 0, "Loot item number (1-9): ");
+            mvprintw(row + 1, 0, "Press Space to auto pick up or Select Loot item number (1-9): ");
             refresh();
-            int ch_loot = getch();
-            int index = ch_loot - '1'; 
-
-            if (index >= 0 && index < lootBox.size())
+            char ch_loot = getch();
+            switch (ch_loot)
             {
-                auto itemToTake = lootBox[index];
-                bool success = player.inventory.addItem(itemToTake, 1, player, world);
+            case ' ':{
+                for(int i=0;i<lootBox.size();i++)
+                {
+                    bool success=player.inventory.addItem(lootBox[i],1,player,world);
+                    if(success)
+                    {
+                        lootBox.erase(lootBox.begin()+i);
+                        i--;
+                    }
+                }
+            break;}
+            default:{
+            int index = ch_loot - '1'; // '1' -> 0
 
-                if (success)
-                {
-                    lootBox.erase(lootBox.begin() + index);
+                if (index >= 0 && index < lootBox.size()) {
+                    auto itemToTake = lootBox[index];
+                    clear();
+                    mvprintw(0,0,"Item Description: %s", itemToTake->get_item_description().c_str());
+                    mvprintw(1,0,"Enter Y for YES");
+                    mvprintw(2,0,"Press Any Other Key for NO");
+                    char choice=getch();
+                    if(choice=='Y'||choice=='y'){
+                    bool success = player.inventory.addItem(itemToTake, 1, player, world);
+                    
+                    if (success) {
+                        lootBox.erase(lootBox.begin() + index); // Remove from loot box
+                    } else {
+                        mvprintw(row + 2, 0, "Inventory is full! Press any key...");
+                        getch(); // Pause
+                    }
+                refresh();}
+                } else {
+                    mvprintw(row + 2, 0, "Invalid number. Press any key...");
+                    getch(); // Pause
                 }
-                else
-                {
-                    mvprintw(row + 2, 0, "Inventory is full! Press any key...");
-                    getch();
-                }
+                break;
             }
-            else
-            {
-                mvprintw(row + 2, 0, "Invalid number. Press any key...");
-                getch();
-            }
-            break;
+
         }
+        break;
+    }
+        
 
+        // === DROP FROM INVENTORY ===
         case 'd':
         case 'D':
         {

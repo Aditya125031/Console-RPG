@@ -44,14 +44,12 @@ Player create_player(Game& game_world) {
     mvprintw(6, 0, "3. Mage");
     mvprintw(8, 0, "Enter choice (1-3): ");
     
-    // ⭐️ FIX: Temporarily enable line buffering for scanw
     nocbreak();
     refresh();
 
     int choice;
     scanw("%d", &choice);
 
-    // ⭐️ FIX: Restore game state
     noecho(); 
     cbreak(); 
 
@@ -74,20 +72,16 @@ Player create_player(Game& game_world) {
     return Player(game_world,playerName, playerType);
 }
 
-// This function should be called once, before starting the game loop
 void setup_curses() {
     initscr();
     
-    // --- Standard Game Terminal Setup ---
-    cbreak();   // ✅ CORRECT: Disables line buffering (reacts instantly)
-    noecho();   // ✅ CORRECT: Prevents input keys from being printed
-    keypad(stdscr, TRUE); // Enables detection of special keys
+    cbreak();   
+    noecho(); 
+    keypad(stdscr, TRUE); 
     
-    // --- Color Setup ---
     if (has_colors()) {
-        start_color(); // Starts the color system
+        start_color(); 
 
-        // Initialize the color pairs using your defined constants
         init_pair(1, COLOR_CYAN, COLOR_BLACK); 
         init_pair(2, COLOR_GREEN, COLOR_BLACK);
         init_pair(3, COLOR_BLUE, COLOR_BLACK); 
@@ -99,9 +93,6 @@ void setup_curses() {
         init_pair(9, COLOR_RED, COLOR_RED); 
     }
     
-    // The timeout below is optional, but often useful for game loops
-    // sets the waiting period for getch() in milliseconds.
-    //timeout(100); 
 }
 
 void show_welcome_screen() {

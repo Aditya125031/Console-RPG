@@ -6,7 +6,7 @@
 
 GoblinWarChief::GoblinWarChief()
     // Mini-boss stats
-    : Enemy("Goblin War Chief", 150, 14) 
+    : Enemy("Goblin War Chief", 150, 15) 
 {
     dialogue.push_back("For the Boss! Attack!");
     dialogue.push_back("You'll make a fine trophy!");

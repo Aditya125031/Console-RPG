@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 Necromancer::Necromancer()
-    : Enemy("Necromancer", 140, 18) 
+    : Enemy("Necromancer", 180, 24) 
 {
     dialogue.push_back("The dead serve me!");
     dialogue.push_back("Rise, my minions!");

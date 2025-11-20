@@ -9,12 +9,10 @@ AudioManager::~AudioManager() {
 }
 
 void AudioManager::init() {
-    // Initialize SDL Audio only
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         cout << "SDL could not initialize! SDL Error: " << SDL_GetError() << endl;
     }
 
-    // Initialize SDL_mixer for MP3 and OGG support
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
         cout << "SDL_mixer could not initialize! Mix Error: " << Mix_GetError() << endl;
     }

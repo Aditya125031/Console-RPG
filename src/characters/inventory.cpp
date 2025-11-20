@@ -1,9 +1,7 @@
 #include "../include/inventory.hpp"
 #include "../extern/pdcurses/curses.h"
-#include <algorithm> // For std::min
+#include <algorithm> 
 
-// --- FULL INCLUDES ---
-// We need the full definitions in the .cpp file
 #include "../include/items.h"
 #include "../include/player.h"
 #include "../include/game.h"
@@ -11,10 +9,8 @@ using namespace std;
 
 void Inventory::reapplyAllEquipStats(Player& player, Game& world)
 {
-    // Reset player to base stats first
     player.reset_stats(); 
     
-    // Apply stats from equipped items
     if (equippedWeapon) {
         equippedWeapon->weapon_apply_effects(player, world);
     }

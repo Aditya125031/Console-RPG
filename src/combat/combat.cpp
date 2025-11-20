@@ -29,13 +29,11 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
 {
     start();
 
-    // 1. Setup curses & ENABLE MOUSE
     nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
     noecho();
     curs_set(0);
 
-    // ENABLE MOUSE EVENTS (Click, Press, Release)
     mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
 
     auto startTime = steady_clock::now();
@@ -46,7 +44,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
     int enemyTurnCount = 0;
     bool fled = false;
 
-    // Cooldowns
     int playerNormalInterval = static_cast<int>(p.inventory.equippedWeapon->cool() * 1000);
     int playerSpecialInterval = static_cast<int>(p.inventory.equippedWeapon->sa_cool() * 1000);
     const int enemyIntervalMs = 2000;
@@ -156,7 +153,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
 
         mvprintw(startRow + 4, startCol, "----------------------------------------");
 
-        // === MENU (Updated) ===
         mvprintw(maxH - 5, 2, "[ CONTROLS ]");
         mvprintw(maxH - 4, 2, "[L-CLICK] Normal Attack");
         mvprintw(maxH - 3, 2, "[R-CLICK] Special Attack");
@@ -170,9 +166,7 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
     {
         auto now = steady_clock::now();
         int ch = getch();
-        MEVENT event; // Structure to hold mouse data
-
-        // === PLAYER FLEE (Spacebar) ===
+        MEVENT event; 
         if (ch == ' ')
         {
             drawCombatState(p.get_name() + " flees from battle!");
@@ -182,7 +176,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
             break;
         }
 
-        // === INVENTORY ===
         if (ch == 'i' || ch == 'I')
         {
             nodelay(stdscr, FALSE);
@@ -190,19 +183,16 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
             nodelay(stdscr, TRUE);
             noecho();
             curs_set(0);
-            mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL); // Re-enable mouse just in case
+            mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL); 
             if (!p.isAlive())
                 break;
             continue;
         }
-
-        // === MOUSE INPUT HANDLING ===
         if (ch == KEY_MOUSE)
         {
             if (nc_getmouse(&event) == OK)
             {
 
-                // === LEFT CLICK (Normal Attack) ===
                 if (event.bstate & BUTTON1_CLICKED)
                 {
                     auto sinceNormal = duration_cast<milliseconds>(now - lastPlayerNormal).count();
@@ -215,8 +205,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
                         snprintf(msg, sizeof(msg), "%s strikes %s!", p.get_name().c_str(), e.get_name().c_str());
                         drawCombatState(std::string(msg));
 
-                        // this_thread::sleep_for(milliseconds(700));
-                        // flushinp(); // Flush buffer to prevent accidental double clicks
                     }
                     else
                     {
@@ -226,9 +214,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
                         drawCombatState(std::string(msg));
                     }
                 }
-
-                // === RIGHT CLICK (Special Attack) ===
-                // Note: Button 3 is usually Right Click in Curses
                 else if (event.bstate & BUTTON3_CLICKED)
                 {
                     if (p.inventory.equippedWeapon->special)
@@ -242,9 +227,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
                             char msg[100];
                             snprintf(msg, sizeof(msg), "%s uses SPECIAL!", p.get_name().c_str());
                             drawCombatState(std::string(msg));
-
-                            // this_thread::sleep_for(milliseconds(900));
-                            // flushinp();
                         }
                         else
                         {
@@ -262,8 +244,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
                 }
             }
         }
-
-        // === ENEMY AUTONOMOUS ACTION ===
         auto sinceEnemy = duration_cast<milliseconds>(now - lastEnemyAction).count();
         if (sinceEnemy >= enemyIntervalMs && e.isAlive())
         {
@@ -298,15 +278,10 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
                 }
             }
             lastEnemyAction = now;
-            //this_thread::sleep_for(milliseconds(400));
         }
 
-        // === IDLE STATE UPDATE ===
         drawCombatState("");
-        //this_thread::sleep_for(milliseconds(100));
     }
-
-    // === END PHASE ===
     int result = 0;
     std::string endMsg;
 
@@ -327,8 +302,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
     }
 
     drawCombatState(endMsg);
-    //this_thread::sleep_for(milliseconds(2000));
-    //flushinp();
     end();
 
     nodelay(stdscr, FALSE);

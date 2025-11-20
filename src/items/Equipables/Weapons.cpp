@@ -42,7 +42,7 @@ int Weapon::get_weapon_mana()
 
 bool Weapon::can_use()
 {
-    auto now = std::chrono::steady_clock::now(); // used auto becuase Deduce the type of now automatically from whatever std::chrono::steady_clock::now() returns
+    auto now = std::chrono::steady_clock::now();
     auto dif = std::chrono::duration_cast<std::chrono::duration<double>>(now-last_use);
     return dif.count() >= weapon_cooldown;
 }
@@ -134,7 +134,7 @@ void Soul_Reaper::special_attack(Player& player, Character& enemy, Game& world)
 
         int damage = player.get_attack_power() * damage_multiplier;
         enemy.take_damage(damage);
-        player.use_mana(12);
+        player.use_mana(20);
 
         world.add_log_message("Soul Reaper's 'SOUL HARVEST' unleashed! Dealt " + to_string(damage) + " damage to the enemy.");
         world.add_log_message("Player healed for 20 health.");
@@ -162,7 +162,7 @@ void God_Slayer::special_attack(Player& player, Character& enemy, Game& world)
 
         int damage = player.get_attack_power() * 2.5;
         enemy.take_damage(damage);
-        player.use_mana(15);
+        player.use_mana(30);
         player.add_health(30);
 
         world.add_log_message("God Slayer's 'DIVINE SLASH' unleashed! Dealt " + to_string(damage) + " damage to the enemy.");
@@ -219,7 +219,7 @@ void Void_Embrace::special_attack(Player& player, Character& enemy, Game& world)
         int base_damage = player.get_attack_power();
         int total_damage = base_damage * void_multiplier;
         enemy.take_damage(total_damage);
-        player.use_mana(25);
+        player.use_mana(40);
 
         world.add_log_message("Dealt " + to_string(total_damage) + " void damage.");
         world.add_log_message("Mana consumed: 25, Remaining: " + to_string(player.get_health()) + "/" + to_string(player.get_max_health()));
@@ -270,7 +270,7 @@ void Oblivion_Shard::special_attack(Player& player, Character& enemy, Game& worl
         int damage = base_damage * damage_multiplier;
         
         enemy.take_damage(damage);
-        player.use_mana(35);
+        player.use_mana(65);
 
         world.add_log_message("Oblivion deals " + to_string(damage) + " damage!");
         world.add_log_message("Mana consumed: 45, Remaining: " + to_string(player.get_mana()) + "/" + to_string(player.get_max_mana()));
@@ -298,7 +298,7 @@ void Orb_of_Avarice::special_attack(Player& player, Character& enemy, Game& worl
 
         int damage = player.get_attack_power() * 2.0;
         enemy.take_damage(damage);
-        player.use_mana(30);
+        player.use_mana(50);
         player.add_health(15);
 
         world.add_log_message("Orb of Avarice's 'GREED'S FURY' unleashed! Dealt " + to_string(damage) + " damage to the enemy.");
@@ -327,7 +327,7 @@ void Eclipse_Striker::special_attack(Player& player, Character& enemy, Game& wor
 
         int damage = player.get_attack_power() * 1.75;
         enemy.take_damage(damage);
-        player.use_mana(20);
+        player.use_mana(30);
         player.add_health(10);
 
         world.add_log_message("Eclipse Striker's 'SOLAR FLARE' unleashed! Dealt " + to_string(damage) + " damage to the enemy.");

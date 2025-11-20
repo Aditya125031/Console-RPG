@@ -3,7 +3,7 @@
 
 class Imp : public Enemy {
 public:
-    Imp(); // Constructor
+    Imp(); 
     Imp(Player& player);
     void triggerDialogue() const override;
 };

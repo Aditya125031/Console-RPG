@@ -9,19 +9,16 @@ AudioManager::~AudioManager() {
 }
 
 void AudioManager::init() {
-    // Initialize SDL Audio only
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         cout << "SDL could not initialize! SDL Error: " << SDL_GetError() << endl;
     }
 
-    // Initialize SDL_mixer for MP3 and OGG support
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
         cout << "SDL_mixer could not initialize! Mix Error: " << Mix_GetError() << endl;
     }
 }
 
 void AudioManager::cleanup() {
-    // Free all loaded SFX
     for (auto const& [key, chunk] : sfxMap) {
         Mix_FreeChunk(chunk);
     }
@@ -36,7 +33,6 @@ void AudioManager::cleanup() {
 }
 
 void AudioManager::playMusic(const string& filePath) {
-    // If music is already playing, stop it
     stopMusic();
 
     // Load new music
@@ -46,7 +42,6 @@ void AudioManager::playMusic(const string& filePath) {
         return;
     }
 
-    // Play music (-1 means loop forever)
     Mix_PlayMusic(currentMusic, -1);
 }
 
@@ -61,9 +56,7 @@ void AudioManager::stopMusic() {
 }
 
 void AudioManager::playSFX(const string& filePath) {
-    // Check if we already loaded this file
     if (sfxMap.find(filePath) == sfxMap.end()) {
-        // Not found, load it now
         Mix_Chunk* newSFX = Mix_LoadWAV(filePath.c_str());
         if (newSFX == nullptr) {
              cout << "Failed to load SFX! Mix Error: " << Mix_GetError() << endl;
@@ -72,6 +65,5 @@ void AudioManager::playSFX(const string& filePath) {
         sfxMap[filePath] = newSFX;
     }
 
-    // Play it on the first free channel (don't loop, so 0)
     Mix_PlayChannel(-1, sfxMap[filePath], 0);
 }

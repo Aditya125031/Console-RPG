@@ -8,9 +8,8 @@
 #include <limits>
 #include <thread>
 #include <chrono>
-#include <cstdlib> // Required for std::system
-//#include <windows.h> // Not needed with curses
-#include "../extern/pdcurses/curses.h" // Include the curses header
+#include <cstdlib> 
+#include "../extern/pdcurses/curses.h"
 #include "../include/tile.h"
 #include "../include/map.h"
 #include "../include/character.h"
@@ -20,16 +19,13 @@
 #include "../include/enemy.h"
 #include"../include/inventory.hpp"
 
-// Note: I'm assuming 'PlayerType' is an enum defined in one of your headers.
 
 Player create_player(Game& game_world) {
     clear();
-    mvprintw(0, 0, "Welcome to Text RPG!");
+    mvprintw(0, 0, "Welcome to the Game - Create Your Character!");
 
-    // --- NAME INPUT ---
     mvprintw(1, 0, "Please enter your hero's name: ");
     
-    // ⭐️ FIX: Temporarily turn on echo() to see typing
     echo(); 
     refresh();
 

@@ -5,7 +5,6 @@
 #include <cstdlib>
 
 GoblinWarChief::GoblinWarChief()
-    // Mini-boss stats
     : Enemy("Goblin War Chief", 150, 15) 
 {
     dialogue.push_back("For the Boss! Attack!");
@@ -13,8 +12,7 @@ GoblinWarChief::GoblinWarChief()
     dialogue.push_back("More guts! More glory!");
 }
 GoblinWarChief::GoblinWarChief(Player& player)
-    // Mini-boss stats
-    : Enemy("Goblin War Chief", 150, 14) 
+    : Enemy("Goblin War Chief", 150, 15) 
 {
      std::string playerType = player.get_type_string();
 

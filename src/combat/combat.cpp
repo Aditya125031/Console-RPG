@@ -176,7 +176,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
             break;
         }
 
-        // === INVENTORY ===
         if (ch == 'i' || ch == 'I')
         {
             nodelay(stdscr, FALSE);
@@ -283,8 +282,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
 
         drawCombatState("");
     }
-
-    // === END PHASE ===
     int result = 0;
     std::string endMsg;
 

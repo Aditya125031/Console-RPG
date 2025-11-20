@@ -12,5 +12,4 @@ public:
     virtual void triggerDialogue() const override;
     virtual void specialAbility(Character& target) override;
 };
-
-#endif //GOBLIN_H
+#endif

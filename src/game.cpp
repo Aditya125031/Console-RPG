@@ -8,12 +8,9 @@
 #include <chrono>
 #include <sstream>
 #include "../extern/pdcurses/curses.h"
-// REMOVE: #include <iostream>
-// REMOVE: #include <windows.h>
 
 using namespace std;
 
-// Your project headers (kept for completeness)
 #include "../include/combat.hpp"
 #include "../include/inventory.hpp"
 #include "../include/game.h"
@@ -25,25 +22,18 @@ using namespace std;
 #include "../include/goblin.h"
 #include "../include/npc.h"
 
-class AudioManager; // Forward declaration
+class AudioManager; 
 
 const unsigned int MAX_LOG_LINES = 10;
 struct CreditLine {
     std::string text;
-    int color_pair; // 0 for default, or a specific defined pair
+    int color_pair; 
     bool bold;
 };
 void Game::run_credits() {
     clear();
     int term_height, term_width;
     getmaxyx(stdscr, term_height, term_width);
-
-    // COLOR KEY:
-    // 1: White (Standard/Borders)
-    // 2: Red   (Title)
-    // 3: Cyan  (Headers)
-    // 4: Yellow (Names)
-    // 5: Green (Thanks)
 
     std::vector<CreditLine> credits = {
         {"", 0, false},
@@ -52,37 +42,30 @@ void Game::run_credits() {
         {"==================================", 1, true},
         {"", 0, false},
         
-        // --- DESIGN ---
         {"--- GAME DESIGN ---", 3, true},
         {"[ Team 7 ]", 4, false},
         {"", 0, false},
 
-        // --- CHARACTERS ---
         {"--- CHARACTERS ---", 3, true},
         {"[ Aditya (Spartan) ]", 4, false},
         {"", 0, false},
 
-        // --- MAPS ---
         {"--- MAP ---", 3, true},
         {"[ Shuvam (Feonex) ]", 4, false},
         {"", 0, false},
 
-        // --- INVENTORY ---
         {"--- INVENTORY ---", 3, true},
         {"[ Mukund (Magnus Kalicharan)) ]", 4, false},
         {"", 0, false},
 
-        // --- ITEMS ---
         {"--- ITEMS ---", 3, true},
         {"[ Arunoday (The_fool) ]", 4, false},
         {"", 0, false},
 
-        // --- COMBAT ---
         {"--- COMBAT ---", 3, true},
         {"[ Ambadas (Locked_in)]", 4, false},
         {"", 0, false},
 
-        // --- SPECIAL THANKS ---
         {"--- SPECIAL THANKS ---", 3, true},
         {"PDCurses Team", 5, false},
         {"StackOverflow", 5, false},
@@ -95,32 +78,28 @@ void Game::run_credits() {
         {"", 0, false}
     };
 
-    curs_set(0); // Hide cursor
-    nodelay(stdscr, TRUE); // Non-blocking input
+    curs_set(0);
+    nodelay(stdscr, TRUE); 
 
     int total_lines = credits.size();
     int start_row = term_height; 
 
-    // --- SCROLL LOOP ---
     for (int offset = 0; offset < term_height + total_lines; ++offset) {
         clear();
 
         for (int i = 0; i < total_lines; ++i) {
             int row = start_row + i - offset;
 
-            // Draw only if within screen bounds
             if (row >= 0 && row < term_height) {
                 std::string text = credits[i].text;
                 int col = (term_width - text.length()) / 2;
                 if (col < 0) col = 0;
 
-                // Apply styles
                 if (credits[i].bold) attron(A_BOLD);
                 if (credits[i].color_pair > 0) attron(COLOR_PAIR(credits[i].color_pair));
 
                 mvprintw(row, col, "%s", text.c_str());
 
-                // Remove styles
                 if (credits[i].bold) attroff(A_BOLD);
                 if (credits[i].color_pair > 0) attroff(COLOR_PAIR(credits[i].color_pair));
             }
@@ -128,15 +107,12 @@ void Game::run_credits() {
 
         refresh();
 
-        // Check if user pressed a key to skip
         int ch = getch();
         if (ch != ERR) break; 
 
-        // Control scroll speed (120ms per line move)
         std::this_thread::sleep_for(std::chrono::milliseconds(180));
     }
 
-    // --- EXIT SCREEN ---
     nodelay(stdscr, FALSE);
     clear();
     std::string exit_msg = "F A R E W E L L   R O S E N    H E R O.";
@@ -146,17 +122,16 @@ void Game::run_credits() {
     std::string prompt = "[ Press any key to continue ]";
     mvprintw(rows - 2, (cols - prompt.length()) / 2, "%s", prompt.c_str());
     refresh();
-    getch(); // Wait for input
-    curs_set(1); // Restore cursor
+    getch(); 
+    curs_set(1);
 }
 void Game::play_cinematic_dialogue(const std::vector<std::string> &lines)
 {
-    clear(); // Clear the whole screen (Black background)
+    clear(); 
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    // 1. Wrap text to ensure it fits on screen
-    int max_width = cols - 10; // Leave some padding
+    int max_width = cols - 10; 
     std::vector<std::string> wrapped_lines;
     for (const std::string &line : lines)
     {
@@ -164,36 +139,31 @@ void Game::play_cinematic_dialogue(const std::vector<std::string> &lines)
         wrapped_lines.insert(wrapped_lines.end(), temp.begin(), temp.end());
     }
 
-    // 2. Calculate starting Y position to center the block vertically
     int start_y = (rows - wrapped_lines.size()) / 2;
 
-    // 3. Print lines
     attron(A_BOLD);
     for (int i = 0; i < wrapped_lines.size(); ++i)
     {
         int text_len = wrapped_lines[i].length();
-        int start_x = (cols - text_len) / 2; // Center horizontally
+        int start_x = (cols - text_len) / 2; 
         mvprintw(start_y + i, start_x, "%s", wrapped_lines[i].c_str());
         if(getch())
         {
-            continue; // Skip waiting if a key is pressed
+            continue; 
         }
     }
     attroff(A_BOLD);
 
-    // 4. Print "Continue" prompt at the bottom
     std::string prompt = "[ Press any key to continue ]";
     mvprintw(rows - 2, (cols - prompt.length()) / 2, "%s", prompt.c_str());
 
     refresh();
     
-    // 5. Wait for user input
-    nodelay(stdscr, FALSE); // Ensure blocking input
+    nodelay(stdscr, FALSE);
     getch();
 }
 void Game::show_dialogue_message(const std::string &message)
 {
-    // This function just sets the message that will be drawn by the dashboard
     int term_width, term_height;
     getmaxyx(stdscr, term_height, term_width);
     int dialogue_width = term_width - 10;
@@ -201,7 +171,6 @@ void Game::show_dialogue_message(const std::string &message)
         dialogue_width = 20;
     std::vector<std::string> wrapped_lines = wrap_text(message, dialogue_width);
 
-    // 2. Add the wrapped lines to the CORRECT vector
     current_dialogue_lines.insert(current_dialogue_lines.end(), wrapped_lines.begin(), wrapped_lines.end());
 }
 
@@ -214,15 +183,9 @@ void Game::add_log_message(std::string message)
     }
 }
 
-// In Game.cpp
-// (Make sure you have the DisplayItem struct here)
-
-// Helper function to build the player's item list (same as before)
 std::vector<DisplayItem> Game::buildPlayerItemList(Player &player)
 {
     std::vector<DisplayItem> itemMap;
-
-    // Add Equipment
     if (player.inventory.equippedWeapon)
     {
         itemMap.push_back({player.inventory.equippedWeapon->get_item_name() + " (Equipped)",
@@ -234,7 +197,6 @@ std::vector<DisplayItem> Game::buildPlayerItemList(Player &player)
                            "EQUIPPED_ARMOR", "ARMOR", player.inventory.equippedArmor->get_item_description() + " \nExtra Health : " + to_string(player.inventory.equippedArmor->get_armor_health()) + "\nExtra Mana : " + to_string(player.inventory.equippedArmor->get_armor_mana()) + "\n"});
     }
 
-    // 2. Add Bag Items (using public members)
     if (player.inventory.inventoryWeapon)
     {
         itemMap.push_back({player.inventory.inventoryWeapon->get_item_name() + " (Bag)",
@@ -261,7 +223,7 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                                            vector<shared_ptr<Item>> &lootBox)
 {
     bool inLootMenu = true;
-    Game &world = *this; // For inventory functions
+    Game &world = *this; 
 
     while (inLootMenu)
     {
@@ -305,7 +267,7 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
             mvprintw(row + 1, 0, "Loot item number (1-9): ");
             refresh();
             int ch_loot = getch();
-            int index = ch_loot - '1'; // '1' -> 0
+            int index = ch_loot - '1'; 
 
             if (index >= 0 && index < lootBox.size())
             {
@@ -314,7 +276,7 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
 
                 if (success)
                 {
-                    lootBox.erase(lootBox.begin() + index); // Remove from loot box
+                    lootBox.erase(lootBox.begin() + index);
                 }
                 else
                 {
@@ -330,7 +292,6 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
             break;
         }
 
-        // Drop from inventory
         case 'd':
         case 'D':
         {
@@ -379,7 +340,6 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                         droppedItem = player.inventory.removePotionForLoot(itemToDrop.itemID, world);
                     }
 
-                    // If we successfully removed it, add it to the loot box
                     if (droppedItem != nullptr)
                     {
                         lootBox.push_back(droppedItem);
@@ -389,7 +349,7 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
             else
             {
                 mvprintw(row + 2, 0, "Invalid letter. Press any key...");
-                getch(); // Pause
+                getch(); 
             }
             break;
         } 
@@ -578,7 +538,6 @@ void Game::display_dashboard(Player &player, Map &map)
     int i = 0;
     for (const std::string &line : current_dialogue_lines)
     {
-        // Center each line individually
         int start_x = (term_width - line.length()) / 2;
         if (start_x < 0)
         {
@@ -804,7 +763,6 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
     {
         auto now = std::chrono::steady_clock::now();
 
-        // Health Regeneration logic
         auto elapsedHpSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - lastHpRegenTime).count();
         int hpInterval = player.getHPRegenTime();
         if (elapsedHpSeconds >= hpInterval && hpInterval > 0)
@@ -818,7 +776,6 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
             lastHpRegenTime = now;
         }
 
-        // --- MANA REGEN LOGIC ---
         auto elapsedManaSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - lastManaRegenTime).count();
         int manaInterval = player.getManaRegenTime();
 
@@ -987,11 +944,11 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
                 dialogue_lines = hattori_ptr->give_quest_infernal_imp();
             }
             else if (!quest[3])
-            { // <-- FIXED
+            { 
                 dialogue_lines = hattori_ptr->give_quest_golem();
             }
             else if (!quest[4])
-            { // <-- FIXED
+            { 
                 dialogue_lines = hattori_ptr->give_quest_necromancer();
             }
             else if (quest[3] && quest[4])
@@ -1005,7 +962,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
 
             play_dialogue(dialogue_lines, player, map);
 
-            return; // Stop the move
+            return; 
         }
         if (!newTile->getQuestStatus(quest))
         {

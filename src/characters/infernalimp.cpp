@@ -12,7 +12,7 @@ InfernalImp::InfernalImp()
     dialogue.push_back("*giggles manically*");
 }
 InfernalImp::InfernalImp(Player& player)
-    : Enemy("Infernal Imp", 60, 18) 
+    : Enemy("Infernal Imp", 160, 18) 
 {
      std::string playerType = player.get_type_string();
 

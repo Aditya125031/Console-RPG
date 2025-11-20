@@ -149,9 +149,23 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
         case 'l':
         case 'L':
         {
-            mvprintw(row + 1, 0, "Loot item number (1-9): ");
+            mvprintw(row + 1, 0, "Press Space to auto pick up or Select Loot item number (1-9): ");
             refresh();
-            int ch_loot = getch();
+            char ch_loot = getch();
+            switch (ch_loot)
+            {
+            case ' ':{
+                for(int i=0;i<lootBox.size();i++)
+                {
+                    bool success=player.inventory.addItem(lootBox[i],1,player,world);
+                    if(success)
+                    {
+                        lootBox.erase(lootBox.begin()+i);
+                        i--;
+                    }
+                }
+            break;}
+            default:{
             int index = ch_loot - '1'; // '1' -> 0
 
                 if (index >= 0 && index < lootBox.size()) {
@@ -177,6 +191,11 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                 }
                 break;
             }
+
+        }
+        break;
+    }
+        
 
         // === DROP FROM INVENTORY ===
         case 'd':

@@ -9,7 +9,6 @@
 #include <chrono>
 #include "character.h"
 #include "player.h"
-// #include "game.h"
 class Game;
 class Player;
 using namespace std;
@@ -319,6 +318,7 @@ class Runeforged_Armor : public Armor
             item_description = "Armor etched with ancient runes that bolster the wearer's vitality and resilience.";
             item_name = "Runeforged Armor";
             armor_health = 55;
+            armor_mana=10;
             code=2;
         }
 };

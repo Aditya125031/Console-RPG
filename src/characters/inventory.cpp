@@ -1,9 +1,7 @@
 #include "../include/inventory.hpp"
 #include "../extern/pdcurses/curses.h"
-#include <algorithm> // For std::min
+#include <algorithm> 
 
-// --- FULL INCLUDES ---
-// We need the full definitions in the .cpp file
 #include "../include/items.h"
 #include "../include/player.h"
 #include "../include/game.h"
@@ -11,10 +9,8 @@ using namespace std;
 
 void Inventory::reapplyAllEquipStats(Player& player, Game& world)
 {
-    // Reset player to base stats first
     player.reset_stats(); 
     
-    // Apply stats from equipped items
     if (equippedWeapon) {
         equippedWeapon->weapon_apply_effects(player, world);
     }
@@ -78,6 +74,7 @@ if (potion)
     // Check if this potion type is tracked in the max quantity map 'm'
     if (m.count(name) == 0) {
         world.add_log_message("Error: Potion '" + name + "' has no max stack size.");
+        return false;
         // We will add it anyway, but you should add it to your 'm' map
         // in the Inventory.h constructor.
     }
@@ -94,7 +91,7 @@ if (potion)
     
     if (currentQuantity >= maxQuantity) {
         world.add_log_message(name + " stack is full!");
-        return true; // Not an error, just can't add more
+        return false; // Not an error, just can't add more
     }
     
     // Calculate how many we can actually add

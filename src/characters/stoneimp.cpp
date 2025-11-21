@@ -4,16 +4,14 @@
 #include <cstdlib>
 
 StoneImp::StoneImp()
-    // High health, low attack
-    : Enemy("Stone Imp", 80, 5) 
+    : Enemy("Stone Imp", 90, 9) 
 {
-    originalAttackPower = attackPower; // Store initial attack power
+    originalAttackPower = attackPower;
     dialogue.push_back("*rumble*...");
     dialogue.push_back("Flesh is weak. Stone is eternal.");
     dialogue.push_back("You cannot break me.");
 }
 StoneImp::StoneImp(Player& player)
-    // High health, low attack
     : Enemy("Stone Imp", 80, 5) 
 {
      std::string playerType = player.get_type_string();
@@ -28,7 +26,7 @@ StoneImp::StoneImp(Player& player)
     {
         dropLoot.push_back(make_shared<Mystic_Veil>()); 
     }
-    originalAttackPower = attackPower; // Store initial attack power
+    originalAttackPower = attackPower;
     dialogue.push_back("*rumble*...");
     dialogue.push_back("Flesh is weak. Stone is eternal.");
     dialogue.push_back("You cannot break me.");

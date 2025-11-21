@@ -8,12 +8,9 @@
 #include <chrono>
 #include <sstream>
 #include "../extern/pdcurses/curses.h"
-// REMOVE: #include <iostream>
-// REMOVE: #include <windows.h>
 
 using namespace std;
 
-// Your project headers (kept for completeness)
 #include "../include/combat.hpp"
 #include "../include/inventory.hpp"
 #include "../include/game.h"
@@ -25,11 +22,146 @@ using namespace std;
 #include "../include/goblin.h"
 #include "../include/npc.h"
 
-class AudioManager; // Forward declaration
+class AudioManager; 
+struct CreditLine {
+    std::string text;
+    int color_pair; 
+    bool bold;
+};
+void Game::run_credits() {
+    clear();
+    int term_height, term_width;
+    getmaxyx(stdscr, term_height, term_width);
 
+    std::vector<CreditLine> credits = {
+        {"", 0, false},
+        {"==================================", 1, true},
+        {"      THE DEFEATED      ", 2, true},
+        {"==================================", 1, true},
+        {"", 0, false},
+        
+        {"--- GAME DESIGN ---", 3, true},
+        {"[ Team 7 ]", 4, false},
+        {"", 0, false},
+
+        {"--- CHARACTERS ---", 3, true},
+        {"[ Aditya (Spartan) ]", 4, false},
+        {"", 0, false},
+
+        {"--- MAP ---", 3, true},
+        {"[ Shuvam (Feonex) ]", 4, false},
+        {"", 0, false},
+
+        {"--- INVENTORY ---", 3, true},
+        {"[ Mukund (Magnus Kalicharan)) ]", 4, false},
+        {"", 0, false},
+
+        {"--- ITEMS ---", 3, true},
+        {"[ Arunoday (The_fool) ]", 4, false},
+        {"", 0, false},
+
+        {"--- COMBAT ---", 3, true},
+        {"[ Ambadas (Locked_in)]", 4, false},
+        {"", 0, false},
+
+        {"--- SPECIAL THANKS ---", 3, true},
+        {"PDCurses Team", 5, false},
+        {"StackOverflow", 5, false},
+        {"Gemini", 5, false},
+        {"", 0, false},
+        
+        {"==================================", 1, true},
+        {"THANKS FOR PLAYING!", 2, true},
+        {"==================================", 1, true},
+        {"", 0, false}
+    };
+
+    curs_set(0);
+    nodelay(stdscr, TRUE); 
+
+    int total_lines = credits.size();
+    int start_row = term_height; 
+
+    for (int offset = 0; offset < term_height + total_lines; ++offset) {
+        clear();
+
+        for (int i = 0; i < total_lines; ++i) {
+            int row = start_row + i - offset;
+
+            if (row >= 0 && row < term_height) {
+                std::string text = credits[i].text;
+                int col = (term_width - text.length()) / 2;
+                if (col < 0) col = 0;
+
+                if (credits[i].bold) attron(A_BOLD);
+                if (credits[i].color_pair > 0) attron(COLOR_PAIR(credits[i].color_pair));
+
+                mvprintw(row, col, "%s", text.c_str());
+
+                if (credits[i].bold) attroff(A_BOLD);
+                if (credits[i].color_pair > 0) attroff(COLOR_PAIR(credits[i].color_pair));
+            }
+        }
+
+        refresh();
+
+        int ch = getch();
+        if (ch != ERR) break; 
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(180));
+    }
+
+    nodelay(stdscr, FALSE);
+    clear();
+    std::string exit_msg = "F A R E W E L L   R O S E N    H E R O.";
+    mvprintw(term_height / 2, (term_width - exit_msg.length()) / 2, "%s", exit_msg.c_str());
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    std::string prompt = "[ Press any key to continue ]";
+    mvprintw(rows - 2, (cols - prompt.length()) / 2, "%s", prompt.c_str());
+    refresh();
+    getch(); 
+    curs_set(1);
+}
+void Game::play_cinematic_dialogue(const std::vector<std::string> &lines)
+{
+    clear(); 
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+
+    int max_width = cols - 10; 
+    std::vector<std::string> wrapped_lines;
+    for (const std::string &line : lines)
+    {
+        std::vector<std::string> temp = wrap_text(line, max_width);
+        wrapped_lines.insert(wrapped_lines.end(), temp.begin(), temp.end());
+    }
+
+    int start_y = (rows - wrapped_lines.size()) / 2;
+
+    attron(A_BOLD);
+    for (int i = 0; i < wrapped_lines.size(); ++i)
+    {
+        int text_len = wrapped_lines[i].length();
+        int start_x = (cols - text_len) / 2; 
+        mvprintw(start_y + i, start_x, "%s", wrapped_lines[i].c_str());
+        if(getch())
+        {
+            continue; 
+        }
+    }
+    attroff(A_BOLD);
+
+    std::string prompt = "[ Press any key to continue ]";
+    mvprintw(rows - 2, (cols - prompt.length()) / 2, "%s", prompt.c_str());
+
+    refresh();
+    
+    nodelay(stdscr, FALSE);
+    getch();
+}
 void Game::show_dialogue_message(const std::string &message)
 {
-    // This function just sets the message that will be drawn by the dashboard
     int term_width, term_height;
     getmaxyx(stdscr, term_height, term_width);
     int dialogue_width = term_width - 10;
@@ -37,7 +169,6 @@ void Game::show_dialogue_message(const std::string &message)
         dialogue_width = 20;
     std::vector<std::string> wrapped_lines = wrap_text(message, dialogue_width);
 
-    // 2. Add the wrapped lines to the CORRECT vector
     current_dialogue_lines.insert(current_dialogue_lines.end(), wrapped_lines.begin(), wrapped_lines.end());
 }
 
@@ -53,8 +184,6 @@ void Game::add_log_message(std::string message)
 std::vector<DisplayItem> Game::buildPlayerItemList(Player &player)
 {
     std::vector<DisplayItem> itemMap;
-
-    // Add Equipment
     if (player.inventory.equippedWeapon)
     {
         itemMap.push_back({player.inventory.equippedWeapon->get_item_name() + " (Equipped)",
@@ -66,7 +195,6 @@ std::vector<DisplayItem> Game::buildPlayerItemList(Player &player)
                            "EQUIPPED_ARMOR", "ARMOR", player.inventory.equippedArmor->get_item_description() + " \nExtra Health : " + to_string(player.inventory.equippedArmor->get_armor_health()) + "\nExtra Mana : " + to_string(player.inventory.equippedArmor->get_armor_mana()) + "\n"});
     }
 
-    // 2. Add Bag Items (using public members)
     if (player.inventory.inventoryWeapon)
     {
         itemMap.push_back({player.inventory.inventoryWeapon->get_item_name() + " (Bag)",
@@ -161,7 +289,7 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                                            vector<shared_ptr<Item>> &lootBox)
 {
     bool inLootMenu = true;
-    Game &world = *this; // For inventory functions
+    Game &world = *this; 
 
     // --- State Management ---
     enum class LootFocus
@@ -464,28 +592,26 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                 }
             }
             break;
-        } // end switch
-    } // end while
+        } 
+        } 
+    } 
 
     return lootBox;
 }
+
 
 void Game::clear_dialogue_message()
 {
     current_dialogue_lines.clear();
 }
 
-bool Game::showGameOverScreen()
+bool Game::showGameOverScreen(AudioManager &audio)
 {
-    // Ensure we are in blocking mode for the menu
+    audio.playMusic("../data/audio/game_end.mp3");
     nodelay(stdscr, FALSE);
-    curs_set(0); // Hide cursor
-
+    curs_set(0); 
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
-
-    // ASCII Art for "DEFEATED"
-    // We will print this in RED/BOLD
     const std::vector<std::string> title = {
         "  ____   _____ _____  _____     _   _____ _____  ____  ",
         " |  _ \\ | ____|  ___|| ____|   / \\ |_   _| ____||  _ \\ ",
@@ -498,7 +624,6 @@ bool Game::showGameOverScreen()
     int startY = (rows / 2) - 8;
     int startX = (cols - title[0].length()) / 2;
 
-    // Menu Options
     const std::string options[2] = {
         "Retry from Last Checkpoint",
         "Exit Game"};
@@ -508,8 +633,7 @@ bool Game::showGameOverScreen()
     {
         clear();
 
-        // --- DRAW BLOOD BORDER ---
-        attron(COLOR_PAIR(4)); // Red
+        attron(COLOR_PAIR(4)); 
         for (int x = 0; x < cols; x++)
         {
             mvaddch(0, x, ACS_CKBOARD);
@@ -522,8 +646,6 @@ bool Game::showGameOverScreen()
         }
         attroff(COLOR_PAIR(4));
 
-        // --- DRAW TITLE ---
-        // Use COLOR_PAIR(4) (Red) and A_BOLD for the "Bloody" look
         attron(COLOR_PAIR(4) | A_BOLD);
         for (size_t i = 0; i < title.size(); ++i)
         {
@@ -531,7 +653,6 @@ bool Game::showGameOverScreen()
         }
         attroff(COLOR_PAIR(4) | A_BOLD);
 
-        // --- DRAW MENU ---
         int menuY = startY + title.size() + 4;
         for (int i = 0; i < 2; ++i)
         {
@@ -540,21 +661,18 @@ bool Game::showGameOverScreen()
 
             if (i == choice)
             {
-                // Highlight selected option (Reverse video or White on Red)
                 attron(A_REVERSE | A_BOLD);
                 mvprintw(menuY + (i * 2), optX - 2, "> %s <", options[i].c_str());
                 attroff(A_REVERSE | A_BOLD);
             }
             else
             {
-                // Dim unselected option
                 mvprintw(menuY + (i * 2), optX, "%s", options[i].c_str());
             }
         }
 
         refresh();
 
-        // --- INPUT HANDLING ---
         int ch = getch();
         switch (ch)
         {
@@ -572,12 +690,12 @@ bool Game::showGameOverScreen()
             if (choice > 1)
                 choice = 0;
             break;
-        case 10:  // Enter Key
-        case ' ': // Spacebar
+        case 10: 
+        case ' ':
             if (choice == 0)
-                return true; // Retry
+                return true; 
             else
-                return false; // Exit
+                return false;
             break;
         }
     }
@@ -598,9 +716,8 @@ void Game::display_dashboard(Player &player, Map &map)
     int left_padding = max(0, (term_width - full_len) / 2);
     int row = 0;
 
-    // Print the title centered at row 0
     mvprintw(row, left_padding, "%s", title_prefix.c_str());
-    attron(COLOR_PAIR(4) | A_BOLD); // Red for "DEFEATED"
+    attron(COLOR_PAIR(4) | A_BOLD); 
     printw("%s", title_red.c_str());
     attroff(COLOR_PAIR(4) | A_BOLD);
     printw("%s", title_suffix.c_str());
@@ -627,10 +744,8 @@ void Game::display_dashboard(Player &player, Map &map)
     attroff(COLOR_PAIR(2));
     row++;
 
-    // 4. Mana
     mvprintw(row, 0, " Mana: ");
     attron(COLOR_PAIR(1));
-    // Note: Assuming get_mana() is current and you might need a get_max_mana() later
     printw("%d/%d", player.get_mana(), player.get_max_mana());
     attroff(COLOR_PAIR(1));
     row++;
@@ -664,7 +779,6 @@ void Game::display_dashboard(Player &player, Map &map)
     int i = 0;
     for (const std::string &line : current_dialogue_lines)
     {
-        // Center each line individually
         int start_x = (term_width - line.length()) / 2;
         if (start_x < 0)
         {
@@ -684,7 +798,6 @@ std::vector<std::string> Game::wrap_text(const std::string &text, int max_width)
 
     while (ss >> word)
     {
-        // Check if the new word fits on the current line
         if (current_line.empty() || current_line.length() + word.length() + 1 <= max_width)
         {
             if (!current_line.empty())
@@ -695,12 +808,10 @@ std::vector<std::string> Game::wrap_text(const std::string &text, int max_width)
         }
         else
         {
-            // Word doesn't fit, so push the current line and start a new one
             lines.push_back(current_line);
             current_line = word;
         }
     }
-    // Add the last line
     if (!current_line.empty())
     {
         lines.push_back(current_line);
@@ -728,7 +839,6 @@ void Game::play_dialogue(const std::vector<std::string> &lines, Player &player, 
         current_dialogue_lines.push_back(line);
         display_dashboard(player, map);
         getch();
-        // --- END OF NEW LOGIC ---
     }
 }
 
@@ -1247,9 +1357,7 @@ void Game::runInventoryMenu(Player &player, Game &world)
         }
         break;
         }
-    } // end while(inInventory)
-
-    // --- 2. NEW: CLOSING MESSAGE ---
+    }
     clear();
     curs_set(0);
     midY = LINES / 2;
@@ -1271,7 +1379,6 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
 {
     add_log_message("You entered the forest.");
 
-    // 1. Start in Non-Blocking Mode (Real-time)
     nodelay(stdscr, TRUE);
 
     lastHpRegenTime = std::chrono::steady_clock::now();
@@ -1282,10 +1389,8 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
     {
         auto now = std::chrono::steady_clock::now();
 
-        // --- HP REGEN LOGIC ---
         auto elapsedHpSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - lastHpRegenTime).count();
-        int hpInterval = player.getHPRegenTime(); // Assuming this returns seconds
-
+        int hpInterval = player.getHPRegenTime();
         if (elapsedHpSeconds >= hpInterval && hpInterval > 0)
         {
             int healAmount = 1;
@@ -1297,7 +1402,6 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
             lastHpRegenTime = now;
         }
 
-        // --- MANA REGEN LOGIC ---
         auto elapsedManaSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - lastManaRegenTime).count();
         int manaInterval = player.getManaRegenTime();
 
@@ -1322,19 +1426,13 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
             continue;
         }
 
-        // 2. Get Input (Non-blocking because of nodelay above)
         int input = getch();
 
-        // 3. IF NO INPUT: Sleep briefly and Loop again to update Regen
         if (input == ERR)
         {
-            napms(50); // PDCurses specific sleep (50ms). Saves CPU.
+            napms(50);
             continue;
         }
-
-        // 4. INPUT DETECTED! SWITCH TO BLOCKING MODE IMMEDIATELY.
-        // This fixes the Loot System. Any function called below
-        // will now wait for input normally.
         nodelay(stdscr, FALSE);
 
         switch (input)
@@ -1375,15 +1473,12 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
         default:
             break;
         }
-
-        // 5. ACTION COMPLETE. SWITCH BACK TO NON-BLOCKING (REAL-TIME)
         if (inForest)
         {
             nodelay(stdscr, TRUE);
         }
     }
 
-    // Cleanup: Ensure blocking is ON when leaving the function
     nodelay(stdscr, FALSE);
 }
 
@@ -1410,7 +1505,7 @@ void Game::mvprintw_center(int y, const std::string &text)
 void Game::game_loop(Player &player, AudioManager &audio)
 {
     clear();
-    vector<bool> quest(5, false);
+    vector<bool> quest(6, false);
     Map stage1(player, quest, 153, 37, "../data/map/map.txt");
 
     // Welcome message (only shows once)
@@ -1543,7 +1638,6 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
     Tile *newTile = map.getTileAt(newx, newy);
     Tile *oldTile = map.getTileAt(entity.get_x(), entity.get_y());
     clear_dialogue_message();
-    // --- 1. Check for Character on New Tile ---
     if (newTile->getCharacter() != nullptr)
     {
         clear_dialogue_message();
@@ -1567,11 +1661,11 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
                 dialogue_lines = hattori_ptr->give_quest_infernal_imp();
             }
             else if (!quest[3])
-            { // <-- FIXED
+            { 
                 dialogue_lines = hattori_ptr->give_quest_golem();
             }
             else if (!quest[4])
-            { // <-- FIXED
+            { 
                 dialogue_lines = hattori_ptr->give_quest_necromancer();
             }
             else if (quest[3] && quest[4])
@@ -1585,7 +1679,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
 
             play_dialogue(dialogue_lines, player, map);
 
-            return; // Stop the move
+            return; 
         }
         if (!newTile->getQuestStatus(quest))
         {
@@ -1614,7 +1708,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
                 show_dialogue_message("You are not powerful enough! Meet Oracle at (46,13)."); // <-- FIXED
                 break;
             }
-            return; // Stop the move
+            return;
         }
         else
         {
@@ -1630,9 +1724,8 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
 
             if (k == 0)
             {
-                // Show the bloody screen
-                bool retry = showGameOverScreen();
-
+                bool retry = showGameOverScreen(audio);
+                audio.playMusic("../data/audio/sacred-garden-10377.mp3");
                 if (retry)
                 {
                     newTile->getCharacter()->take_damage((-1) * (newTile->getCharacter()->get_max_health() - newTile->getCharacter()->get_health()));
@@ -1646,12 +1739,11 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
                 }
                 else
                 {
-                    // === OPTION 2: EXIT ===
                     clear();
                     mvprintw(rows / 2, (cols - 20) / 2, "Farewell, fallen hero...");
                     refresh();
-                    napms(2000); // Wait 2 seconds
-                    exit(0);     // Close the program
+                    napms(2000); 
+                    exit(0);    
                 }
             }
             else if (k == 1)
@@ -1735,8 +1827,13 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
                     case 4:
                         complete_lines = this->hattori.complete_quest_necromancer();
                         break;
-                    default:
+                    case 5:
                         complete_lines = this->hattori.complete_quest_final_boss();
+                        audio.playMusic("../data/audio/game_end.mp3");
+                        play_cinematic_dialogue(complete_lines);
+                        run_credits();
+                        exit(0); 
+                        return;
                         break;
                     }
                     play_dialogue(complete_lines, player, map);

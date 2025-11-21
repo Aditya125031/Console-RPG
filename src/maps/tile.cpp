@@ -177,8 +177,9 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMiniMap = 5; 
             Character* lichlord = new LichLord(player);
             m_characterOnTile = lichlord;
-            requiredQuestCompleted = 4;
+            requiredQuestCompleted = 0;
             m_isWalkable = false;
+            doQuest=5;
         }
         else if(displayChar=="NPC"){
             m_mapDisplayChar = "!"; 
@@ -279,6 +280,7 @@ void Tile::set_doQuest(int a){
 bool Tile::get_isNPC(){
     return isNPC;
 }
+
 
 vector<std::shared_ptr<Item>>* Tile::getLootOnTile(){
     return m_lootOnTile;

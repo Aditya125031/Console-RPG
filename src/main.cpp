@@ -8,9 +8,8 @@
 #include <limits>
 #include <thread>
 #include <chrono>
-#include <cstdlib> // Required for std::system
-// #include <windows.h> // Not needed with curses
-#include "../extern/pdcurses/curses.h" // Include the curses header
+#include <cstdlib> 
+#include "../extern/pdcurses/curses.h"
 #include "../include/tile.h"
 #include "../include/map.h"
 #include "../include/character.h"
@@ -20,7 +19,6 @@
 #include "../include/enemy.h"
 #include "../include/inventory.hpp"
 
-// Note: I'm assuming 'PlayerType' is an enum defined in one of your headers.
 
 void draw_box(int y, int x, int w, int h)
 {
@@ -193,20 +191,17 @@ Player create_player(Game &game_world)
 // This function should be called once, before starting the game loop
 void setup_curses()
 {
+void setup_curses() {
     initscr();
+    
+    cbreak();   
+    noecho(); 
+    keypad(stdscr, TRUE); 
+    
+    if (has_colors()) {
+        start_color(); 
 
-    // --- Standard Game Terminal Setup ---
-    cbreak();            
-    noecho();            
-    keypad(stdscr, TRUE);
-
-    // --- Color Setup ---
-    if (has_colors())
-    {
-        start_color(); // Starts the color system
-
-        // Initialize the color pairs using your defined constants
-        init_pair(1, COLOR_CYAN, COLOR_BLACK);
+        init_pair(1, COLOR_CYAN, COLOR_BLACK); 
         init_pair(2, COLOR_GREEN, COLOR_BLACK);
         init_pair(3, COLOR_BLUE, COLOR_BLACK);
         init_pair(4, COLOR_RED, COLOR_BLACK);
@@ -216,10 +211,7 @@ void setup_curses()
         init_pair(8, COLOR_WHITE, COLOR_WHITE);
         init_pair(9, COLOR_RED, COLOR_RED);
     }
-
-    // The timeout below is optional, but often useful for game loops
-    // sets the waiting period for getch() in milliseconds.
-    // timeout(100);
+    
 }
 
 void show_welcome_screen()

@@ -17,27 +17,30 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
     switch (type) {
     
     case PlayerType::Swordsman:
-        this->health = 1200;
-        this->attackPower = 145;
+        this->health = 120;
+        this->attackPower = 15;
         this->mana = 20;
         this->regen_hp_time = 5;
         this->regen_mana_time = 10;
+        this->inventory.equippedWeapon = make_shared<Iron_Sword>();
         break;
 
     case PlayerType::Archer:
         this->health = 100;
-        this->attackPower = 12;
+        this->attackPower = 13;
         this->mana = 60;
         this->regen_hp_time = 8;
         this->regen_mana_time = 8;
+        this->inventory.equippedWeapon = make_shared<Wooden_Bow>();
         break;
 
     case PlayerType::Mage:
         this->health = 80;
-        this->attackPower = 8;
+        this->attackPower = 11;
         this->mana = 100;
         this->regen_hp_time = 10;
         this->regen_mana_time = 5;
+        this->inventory.equippedWeapon = make_shared<Novice_Wand>();
         break;
     }
     this->maxHealth = this->health;

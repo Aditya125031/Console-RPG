@@ -17,7 +17,7 @@
 #include "imp.h"
 #include "infernalimp.h"
 #include "stoneimp.h"
-class Game; // Forward declaration
+class Game; 
 
 class Combat {
 public:
@@ -28,4 +28,4 @@ public:
     void clearScreen();   // declared as member
 };
 
-#endif // COMBAT_HPP
+#endif 

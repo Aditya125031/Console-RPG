@@ -17,14 +17,17 @@
 #include "imp.h"
 #include "infernalimp.h"
 #include "stoneimp.h"
+
 class Game; 
+class AudioManager;
 
 class Combat {
 public:
-    int fight(Player&, Enemy&,Game&);
+    int fight(Player&, Enemy&,Game&, AudioManager&);
     void start();
-    void end();
-    void clearScreen();  
+    void endWin();
+    void endFlee();
+    void clearScreen();   // declared as member
 };
 
 #endif 

@@ -9,20 +9,20 @@
 
 using namespace std;
 
-Player::Player(Game& game_world, std::string name, PlayerType type)
-    : Character(name, 100, 10), 
-      world(game_world),  
-      type(type) 
+Player::Player(Game &game_world, std::string name, PlayerType type)
+    : Character(name, 100, 10),
+      world(game_world),
+      type(type)
 {
-    switch (type) {
-    
+    switch (type)
+    {
+
     case PlayerType::Swordsman:
         this->health = 120;
         this->attackPower = 15;
         this->mana = 20;
         this->regen_hp_time = 5;
         this->regen_mana_time = 10;
-        this->inventory.equippedWeapon = make_shared<Iron_Sword>();
         break;
 
     case PlayerType::Archer:
@@ -31,7 +31,6 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
         this->mana = 60;
         this->regen_hp_time = 8;
         this->regen_mana_time = 8;
-        this->inventory.equippedWeapon = make_shared<Wooden_Bow>();
         break;
 
     case PlayerType::Mage:
@@ -40,7 +39,6 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
         this->mana = 100;
         this->regen_hp_time = 10;
         this->regen_mana_time = 5;
-        this->inventory.equippedWeapon = make_shared<Novice_Wand>();
         break;
     }
     this->maxHealth = this->health;
@@ -48,12 +46,10 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
     this->baseMaxHealth = this->health;
     this->baseAttackPower = this->attackPower;
     this->baseMaxMana = this->mana;
-    printw("A new %s named %s has arrived!\n", get_type_string().c_str(), this->name.c_str());
-    this_thread::sleep_for(chrono::seconds(1));
-    flushinp();
 }
 
-void Player::reset_stats() {
+void Player::reset_stats()
+{
     this->attackPower = this->baseAttackPower;
     this->maxHealth = this->baseMaxHealth;
     this->max_mana = this->baseMaxMana;
@@ -86,17 +82,102 @@ std::string Player::get_type_string() const
 
 void Player::show_details() const
 {
-    int row = 0;
-    mvprintw(row++, 0, "---------------------");
-    mvprintw(row++, 0, "Name: %s", this->name.c_str());
-    mvprintw(row++, 0, "Type: %s", get_type_string().c_str());
-    mvprintw(row++, 0, "Health: %d / %d", this->health, this->maxHealth);
-    mvprintw(row++, 0, "Attack Power: %d", this->attackPower);
-    mvprintw(row++, 0, "Mana: %d / %d", this->mana, this->max_mana);
-    mvprintw(row++, 0, "---------------------");
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols); // Get screen dimensions
+
+    // --- Define Box Dimensions ---
+    int boxW = 50;
+    int boxH = 14;
+    int startY = (rows - boxH) / 2;
+    int startX = (cols - boxW) / 2;
+
+    // --- Draw the Box Border (White) ---
+    attron(COLOR_PAIR(6));
+    mvaddch(startY, startX, ACS_ULCORNER);
+    mvaddch(startY, startX + boxW, ACS_URCORNER);
+    mvaddch(startY + boxH, startX, ACS_LLCORNER);
+    mvaddch(startY + boxH, startX + boxW, ACS_LRCORNER);
+    mvhline(startY, startX + 1, ACS_HLINE, boxW - 1);
+    mvhline(startY + boxH, startX + 1, ACS_HLINE, boxW - 1);
+    mvvline(startY + 1, startX, ACS_VLINE, boxH - 1);
+    mvvline(startY + 1, startX + boxW, ACS_VLINE, boxH - 1);
+    attroff(COLOR_PAIR(6));
+
+    // --- Title (Cyan) ---
+    attron(COLOR_PAIR(1) | A_BOLD);
+    mvprintw(startY + 1, startX + (boxW - 16) / 2, "--- PLAYER STATS ---");
+    attroff(COLOR_PAIR(1) | A_BOLD);
+
+    // --- Stats ---
+    int row = startY + 3;
+    int statX = startX + 4;
+
+    // Name and Class (White)
+    attron(COLOR_PAIR(6));
+    mvprintw(row, statX, "Name:  %s", this->name.c_str());
+    mvprintw(row + 1, statX, "Class: %s", get_type_string().c_str());
+    attroff(COLOR_PAIR(6));
+
+    // Health (Green)
+    mvprintw(row + 2, statX, "Health: ");
+    attron(COLOR_PAIR(2)); // Green
+    printw("%d / %d", this->health, this->maxHealth);
+    attroff(COLOR_PAIR(2));
+
+    // Mana (Blue)
+    mvprintw(row + 3, statX, "Mana:   ");
+    attron(COLOR_PAIR(3)); // Blue
+    printw("%d / %d", this->mana, this->max_mana);
+    attroff(COLOR_PAIR(3));
+
+    // Attack (Red)
+    mvprintw(row + 4, statX, "Attack: ");
+    attron(COLOR_PAIR(4)); // Red
+    printw("%d", this->attackPower);
+    attroff(COLOR_PAIR(4));
+
+    // --- Separator ---
+    attron(COLOR_PAIR(6));
+    mvaddch(startY + 9, startX, ACS_LTEE);
+    mvhline(startY + 9, startX + 1, ACS_HLINE, boxW - 2);
+    mvaddch(startY + 9, startX + boxW, ACS_RTEE);
+    attroff(COLOR_PAIR(6));
+
+    // --- Equipment (Yellow) ---
+    row = startY + 11;
+
+    attron(COLOR_PAIR(5)); // Yellow
+
+    // Weapon
+    mvprintw(row, statX, "Weapon: ");
+    if (inventory.equippedWeapon)
+    {
+        printw("%s", inventory.equippedWeapon->get_item_name().c_str());
+    }
+    else
+    {
+        attron(A_DIM); // Dim the "None" text
+        printw("(None)");
+        attroff(A_DIM);
+    }
+
+    // Armor
+    mvprintw(row + 1, statX, "Armor:  ");
+    if (inventory.equippedArmor)
+    {
+        printw("%s", inventory.equippedArmor->get_item_name().c_str());
+    }
+    else
+    {
+        attron(A_DIM);
+        printw("(None)");
+        attroff(A_DIM);
+    }
+
+    attroff(COLOR_PAIR(5));
 }
 
-void Player::special_move(Character& enemy) 
+void Player::special_move(Character &enemy)
 {
     std::shared_ptr<Weapon> current_weapon = this->inventory.equippedWeapon;
 
@@ -113,6 +194,7 @@ void Player::special_move(Character& enemy)
         }
     }
 }
+
 int Player::get_x()
 {
     return this->coord_x;
@@ -239,7 +321,7 @@ double Player::getSpecialAttackInterval() const
     return this->specialAttackInterval;
 }
 
-std::string Player::move(int x, int y, Map& map) 
+std::string Player::move(int x, int y, Map &map)
 {
     return "Moved to position (" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
@@ -278,7 +360,7 @@ Player &Player::operator=(const Player &other)
     Character::operator=(other);
 
     this->type = other.type;
-    this->inventory = other.inventory; 
+    this->inventory = other.inventory;
 
     this->max_mana = other.max_mana;
     this->mana = other.mana;

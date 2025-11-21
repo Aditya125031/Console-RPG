@@ -22,8 +22,6 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
         this->mana = 20;
         this->regen_hp_time = 5;
         this->regen_mana_time = 10;
-        this->inventory.equippedWeapon = make_shared<Shinketsu_Sword>();
-        this->inventory.equippedArmor = make_shared<Runeforged_Armor>();
         break;
 
     case PlayerType::Archer:
@@ -32,8 +30,6 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
         this->mana = 60;
         this->regen_hp_time = 8;
         this->regen_mana_time = 8;
-        this->inventory.equippedWeapon = make_shared<Silent_Death>();
-        this->inventory.equippedArmor = make_shared<Lunar_Veil>();
         break;
 
     case PlayerType::Mage:
@@ -42,8 +38,6 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
         this->mana = 100;
         this->regen_hp_time = 10;
         this->regen_mana_time = 5;
-        this->inventory.equippedWeapon = make_shared<Novice_Wand>();
-        this->inventory.equippedArmor = make_shared<Mystic_Veil>();
         break;
     }
     this->maxHealth = this->health;
@@ -87,16 +81,100 @@ std::string Player::get_type_string() const
     }
 }
 
+#include <string> // Ensure this is included at the top of your player.cpp
+
+/**
+ * @brief Displays the player's stats in a decorative window.
+ */
 void Player::show_details() const
 {
-    int row = 0;
-    mvprintw(row++, 0, "---------------------");
-    mvprintw(row++, 0, "Name: %s", this->name.c_str());
-    mvprintw(row++, 0, "Type: %s", get_type_string().c_str());
-    mvprintw(row++, 0, "Health: %d / %d", this->health, this->maxHealth);
-    mvprintw(row++, 0, "Attack Power: %d", this->attackPower);
-    mvprintw(row++, 0, "Mana: %d / %d", this->mana, this->max_mana);
-    mvprintw(row++, 0, "---------------------");
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols); // Get screen dimensions
+
+    // --- Define Box Dimensions ---
+    int boxW = 50;
+    int boxH = 14;
+    int startY = (rows - boxH) / 2;
+    int startX = (cols - boxW) / 2;
+
+    // --- Draw the Box Border (White) ---
+    attron(COLOR_PAIR(6)); 
+    mvaddch(startY, startX, ACS_ULCORNER);
+    mvaddch(startY, startX + boxW, ACS_URCORNER);
+    mvaddch(startY + boxH, startX, ACS_LLCORNER);
+    mvaddch(startY + boxH, startX + boxW, ACS_LRCORNER);
+    mvhline(startY, startX + 1, ACS_HLINE, boxW - 1);
+    mvhline(startY + boxH, startX + 1, ACS_HLINE, boxW - 1);
+    mvvline(startY + 1, startX, ACS_VLINE, boxH - 1);
+    mvvline(startY + 1, startX + boxW, ACS_VLINE, boxH - 1);
+    attroff(COLOR_PAIR(6));
+
+    // --- Title (Cyan) ---
+    attron(COLOR_PAIR(1) | A_BOLD); 
+    mvprintw(startY + 1, startX + (boxW - 16) / 2, "--- PLAYER STATS ---");
+    attroff(COLOR_PAIR(1) | A_BOLD);
+
+    // --- Stats ---
+    int row = startY + 3;
+    int statX = startX + 4;
+    
+    // Name and Class (White)
+    attron(COLOR_PAIR(6));
+    mvprintw(row,     statX, "Name:  %s", this->name.c_str());
+    mvprintw(row + 1, statX, "Class: %s", get_type_string().c_str());
+    attroff(COLOR_PAIR(6));
+
+    // Health (Green)
+    mvprintw(row + 2, statX, "Health: ");
+    attron(COLOR_PAIR(2)); // Green
+    printw("%d / %d", this->health, this->maxHealth);
+    attroff(COLOR_PAIR(2));
+
+    // Mana (Blue)
+    mvprintw(row + 3, statX, "Mana:   ");
+    attron(COLOR_PAIR(3)); // Blue
+    printw("%d / %d", this->mana, this->max_mana);
+    attroff(COLOR_PAIR(3));
+
+    // Attack (Red)
+    mvprintw(row + 4, statX, "Attack: ");
+    attron(COLOR_PAIR(4)); // Red
+    printw("%d", this->attackPower);
+    attroff(COLOR_PAIR(4));
+
+    // --- Separator ---
+    attron(COLOR_PAIR(6));
+    mvaddch(startY + 9, startX, ACS_LTEE);
+    mvhline(startY + 9, startX + 1, ACS_HLINE, boxW - 2);
+    mvaddch(startY + 9, startX + boxW, ACS_RTEE);
+    attroff(COLOR_PAIR(6));
+
+    // --- Equipment (Yellow) ---
+    row = startY + 11;
+    
+    attron(COLOR_PAIR(5)); // Yellow
+    
+    // Weapon
+    mvprintw(row, statX, "Weapon: ");
+    if (inventory.equippedWeapon) {
+        printw("%s", inventory.equippedWeapon->get_item_name().c_str());
+    } else {
+        attron(A_DIM); // Dim the "None" text
+        printw("(None)");
+        attroff(A_DIM);
+    }
+
+    // Armor
+    mvprintw(row + 1, statX, "Armor:  ");
+    if (inventory.equippedArmor) {
+        printw("%s", inventory.equippedArmor->get_item_name().c_str());
+    } else {
+        attron(A_DIM);
+        printw("(None)");
+        attroff(A_DIM);
+    }
+    
+    attroff(COLOR_PAIR(5));
 }
 
 void Player::special_move(Character& enemy) 

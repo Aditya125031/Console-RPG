@@ -27,8 +27,6 @@ using namespace std;
 
 class AudioManager; // Forward declaration
 
-const unsigned int MAX_LOG_LINES = 10;
-
 void Game::show_dialogue_message(const std::string &message)
 {
     // This function just sets the message that will be drawn by the dashboard
@@ -52,10 +50,6 @@ void Game::add_log_message(std::string message)
     }
 }
 
-// In Game.cpp
-// (Make sure you have the DisplayItem struct here)
-
-// Helper function to build the player's item list (same as before)
 std::vector<DisplayItem> Game::buildPlayerItemList(Player &player)
 {
     std::vector<DisplayItem> itemMap;
@@ -95,48 +89,266 @@ std::vector<DisplayItem> Game::buildPlayerItemList(Player &player)
     return itemMap;
 }
 
-/**
- * @brief This is the new (l)Loot / (d)Drop prompt-based loot menu.
- */
+std::vector<std::string> Game::wrap_text_v2(const std::string &text, int max_width)
+{
+    std::vector<std::string> final_lines;
+    std::stringstream text_stream(text);
+    std::string segment;
+
+    // This tracks if we're on the first line, to avoid
+    // adding padding before the text starts.
+    bool first_segment = true;
+
+    // 1. Split the text by the explicit newline character '\n'
+    while (std::getline(text_stream, segment, '\n'))
+    {
+
+        // If segment is empty, it's an intentional newline (e.g., from \n\n)
+        if (segment.empty())
+        {
+            // This was an intentional newline, add two blank lines
+            final_lines.push_back("");
+            final_lines.push_back("");
+            continue;
+        }
+
+        // If this is NOT the first segment, the \n that split
+        // this segment from the previous one should add two blank lines.
+        if (!first_segment)
+        {
+            final_lines.push_back("");
+            // final_lines.push_back("");
+        }
+
+        // 2. Now, apply word-wrapping logic to this non-empty segment
+        std::stringstream word_stream(segment);
+        std::string word;
+        std::string current_line;
+
+        while (word_stream >> word)
+        {
+            // Check if the new word fits on the current line
+            if (current_line.empty() || current_line.length() + word.length() + 1 <= max_width)
+            {
+                if (!current_line.empty())
+                {
+                    current_line += " ";
+                }
+                current_line += word;
+            }
+            else
+            {
+                // Word doesn't fit, so push the current line and start a new one
+                final_lines.push_back(current_line);
+                current_line = word;
+            }
+        }
+
+        // 3. Add the last line of the segment
+        if (!current_line.empty())
+        {
+            final_lines.push_back(current_line);
+        }
+
+        // We are no longer on the first segment
+        first_segment = false;
+    }
+
+    return final_lines;
+}
+
 vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                                            vector<shared_ptr<Item>> &lootBox)
 {
     bool inLootMenu = true;
     Game &world = *this; // For inventory functions
 
+    // --- State Management ---
+    enum class LootFocus
+    {
+        LOOT_BOX,
+        INVENTORY
+    };
+    LootFocus currentFocus = LootFocus::LOOT_BOX; // Start focused on loot
+
+    int loot_index = 0;
+    int inventory_index = 0;
+
+    // --- OPENING MESSAGE ---
+    clear();
+    curs_set(0);
+    int midY_anim = LINES / 2;
+    int midX_anim = COLS / 2;
+    attron(COLOR_PAIR(5));
+    draw_box(midY_anim - 1, midX_anim - 10, 20, 2);
+    mvprintw(midY_anim, midX_anim - 6, "Loot Found!");
+    attroff(COLOR_PAIR(5));
+    refresh();
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    // --- END OPENING ---
+
     while (inLootMenu)
     {
         clear();
+        curs_set(0);
 
-        // --- 1. DISPLAY LOOT BOX (LEFT COLUMN) [1-9] ---
-        mvprintw(0, 0, "--- LOOT BOX ---");
-        int maxLootDisplay = 9; // Only show 1-9
-        for (int i = 0; i < lootBox.size() && i < maxLootDisplay; ++i)
+        // --- Get Player Items (for inventory pane) ---
+        vector<DisplayItem> playerItems = buildPlayerItemList(player);
+
+        // --- Define Layout (MODIFIED) ---
+        int rows, cols;
+        getmaxyx(stdscr, rows, cols);
+
+        int topH = 15;  // Height of top panes
+        int descH = 12; // *** CHANGED: Height of description pane (was 9)
+        // Recalculate startY based on new total height
+        int totalUIHeight = topH + descH + 4; // 4 = action bar + separators
+        int startY = (rows - totalUIHeight) / 2;
+        int startX = (cols - 80) / 2; // Total width 80
+        int w1 = 39;                  // Left pane width
+        int w2 = 39;                  // Right pane width
+
+        // --- Safety Clamping (Moved after list creation for .size()) ---
+        if (loot_index < 0)
+            loot_index = lootBox.empty() ? 0 : lootBox.size() - 1; // Wrap
+        if (loot_index >= lootBox.size())
+            loot_index = 0; // Wrap
+
+        if (inventory_index < 0)
+            inventory_index = playerItems.empty() ? 0 : playerItems.size() - 1; // Wrap
+        if (inventory_index >= playerItems.size())
+            inventory_index = 0; // Wrap
+
+        // --- 1. Draw Panes ---
+        attron(COLOR_PAIR(6));                                   // White border
+        draw_box(startY, startX, w1, topH);                      // Loot Box
+        draw_box(startY, startX + w1 + 1, w2, topH);             // Inventory
+        draw_box(startY + topH + 1, startX, w1 + w2 + 1, descH); // Description
+        attroff(COLOR_PAIR(6));
+
+        // --- 2. Draw Pane Titles (Highlighting focus) ---
+        if (currentFocus == LootFocus::LOOT_BOX)
         {
-            mvprintw(i + 2, 0, " [%d] %s", i + 1, lootBox[i]->get_item_name().c_str());
+            attron(COLOR_PAIR(1) | A_REVERSE);
+            mvprintw(startY, startX + 2, "[ LOOT BOX ]");
+            attroff(COLOR_PAIR(1) | A_REVERSE);
+            attron(COLOR_PAIR(6) | A_DIM);
+            mvprintw(startY, startX + w1 + 3, "[ YOUR INVENTORY ]");
+            attroff(COLOR_PAIR(6) | A_DIM);
         }
+        else
+        {
+            attron(COLOR_PAIR(6) | A_DIM);
+            mvprintw(startY, startX + 2, "[ LOOT BOX ]");
+            attroff(COLOR_PAIR(6) | A_DIM);
+            attron(COLOR_PAIR(1) | A_REVERSE);
+            mvprintw(startY, startX + w1 + 3, "[ YOUR INVENTORY ]");
+            attroff(COLOR_PAIR(1) | A_REVERSE);
+        }
+
+        // --- 3. Draw Item Lists ---
+        // (Scrolling logic can be added here later if lists grow)
+        int itemY = startY + 2;
+        int listMaxHeight = topH - 3; // Max items to show in pane
+
+        // Loot Box List
+        int itemX = startX + 2;
         if (lootBox.empty())
         {
-            mvprintw(2, 0, " (Empty)");
+            attron(A_DIM);
+            mvprintw(itemY, itemX, "(Empty)");
+            attroff(A_DIM);
         }
-
-        // --- 2. DISPLAY PLAYER INVENTORY (RIGHT COLUMN) [a-z] ---
-        mvprintw(0, 35, "--- YOUR INVENTORY ---");
-        vector<DisplayItem> playerItems = buildPlayerItemList(player);
-        for (int i = 0; i < playerItems.size() && i < 26; ++i)
+        else
         {
-            mvprintw(i + 2, 35, " [%c] %s", 'a' + i, playerItems[i].displayName.c_str());
+            for (int i = 0; i < lootBox.size() && i < listMaxHeight; ++i)
+            {
+                if (currentFocus == LootFocus::LOOT_BOX && i == loot_index)
+                {
+                    attron(COLOR_PAIR(5) | A_REVERSE);
+                    mvprintw(itemY + i, itemX, "> %s", lootBox[i]->get_item_name().c_str());
+                    attroff(COLOR_PAIR(5) | A_REVERSE);
+                }
+                else
+                {
+                    mvprintw(itemY + i, itemX + 2, "%s", lootBox[i]->get_item_name().c_str());
+                }
+            }
         }
 
-        // --- 3. DISPLAY ACTIONS ---
-        int row = max(12, (int)playerItems.size() + 4);
-        mvprintw(row++, 0, "--- ACTIONS ---");
-        mvprintw(row++, 0, "(l) Loot from Crate");
-        mvprintw(row++, 0, "(d) Drop from Inventory");
-        mvprintw(row++, 0, "(q) Quit Looting");
-        mvprintw(row, 0, "Choice: ");
+        // Inventory List
+        itemX = startX + w1 + 3;
+        if (playerItems.empty())
+        {
+            attron(A_DIM);
+            mvprintw(itemY, itemX, "(Empty)");
+            attroff(A_DIM);
+        }
+        else
+        {
+            for (int i = 0; i < playerItems.size() && i < listMaxHeight; ++i)
+            {
+                if (currentFocus == LootFocus::INVENTORY && i == inventory_index)
+                {
+                    attron(COLOR_PAIR(5) | A_REVERSE);
+                    mvprintw(itemY + i, itemX, "> %s", playerItems[i].displayName.c_str());
+                    attroff(COLOR_PAIR(5) | A_REVERSE);
+                }
+                else
+                {
+                    mvprintw(itemY + i, itemX + 2, "%s", playerItems[i].displayName.c_str());
+                }
+            }
+        }
+
+        // --- 4. Draw Description Pane (MODIFIED) ---
+        int descY = startY + topH + 2;
+        int descX = startX + 2;
+        int descWidth = w1 + w2 - 2;
+        std::string desc_text = "Select an item to see its description.";
+
+        if (currentFocus == LootFocus::LOOT_BOX && !lootBox.empty())
+        {
+            desc_text = lootBox[loot_index]->get_item_description();
+        }
+        else if (currentFocus == LootFocus::INVENTORY && !playerItems.empty())
+        {
+            desc_text = playerItems[inventory_index].description;
+        }
+
+        attron(COLOR_PAIR(3) | A_BOLD);
+        mvprintw(descY, descX, "Description:");
+        attroff(COLOR_PAIR(3) | A_BOLD);
+
+        std::vector<std::string> wrapped_lines = wrap_text_v2(desc_text, descWidth);
+        attron(COLOR_PAIR(6));
+        // *** CHANGED: Using new descH-2 (allows 10 lines)
+        for (int i = 0; i < wrapped_lines.size() && i < (descH - 2); ++i)
+        {
+            mvprintw(descY + 1 + i, descX, "%s", wrapped_lines[i].c_str());
+        }
+        attroff(COLOR_PAIR(6));
+
+        // --- 5. Draw Action Bar ---
+        int actionY = startY + topH + descH + 3;
+        mvprintw(actionY, startX, "[ARROWS/WASD] Navigate | [q] Quit");
+
+        if (currentFocus == LootFocus::LOOT_BOX && !lootBox.empty())
+        {
+            attron(COLOR_PAIR(2) | A_BOLD); // Green for Loot
+            mvprintw(actionY, startX + 60, "[ENTER] Loot");
+            attroff(COLOR_PAIR(2) | A_BOLD);
+        }
+        else if (currentFocus == LootFocus::INVENTORY && !playerItems.empty())
+        {
+            attron(COLOR_PAIR(4) | A_BOLD); // Red for Drop
+            mvprintw(actionY, startX + 60, "[ENTER] Drop");
+            attroff(COLOR_PAIR(4) | A_BOLD);
+        }
+
         refresh();
 
+        // --- 6. Handle Input (MODIFIED with WRAPPING) ---
         int ch = getch();
         switch (ch)
         {
@@ -145,114 +357,119 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
             inLootMenu = false;
             break;
 
-        // === LOOT FROM CRATE ===
-        case 'l':
-        case 'L':
-        {
-            mvprintw(row + 1, 0, "Loot item number (1-9): ");
-            refresh();
-            int ch_loot = getch();
-            int index = ch_loot - '1'; // '1' -> 0
-
-            if (index >= 0 && index < lootBox.size())
+        case KEY_UP:
+        case 'w':
+            if (currentFocus == LootFocus::LOOT_BOX)
             {
-                auto itemToTake = lootBox[index];
+                loot_index--;
+                // (Clamping is now handled at the top of the loop)
+            }
+            else
+            {
+                inventory_index--;
+            }
+            break;
+
+        case KEY_DOWN:
+        case 's':
+            if (currentFocus == LootFocus::LOOT_BOX)
+            {
+                loot_index++;
+            }
+            else
+            {
+                inventory_index++;
+            }
+            break;
+
+        case KEY_LEFT:
+        case 'a':
+            // Wrap around: Inventory -> Loot Box, or Loot Box -> Inventory
+            currentFocus = (currentFocus == LootFocus::LOOT_BOX) ? LootFocus::INVENTORY : LootFocus::LOOT_BOX;
+            break;
+
+        case KEY_RIGHT:
+        case 'd':
+            // Wrap around: Loot Box -> Inventory, or Inventory -> Loot Box
+            currentFocus = (currentFocus == LootFocus::LOOT_BOX) ? LootFocus::INVENTORY : LootFocus::LOOT_BOX;
+            break;
+
+        // --- CONSOLIDATED ACTION ---
+        // --- CONSOLIDATED ACTION ---
+        case 10: // Enter key
+            if (currentFocus == LootFocus::LOOT_BOX && !lootBox.empty())
+            {
+                // --- LOOT ACTION ---
+                auto itemToTake = lootBox[loot_index];
                 bool success = player.inventory.addItem(itemToTake, 1, player, world);
 
                 if (success)
                 {
-                    lootBox.erase(lootBox.begin() + index); // Remove from loot box
+                    lootBox.erase(lootBox.begin() + loot_index);
                 }
                 else
                 {
-                    mvprintw(row + 2, 0, "Inventory is full! Press any key...");
+                    // --- INVENTORY FULL POP-UP ---
+                    int popW = 30;
+                    int popH = 4;
+                    int popY = (LINES - popH) / 2; // Center Y
+                    int popX = (COLS - popW) / 2;  // Center X
+
+                    attron(COLOR_PAIR(4) | A_BOLD); // Red + Bold
+                    mvprintw(popY + 20, popX + (popW - 19) / 2, "Inventory is full!");
+                    attroff(COLOR_PAIR(4) | A_BOLD);
+
+                    refresh();
                     getch(); // Pause
                 }
             }
-            else
+            else if (currentFocus == LootFocus::INVENTORY && !playerItems.empty())
             {
-                mvprintw(row + 2, 0, "Invalid number. Press any key...");
-                getch(); // Pause
-            }
-            break;
-        }
+                // --- DROP ACTION (IMMEDIATE) ---
 
-        // === DROP FROM INVENTORY ===
-        case 'd':
-        case 'D':
-        {
-            mvprintw(row + 1, 0, "Drop item letter (a-z): ");
-            refresh();
-            int ch_drop = getch();
-            int index = ch_drop - 'a'; // 'a' -> 0
+                // 1. Get the item to drop
+                DisplayItem itemToDrop = playerItems[inventory_index];
 
-            if (index >= 0 && index < playerItems.size())
-            {
-                // --- Show confirmation screen ---
-                DisplayItem itemToDrop = playerItems[index];
-                clear();
-                mvprintw(0, 0, "Drop %s?", itemToDrop.displayName.c_str());
-                mvprintw(2, 0, "Description: %s", itemToDrop.description.c_str());
-                mvprintw(6, 0, "(d) Drop");
-                mvprintw(7, 0, "(c) Cancel");
-                refresh();
-
-                int ch_confirm = getch();
-                if (ch_confirm == 'd' || ch_confirm == 'D')
+                // 2. Perform the drop logic immediately (no confirmation)
+                shared_ptr<Item> droppedItem = nullptr;
+                if (itemToDrop.itemID == "EQUIPPED_WEAPON")
                 {
-                    // User confirmed. Call the remove functions.
-                    shared_ptr<Item> droppedItem = nullptr;
-
-                    if (itemToDrop.itemID == "EQUIPPED_WEAPON")
-                    {
-                        // 1. Copy the pointer
-                        droppedItem = player.inventory.equippedWeapon;
-                        // 2. Call your existing void function
-                        player.inventory.dropEquippedWeapon(world, player);
-                    }
-                    else if (itemToDrop.itemID == "INVENTORY_WEAPON")
-                    {
-                        droppedItem = player.inventory.inventoryWeapon;
-                        player.inventory.dropInventoryWeapon(world);
-                    }
-                    else if (itemToDrop.itemID == "EQUIPPED_ARMOR")
-                    {
-                        droppedItem = player.inventory.equippedArmor;
-                        player.inventory.dropEquippedArmor(world, player);
-                    }
-                    else if (itemToDrop.itemID == "INVENTORY_ARMOR")
-                    {
-                        droppedItem = player.inventory.inventoryArmor;
-                        player.inventory.dropInventoryArmor(world);
-                    }
-                    // --- OUR NEW LOGIC FOR POTIONS ---
-                    else if (itemToDrop.type == "POTION")
-                    {
-                        // Call the one new function
-                        droppedItem = player.inventory.removePotionForLoot(itemToDrop.itemID, world);
-                    }
-
-                    // If we successfully removed it, add it to the loot box
-                    if (droppedItem != nullptr)
-                    {
-                        lootBox.push_back(droppedItem);
-                    }
+                    droppedItem = player.inventory.equippedWeapon;
+                    player.inventory.dropEquippedWeapon(world, player);
                 }
-                // If 'c' or anything else, do nothing and loop
-            }
-            else
-            {
-                mvprintw(row + 2, 0, "Invalid letter. Press any key...");
-                getch(); // Pause
+                else if (itemToDrop.itemID == "INVENTORY_WEAPON")
+                {
+                    droppedItem = player.inventory.inventoryWeapon;
+                    player.inventory.dropInventoryWeapon(world);
+                }
+                else if (itemToDrop.itemID == "EQUIPPED_ARMOR")
+                {
+                    droppedItem = player.inventory.equippedArmor;
+                    player.inventory.dropEquippedArmor(world, player);
+                }
+                else if (itemToDrop.itemID == "INVENTORY_ARMOR")
+                {
+                    droppedItem = player.inventory.inventoryArmor;
+                    player.inventory.dropInventoryArmor(world);
+                }
+                else if (itemToDrop.type == "POTION")
+                {
+                    droppedItem = player.inventory.removePotionForLoot(itemToDrop.itemID, world);
+                }
+
+                // 3. Add the item to the loot box on the ground
+                if (droppedItem != nullptr)
+                {
+                    lootBox.push_back(droppedItem);
+                }
             }
             break;
-        } // end case 'd'
         } // end switch
     } // end while
 
-    // Return whatever is left in the loot box
     return lootBox;
 }
+
 void Game::clear_dialogue_message()
 {
     current_dialogue_lines.clear();
@@ -276,7 +493,7 @@ bool Game::showGameOverScreen()
         " | |_| || |___|  _|  | |___  / ___ \\ | | | |___ | |_| |",
         " |____/ |_____|_|    |_____|/_/   \\_\\|_| |_____||____/ ",
         "                                                  ",
-        "           O N C E    A G A I N . . .             "};
+        "                         O N C E    A G A I N . . .             "};
 
     int startY = (rows / 2) - 8;
     int startX = (cols - title[0].length()) / 2;
@@ -408,7 +625,7 @@ void Game::display_dashboard(Player &player, Map &map)
     attron(COLOR_PAIR(2));
     printw("%d", player.get_attack_power());
     attroff(COLOR_PAIR(2));
-    row++;  
+    row++;
 
     // 4. Mana
     mvprintw(row, 0, " Mana: ");
@@ -534,7 +751,7 @@ void Game::show_full_map(Map &map)
         switch (input)
         {
         case 'm':
-        case 'q':
+        case 'M':
             onFullMap = false;
             break;
 
@@ -546,131 +763,508 @@ void Game::show_full_map(Map &map)
 
     clear();
 }
-void Game::runItemActionMenu(DisplayItem selectedItem, Player &player, Game &world)
-{
-    clear();
-    printw("Selected: %s\n Item Description: %s", selectedItem.displayName.c_str(), selectedItem.description.c_str());
-    printw("------------------\n");
 
-    // "Use" text changes based on item type
-    if (selectedItem.type == "WEAPON" || selectedItem.type == "ARMOR")
-    {
-        printw("(e or u) Equip / Swap\n");
-    }
-    else if (selectedItem.type == "POTION")
-    {
-        printw("(e or u) Use\n");
-    }
+// void Game::runItemActionMenu(DisplayItem selectedItem, Player &player, Game &world)
+// {
+//     clear();
+//     printw("Selected: %s\n Item Description: %s", selectedItem.displayName.c_str(), selectedItem.description.c_str());
+//     printw("------------------\n");
 
-    printw("(d) Drop\n");
-    printw("(c) Cancel\n");
-    refresh();
+//     // "Use" text changes based on item type
+//     if (selectedItem.type == "WEAPON" || selectedItem.type == "ARMOR")
+//     {
+//         printw("(e or u) Equip / Swap\n");
+//     }
+//     else if (selectedItem.type == "POTION")
+//     {
+//         printw("(e or u) Use\n");
+//     }
 
-    char ch = getch();
-    switch (ch)
-    {
-    case 'e': // Equip/Swap
-    case 'u': // Use
-        if (selectedItem.type == "WEAPON")
-        {
-            player.inventory.swapWeapon(player, world);
-        }
-        else if (selectedItem.type == "ARMOR")
-        {
-            player.inventory.swapArmor(player, world);
-        }
-        else if (selectedItem.type == "POTION")
-        {
-            // We use the itemID, which holds the potion's name
-            player.inventory.usePotion(selectedItem.itemID, player, world);
-        }
-        break;
+//     printw("(d) Drop\n");
+//     printw("(c) Cancel\n");
+//     refresh();
 
-    case 'd': // Drop
-        if (selectedItem.itemID == "EQUIPPED_WEAPON")
-        {
-            player.inventory.dropEquippedWeapon(world, player);
-        }
-        else if (selectedItem.itemID == "INVENTORY_WEAPON")
-        {
-            player.inventory.dropInventoryWeapon(world);
-        }
-        else if (selectedItem.itemID == "EQUIPPED_ARMOR")
-        {
-            player.inventory.dropEquippedArmor(world, player);
-        }
-        else if (selectedItem.itemID == "INVENTORY_ARMOR")
-        {
-            player.inventory.dropInventoryArmor(world);
-        }
-        else if (selectedItem.type == "POTION")
-        {
-            // We use the itemID, which holds the potion's name
-            player.inventory.dropPotion(selectedItem.itemID, world);
-        }
-        break;
+//     char ch = getch();
+//     switch (ch)
+//     {
+//     case 'e': // Equip/Swap
+//     case 'u': // Use
+//         if (selectedItem.type == "WEAPON")
+//         {
+//             player.inventory.swapWeapon(player, world);
+//         }
+//         else if (selectedItem.type == "ARMOR")
+//         {
+//             player.inventory.swapArmor(player, world);
+//         }
+//         else if (selectedItem.type == "POTION")
+//         {
+//             // We use the itemID, which holds the potion's name
+//             player.inventory.usePotion(selectedItem.itemID, player, world);
+//         }
+//         break;
 
-    case 'c': // Cancel
-    default:
-        break;
-    }
-}
+//     case 'd': // Drop
+//         if (selectedItem.itemID == "EQUIPPED_WEAPON")
+//         {
+//             player.inventory.dropEquippedWeapon(world, player);
+//         }
+//         else if (selectedItem.itemID == "INVENTORY_WEAPON")
+//         {
+//             player.inventory.dropInventoryWeapon(world);
+//         }
+//         else if (selectedItem.itemID == "EQUIPPED_ARMOR")
+//         {
+//             player.inventory.dropEquippedArmor(world, player);
+//         }
+//         else if (selectedItem.itemID == "INVENTORY_ARMOR")
+//         {
+//             player.inventory.dropInventoryArmor(world);
+//         }
+//         else if (selectedItem.type == "POTION")
+//         {
+//             // We use the itemID, which holds the potion's name
+//             player.inventory.dropPotion(selectedItem.itemID, world);
+//         }
+//         break;
+
+//     case 'c': // Cancel
+//     default:
+//         break;
+//     }
+// }
+
 void Game::runInventoryMenu(Player &player, Game &world)
 {
+    clear();
+    curs_set(0);
+    int midY = LINES / 2;
+    int midX = COLS / 2;
+    int boxW = 28;
+    int boxH = 2;
+
+    // Draw the "Opening" box (e.g., Yellow)
+    attron(COLOR_PAIR(5));
+    draw_box(midY - 1, midX - (boxW / 2), boxW, boxH);
+    mvprintw(midY, midX - 10, "Opening Inventory...");
+    attroff(COLOR_PAIR(5));
+
+    refresh();
+    std::this_thread::sleep_for(std::chrono::milliseconds(400));
+
     bool inInventory = true;
+    int selected_index = 0; // Tracks the highlighted item
+
     while (inInventory)
     {
         clear();
-        printw("--- INVENTORY --- (Select # or 'q' to quit)\n\n");
+        curs_set(0); // Hide cursor
 
-        // This vector maps a menu index (1, 2, 3...) to an item
+        // --- Get Screen Dimensions ---
+        int rows, cols;
+        getmaxyx(stdscr, rows, cols);
+
+        // --- Define Box Dimensions ---
+        int boxW = 70;                      // Total width
+        int boxH = 18;                      // **REDUCED HEIGHT** to make space for action bar
+        int startY = (rows - boxH) / 2 - 2; // Moved up slightly
+        int startX = (cols - boxW) / 2;
+
+        // --- Draw Main Box & Title ---
+        attron(COLOR_PAIR(6)); // White border
+        draw_box(startY, startX, boxW, boxH);
+        attroff(COLOR_PAIR(6));
+
+        attron(COLOR_PAIR(1) | A_BOLD); // Cyan Title
+        mvprintw(startY - 1, startX - 3 + (boxW - 13) / 2, "--- INVENTORY ---");
+        attroff(COLOR_PAIR(1) | A_BOLD);
+
+        // --- Define Splitter ---
+        int splitX = startX + (boxW / 2) - 2;
+        attron(COLOR_PAIR(6));
+        mvaddch(startY, splitX, ACS_TTEE);
+        mvaddch(startY + boxH, splitX, ACS_BTEE);
+        mvvline(startY + 1, splitX, ACS_VLINE, boxH - 1);
+        attroff(COLOR_PAIR(6));
+
+        // --- 1. Draw Item List (Left Pane) ---
         vector<DisplayItem> itemMap = buildPlayerItemList(player);
-        // --- Display the list ---
+        int itemY = startY + 2;
+        int itemX = startX + 2;
+
+        DisplayItem selectedItem; // We'll store the selected item here
+
         if (itemMap.empty())
         {
-            printw(" (Empty)\n");
+            attron(A_DIM);
+            mvprintw(itemY, itemX, "(Empty)");
+            attroff(A_DIM);
         }
         else
         {
+            // Ensure selected_index is valid
+            if (selected_index < 0)
+                selected_index = 0;
+            if (selected_index >= itemMap.size())
+                selected_index = itemMap.size() - 1;
+
+            // Get the item for later use
+            selectedItem = itemMap[selected_index];
+
             for (int i = 0; i < itemMap.size(); ++i)
             {
-                printw(" %d: %s\n", i + 1, itemMap[i].displayName.c_str());
+                std::string item_name = itemMap[i].displayName;
+                int max_name_width = (splitX - itemX) - 4;
+                if (item_name.length() > max_name_width)
+                {
+                    item_name = item_name.substr(0, max_name_width) + "...";
+                }
+
+                if (i == selected_index)
+                {
+                    attron(COLOR_PAIR(5) | A_REVERSE);
+                    mvprintw(itemY + i, itemX, "> %s", item_name.c_str());
+                    attroff(COLOR_PAIR(5) | A_REVERSE);
+                }
+                else
+                {
+                    mvprintw(itemY + i, itemX + 2, "%s", item_name.c_str());
+                }
             }
         }
 
-        printw("\nSelect item #: ");
-        refresh();
+        // --- 2. Draw Description (Right Pane) ---
+        int descY = startY + 2;
+        int descX = splitX + 2;
+        int descWidth = (startX + boxW) - descX - 2;
 
-        // --- Get user input ---
-        char ch = getch();
-
-        if (ch == 'q')
+        if (!itemMap.empty())
         {
-            inInventory = false; // Exit loop
-            continue;
-        }
+            attron(COLOR_PAIR(3) | A_BOLD); // Blue
+            mvprintw(descY, descX, "Item Description:");
+            attroff(COLOR_PAIR(3) | A_BOLD);
 
-        // Convert char '1' to int 1
-        int choice = ch - '0';
+            std::string desc_text = selectedItem.description;
+            std::vector<std::string> wrapped_lines = wrap_text_v2(desc_text, descWidth);
 
-        // Check if choice is valid
-        if (choice > 0 && choice <= itemMap.size())
-        {
-            // Valid item selected!
-            DisplayItem selectedItem = itemMap[choice - 1]; // -1 for 0-indexing
-            runItemActionMenu(selectedItem, player, world);
+            attron(COLOR_PAIR(6)); // White
+            for (int i = 0; i < wrapped_lines.size() && i < (boxH - 4); ++i)
+            {
+                mvprintw(descY + 2 + i, descX, "%s", wrapped_lines[i].c_str());
+            }
+            attroff(COLOR_PAIR(6));
         }
         else
         {
-            // Invalid key
-            printw("\nInvalid selection. Press any key.");
-            getch();
+            mvprintw(descY, descX, "Your bag is empty.");
+        }
+
+        // --- 3. Draw Controls & Action Bar (NEW SECTION) ---
+        int actionY = startY + boxH + 1; // Below the main box
+
+        // Static controls
+        mvprintw(actionY, startX, "[UP/DOWN] Navigate");
+        mvprintw(actionY + 1, startX, "[q] Quit");
+
+        // Dynamic controls (in the middle)
+        if (!itemMap.empty())
+        {
+            attron(COLOR_PAIR(5) | A_BOLD); // Yellow
+
+            // Primary Action (Enter)
+            if (selectedItem.type == "WEAPON" || selectedItem.type == "ARMOR")
+            {
+                mvprintw(actionY, startX + 25, "[ENTER] Equip/Swap");
+            }
+            else if (selectedItem.type == "POTION")
+            {
+                mvprintw(actionY, startX + 25, "[ENTER] Use");
+            }
+
+            // Secondary Action (d)
+            mvprintw(actionY + 1, startX + 25, "[d] Drop %s", selectedItem.displayName.c_str());
+
+            attroff(COLOR_PAIR(5) | A_BOLD);
+        }
+
+        actionY += 2; // Move down for the text
+
+        // Draw a separator line
+        attron(COLOR_PAIR(6));
+        mvaddch(actionY, startX, ACS_LTEE);
+        mvhline(actionY, startX + 1, ACS_HLINE, boxW - 2);
+        mvaddch(actionY, startX + boxW, ACS_RTEE);
+        attroff(COLOR_PAIR(6));
+
+        refresh();
+
+        // --- 4. Get User Input (Updated) ---
+        int ch = getch();
+        switch (ch)
+        {
+        case 'q':
+        case 'Q':
+            inInventory = false;
+            continue;
+
+        case KEY_UP:
+        case 'w':
+            selected_index--;
+            if (selected_index < 0)
+                selected_index = itemMap.empty() ? 0 : itemMap.size() - 1;
+            break;
+
+        case KEY_DOWN:
+        case 's':
+            selected_index++;
+            if (itemMap.empty() || selected_index >= itemMap.size())
+                selected_index = 0;
+            break;
+
+        // --- Primary Action: ENTER ---
+        case 10: // Enter key
+            {
+                if (itemMap.empty())
+                    break;
+                
+                // We already have 'selectedItem' from the drawing phase
+
+                // --- Equip/Swap (IMMEDIATE ACTION) ---
+                if (selectedItem.type == "WEAPON" || selectedItem.type == "ARMOR")
+                {
+                    if (selectedItem.type == "WEAPON")
+                    {
+                        player.inventory.swapWeapon(player, world);
+                    }
+                    else if (selectedItem.type == "ARMOR")
+                    {
+                        player.inventory.swapArmor(player, world);
+                    }
+                }
+                // --- Use Potion (REQUIRES CONFIRMATION) ---
+                else if (selectedItem.type == "POTION")
+                {
+                    // --- NEW: INTERACTIVE "USE" CONFIRMATION ---
+                    bool inConfirmation = true;
+                    bool didConfirm = false;
+                    int confirm_choice = 1; // 0 = Yes, 1 = No (Default to No)
+
+                    int popW = 40;
+                    int popH = 6;
+                    int popY = (LINES - popH) / 2;
+                    int popX = (COLS - popW) / 2;
+
+                    while (inConfirmation)
+                    {
+                        // Draw the confirmation box
+                        clear(); // Clear the screen for the pop-up
+                        attron(COLOR_PAIR(2) | A_BOLD); // Green border
+                        draw_box(popY, popX, popW, popH);
+                        attroff(COLOR_PAIR(2) | A_BOLD);
+
+                        // Title
+                        std::string use_prompt = "Use " + selectedItem.displayName + "?";
+                        mvprintw(popY + 1, popX + (popW - use_prompt.length()) / 2, "%s", use_prompt.c_str());
+                        
+                        // Description (dimmed)
+                        attron(A_DIM);
+                        std::string desc_line = "(This will consume the item)";
+                        mvprintw(popY + 2, popX + (popW - desc_line.length()) / 2, "%s", desc_line.c_str());
+                        attroff(A_DIM);
+
+                        // --- Draw Options ---
+                        if (confirm_choice == 0) { // YES
+                            attron(COLOR_PAIR(6) | A_REVERSE);
+                            mvprintw(popY + 4, popX + 8, "[ YES ]");
+                            attroff(COLOR_PAIR(6) | A_REVERSE);
+                            
+                            mvprintw(popY + 4, popX + 26, "  NO  ");
+                        } else { // NO
+                            mvprintw(popY + 4, popX + 8, "  YES  ");
+                            
+                            attron(COLOR_PAIR(6) | A_REVERSE);
+                            mvprintw(popY + 4, popX + 26, "[ NO ]");
+                            attroff(COLOR_PAIR(6) | A_REVERSE);
+                        }
+                        
+                        refresh();
+
+                        // --- Handle Confirmation Input ---
+                        int ch_confirm = getch();
+                        switch (ch_confirm)
+                        {
+                            case KEY_LEFT: case 'a':
+                                confirm_choice = 0; // YES
+                                break;
+                            case KEY_RIGHT: case 'd':
+                                confirm_choice = 1; // NO
+                                break;
+                            case 10: // Enter
+                                if (confirm_choice == 0) {
+                                    didConfirm = true;
+                                }
+                                inConfirmation = false;
+                                break;
+                            case 'q': case 'c': // Quit/Cancel
+                                inConfirmation = false;
+                                break;
+                        }
+                    }
+                    // --- END CONFIRMATION ---
+
+                    if (didConfirm)
+                    {
+                        player.inventory.usePotion(selectedItem.itemID, player, world);
+                    }
+                    // If !didConfirm, the loop just continues
+                }
+
+                // Refresh list and clamp index (runs after equip OR use)
+                itemMap = buildPlayerItemList(player); // Re-fetch
+                if (selected_index >= itemMap.size())
+                    selected_index = itemMap.size() - 1;
+                if (selected_index < 0)
+                    selected_index = 0;
+            }
+            break;
+
+        // --- Secondary Action: DROP ---
+        case 'd':
+        case 'D':
+        {
+            if (itemMap.empty())
+                break; // Nothing to drop
+
+            // We already have 'selectedItem' from the drawing phase
+
+            // --- NEW: INTERACTIVE CONFIRMATION ---
+            bool inConfirmation = true;
+            bool didConfirm = false;
+            int confirm_choice = 1; // 0 = Yes, 1 = No (Default to No)
+
+            int popW = 40;
+            int popH = 6;
+            int popY = (LINES - popH) / 2;
+            int popX = (COLS - popW) / 2;
+
+            while (inConfirmation)
+            {
+                // Draw the confirmation box
+                clear();                        // Clear the screen for the pop-up
+                attron(COLOR_PAIR(4) | A_BOLD); // Red border
+                draw_box(popY, popX, popW, popH);
+                attroff(COLOR_PAIR(4) | A_BOLD);
+
+                // Title
+                std::string drop_prompt = "Drop 1 " + selectedItem.displayName + "?";
+                mvprintw(popY + 1, popX + (popW - drop_prompt.length()) / 2, "%s", drop_prompt.c_str());
+
+                // Description (dimmed)
+                attron(A_DIM);
+                std::string desc_line = "(This action is permanent)";
+                mvprintw(popY + 2, popX + (popW - desc_line.length()) / 2, "%s", desc_line.c_str());
+                attroff(A_DIM);
+
+                // --- Draw Options ---
+                if (confirm_choice == 0)
+                { // YES
+                    attron(COLOR_PAIR(6) | A_REVERSE);
+                    mvprintw(popY + 4, popX + 8, "[ YES ]");
+                    attroff(COLOR_PAIR(6) | A_REVERSE);
+
+                    mvprintw(popY + 4, popX + 26, "  NO  ");
+                }
+                else
+                { // NO
+                    mvprintw(popY + 4, popX + 8, "  YES  ");
+
+                    attron(COLOR_PAIR(6) | A_REVERSE);
+                    mvprintw(popY + 4, popX + 26, "[ NO ]");
+                    attroff(COLOR_PAIR(6) | A_REVERSE);
+                }
+
+                refresh();
+
+                // --- Handle Confirmation Input ---
+                int ch_confirm = getch();
+                switch (ch_confirm)
+                {
+                case KEY_LEFT:
+                case 'a':
+                    confirm_choice = 0; // YES
+                    break;
+                case KEY_RIGHT:
+                case 'd':
+                    confirm_choice = 1; // NO
+                    break;
+                case 10: // Enter
+                    if (confirm_choice == 0)
+                    {
+                        didConfirm = true;
+                    }
+                    inConfirmation = false;
+                    break;
+                case 'q':
+                case 'c': // Quit/Cancel
+                    inConfirmation = false;
+                    break;
+                }
+            }
+            // --- END CONFIRMATION ---
+
+            // --- Execute Drop (if confirmed) ---
+            if (didConfirm)
+            {
+                if (selectedItem.itemID == "EQUIPPED_WEAPON")
+                {
+                    player.inventory.dropEquippedWeapon(world, player);
+                }
+                else if (selectedItem.itemID == "INVENTORY_WEAPON")
+                {
+                    player.inventory.dropInventoryWeapon(world);
+                }
+                else if (selectedItem.itemID == "EQUIPPED_ARMOR")
+                {
+                    player.inventory.dropEquippedArmor(world, player);
+                }
+                else if (selectedItem.itemID == "INVENTORY_ARMOR")
+                {
+                    player.inventory.dropInventoryArmor(world);
+                }
+                else if (selectedItem.type == "POTION")
+                {
+                    player.inventory.dropPotion(selectedItem.itemID, world);
+                }
+
+                // Refresh list and clamp index
+                itemMap = buildPlayerItemList(player); // Re-fetch
+                if (selected_index >= itemMap.size())
+                    selected_index = itemMap.size() - 1;
+                if (selected_index < 0)
+                    selected_index = 0;
+            }
+            // If !didConfirm, the loop just continues, redrawing the inventory
+        }
+        break;
         }
     } // end while(inInventory)
 
+    // --- 2. NEW: CLOSING MESSAGE ---
     clear();
-    printw("You close your bag.\n");
+    curs_set(0);
+    midY = LINES / 2;
+    midX = COLS / 2;
+    boxW = 22;
+    boxH = 2;
+
+    // Draw the "Closed" box (Dim White)
+    attron(COLOR_PAIR(6) | A_DIM);
+    draw_box(midY - 1, midX - (boxW / 2), boxW, boxH);
+    mvprintw(midY, midX - 8, "Inventory Closed");
+    attroff(COLOR_PAIR(6) | A_DIM);
+
     refresh();
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 
 void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioManager &audio)
@@ -747,18 +1341,22 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
         {
         case 'w':
         case 'W':
+        case KEY_UP:
             move_character(player, 0, -1, map, quest, audio, player);
             break;
         case 's':
         case 'S':
+        case KEY_DOWN:
             move_character(player, 0, 1, map, quest, audio, player);
             break;
         case 'a':
         case 'A':
+        case KEY_LEFT:
             move_character(player, -1, 0, map, quest, audio, player);
             break;
         case 'd':
         case 'D':
+        case KEY_RIGHT:
             move_character(player, 1, 0, map, quest, audio, player);
             break;
         case 'm':
@@ -789,26 +1387,83 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
     nodelay(stdscr, FALSE);
 }
 
+void Game::draw_box(int y, int x, int w, int h)
+{
+    mvaddch(y, x, ACS_ULCORNER);
+    mvaddch(y, x + w, ACS_URCORNER);
+    mvaddch(y + h, x, ACS_LLCORNER);
+    mvaddch(y + h, x + w, ACS_LRCORNER);
+    mvhline(y, x + 1, ACS_HLINE, w - 1);
+    mvhline(y + h, x + 1, ACS_HLINE, w - 1);
+    mvvline(y + 1, x, ACS_VLINE, h - 1);
+    mvvline(y + 1, x + w, ACS_VLINE, h - 1);
+}
+
+void Game::mvprintw_center(int y, const std::string &text)
+{
+    int x = (COLS - text.length()) / 2;
+    mvprintw(y, x, "%s", text.c_str());
+}
+
+// --- Redesigned Game Loop ---
+
 void Game::game_loop(Player &player, AudioManager &audio)
 {
     clear();
     vector<bool> quest(5, false);
     Map stage1(player, quest, 153, 37, "../data/map/map.txt");
-    printw("\n--- You find your way to a nearby village to rest. ---\n");
-    bool isGameRunning = true;
+
+    // Welcome message (only shows once)
+    attron(COLOR_PAIR(6)); // White
+    mvprintw_center(LINES / 2, "You find your way to a nearby village to rest.");
+    attroff(COLOR_PAIR(6));
     refresh();
+    this_thread::sleep_for(chrono::milliseconds(1500));
+    flushinp();
+
+    bool isGameRunning = true;
+    int choice = 0; // 0 = Stats, 1 = Venture, 2 = Exit
+    const std::vector<std::string> options = {
+        "Show My Stats",
+        "Venture into the forest",
+        "Exit Game"};
 
     while (isGameRunning)
     {
         clear();
-        int row = 0;
+        curs_set(0); // Hide cursor
 
-        mvprintw(row++, 0, "\n--- Village Menu ---");
-        mvprintw(row++, 0, "1. Show My Stats");
-        mvprintw(row++, 0, "2. Venture into the forest");
-        mvprintw(row++, 0, "3. Exit Game");
-        mvprintw(row, 0, "Choice: ");
+        // --- Title ---
+        attron(COLOR_PAIR(5) | A_BOLD); // Yellow
+        mvprintw_center(LINES / 2 - 8, "~~~ THE VILLAGE OF RESPITE ~~~");
+        attroff(COLOR_PAIR(5) | A_BOLD);
+
+        // --- Draw Menu Options ---
+        for (int i = 0; i < options.size(); ++i)
+        {
+            int boxY = (LINES / 2) - 4 + (i * 3);
+            int boxX = (COLS / 2) - 20;
+
+            if (i == choice)
+            {
+                // Highlighted
+                attron(COLOR_PAIR(1) | A_BOLD); // Cyan
+                draw_box(boxY - 1, boxX - 2, 44, 2);
+                mvprintw(boxY, boxX, ">> %s <<", options[i].c_str());
+                attroff(COLOR_PAIR(1) | A_BOLD);
+            }
+            else
+            {
+                // Not highlighted
+                attron(COLOR_PAIR(6)); // White
+                mvprintw(boxY, boxX, "   %s   ", options[i].c_str());
+                attroff(COLOR_PAIR(6));
+            }
+        }
+
+        mvprintw_center(LINES - 3, "Use UP/DOWN keys and ENTER to select.");
         refresh();
+
         if (is_termresized())
         {
             resize_term(0, 0);
@@ -816,39 +1471,69 @@ void Game::game_loop(Player &player, AudioManager &audio)
             refresh();
             continue;
         }
+
         int menuChoice = getch();
         switch (menuChoice)
         {
-        case '1':
-            clear();
-            player.show_details();
-            mvprintw(getmaxy(stdscr) - 2, 0, "Press any key to return...");
-            refresh();
-            getch();
+        case KEY_UP:
+        case 'w':
+            choice--;
+            if (choice < 0)
+                choice = options.size() - 1;
             break;
-        case '2':
-            explore_forest(player, stage1, quest, audio);
-            if (!player.isAlive())
+        case KEY_DOWN:
+        case 's':
+            choice++;
+            if (choice >= options.size())
+                choice = 0;
+            break;
+
+        case 10: // Enter key
+        {
+            // --- Map choice to original logic ---
+
+            // Choice 0: Show Stats
+            if (choice == 0)
             {
+                clear();
+                curs_set(1); // Show cursor for stats page (if it scrolls)
+                player.show_details();
+                mvprintw(getmaxy(stdscr) - 2, 0, "Press any key to return...");
+                refresh();
+                getch(); // Wait for key
+                flushinp();
+            }
+            // Choice 1: Venture into forest
+            else if (choice == 1)
+            {
+                explore_forest(player, stage1, quest, audio);
+                if (!player.isAlive())
+                {
+                    // If player died, the game over screen handled it
+                    // We just need to exit the loop
+                    isGameRunning = false;
+                }
+            }
+            // Choice 2: Exit Game
+            else if (choice == 2)
+            {
+                attron(COLOR_PAIR(6));
+                mvprintw_center(LINES - 1, "Thanks for playing!");
+                attroff(COLOR_PAIR(6));
+                refresh();
+                this_thread::sleep_for(chrono::seconds(1));
+                flushinp();
                 isGameRunning = false;
             }
             break;
-        case '3':
-            mvprintw(row + 1, 0, "Thanks for playing!");
-            refresh();
-            this_thread::sleep_for(chrono::seconds(1));
-            flushinp();
-            isGameRunning = false;
-            break;
+        } // End Enter key
+
         default:
-            mvprintw(row + 1, 0, "Invalid choice. Please try again.");
-            refresh();
-            this_thread::sleep_for(chrono::seconds(1));
-            flushinp();
             break;
         }
     }
 }
+
 void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool> &quest, AudioManager &audio, Player &player)
 {
     int rows, cols;
@@ -920,7 +1605,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
                 show_dialogue_message("The Golem's ancient magic is too strong. Complete other trials first.Meet Oracle at (46,13)."); // <-- FIXED
                 break;
             case 3:
-                show_dialogue_message("A dark aura repels you. You must complete Oracle's other tasks first.Meet Oracle at (46,13).");
+                show_dialogue_message("A dark aura repels you. You must complete Oracle's other tasks first. Meet Oracle at (46,13).");
                 break;
             case 4:                                                                                                                      // Final Boss
                 show_dialogue_message("The Citadel is sealed. Oracle says you must defeat the bosses to enter.Meet Oracle at (46,13)."); // <-- FIXED
@@ -1092,6 +1777,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
             map.getTileAt(newx, newy)->setMiniMapDisplayChar(".");
             add_log_message("You looted everything.");
         }
+        return;
     }
 
     else if (map.getTileAt(newx, newy)->getIsWalkable())

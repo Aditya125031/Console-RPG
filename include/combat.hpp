@@ -23,7 +23,8 @@ class Combat {
 public:
     int fight(Player&, Enemy&,Game&);
     void start();
-    void end();
+    void endWin();
+    void endFlee();
     void clearScreen();   // declared as member
 };
 

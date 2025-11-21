@@ -28,10 +28,11 @@ class Game
 {
     private:
         std::deque<std::string> event_log;
-        const size_t MAX_LOG_LINES = 10;
+        const size_t MAX_LOG_LINES = 15;
         std::string current_dialogue_message = "";
         std::vector<std::string> current_dialogue_lines;
         std::vector<std::string> wrap_text(const std::string& text, int max_width);
+        std::vector<std::string> wrap_text_v2(const std::string& text, int max_width);
         std::chrono::steady_clock::time_point lastHpRegenTime;
         std::chrono::steady_clock::time_point lastManaRegenTime;
     public:
@@ -51,6 +52,8 @@ class Game
         NPC hattori;
         std::vector<std::shared_ptr<Item>>runLootMenu(Player& player, std::vector<std::shared_ptr<Item>>& lootBox);
         bool showGameOverScreen();
+        void draw_box(int y, int x, int w, int h);
+        void mvprintw_center(int y, const std::string &text);
 };
 
 

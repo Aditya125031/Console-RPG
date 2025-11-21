@@ -9,20 +9,20 @@
 
 using namespace std;
 
-Player::Player(Game& game_world, std::string name, PlayerType type)
-    : Character(name, 100, 10), 
-      world(game_world),  
-      type(type) 
+Player::Player(Game &game_world, std::string name, PlayerType type)
+    : Character(name, 100, 10),
+      world(game_world),
+      type(type)
 {
-    switch (type) {
-    
+    switch (type)
+    {
+
     case PlayerType::Swordsman:
         this->health = 120;
         this->attackPower = 15;
         this->mana = 20;
         this->regen_hp_time = 5;
         this->regen_mana_time = 10;
-        this->inventory.equippedWeapon = make_shared<Iron_Sword>();
         break;
 
     case PlayerType::Archer:
@@ -31,7 +31,6 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
         this->mana = 60;
         this->regen_hp_time = 8;
         this->regen_mana_time = 8;
-        this->inventory.equippedWeapon = make_shared<Wooden_Bow>();
         break;
 
     case PlayerType::Mage:
@@ -40,7 +39,6 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
         this->mana = 100;
         this->regen_hp_time = 10;
         this->regen_mana_time = 5;
-        this->inventory.equippedWeapon = make_shared<Novice_Wand>();
         break;
     }
     this->maxHealth = this->health;
@@ -48,12 +46,10 @@ Player::Player(Game& game_world, std::string name, PlayerType type)
     this->baseMaxHealth = this->health;
     this->baseAttackPower = this->attackPower;
     this->baseMaxMana = this->mana;
-    printw("A new %s named %s has arrived!\n", get_type_string().c_str(), this->name.c_str());
-    this_thread::sleep_for(chrono::seconds(1));
-    flushinp();
 }
 
-void Player::reset_stats() {
+void Player::reset_stats()
+{
     this->attackPower = this->baseAttackPower;
     this->maxHealth = this->baseMaxHealth;
     this->max_mana = this->baseMaxMana;
@@ -84,11 +80,6 @@ std::string Player::get_type_string() const
     }
 }
 
-#include <string> // Ensure this is included at the top of your player.cpp
-
-/**
- * @brief Displays the player's stats in a decorative window.
- */
 void Player::show_details() const
 {
     int rows, cols;
@@ -101,7 +92,7 @@ void Player::show_details() const
     int startX = (cols - boxW) / 2;
 
     // --- Draw the Box Border (White) ---
-    attron(COLOR_PAIR(6)); 
+    attron(COLOR_PAIR(6));
     mvaddch(startY, startX, ACS_ULCORNER);
     mvaddch(startY, startX + boxW, ACS_URCORNER);
     mvaddch(startY + boxH, startX, ACS_LLCORNER);
@@ -113,17 +104,17 @@ void Player::show_details() const
     attroff(COLOR_PAIR(6));
 
     // --- Title (Cyan) ---
-    attron(COLOR_PAIR(1) | A_BOLD); 
+    attron(COLOR_PAIR(1) | A_BOLD);
     mvprintw(startY + 1, startX + (boxW - 16) / 2, "--- PLAYER STATS ---");
     attroff(COLOR_PAIR(1) | A_BOLD);
 
     // --- Stats ---
     int row = startY + 3;
     int statX = startX + 4;
-    
+
     // Name and Class (White)
     attron(COLOR_PAIR(6));
-    mvprintw(row,     statX, "Name:  %s", this->name.c_str());
+    mvprintw(row, statX, "Name:  %s", this->name.c_str());
     mvprintw(row + 1, statX, "Class: %s", get_type_string().c_str());
     attroff(COLOR_PAIR(6));
 
@@ -154,14 +145,17 @@ void Player::show_details() const
 
     // --- Equipment (Yellow) ---
     row = startY + 11;
-    
+
     attron(COLOR_PAIR(5)); // Yellow
-    
+
     // Weapon
     mvprintw(row, statX, "Weapon: ");
-    if (inventory.equippedWeapon) {
+    if (inventory.equippedWeapon)
+    {
         printw("%s", inventory.equippedWeapon->get_item_name().c_str());
-    } else {
+    }
+    else
+    {
         attron(A_DIM); // Dim the "None" text
         printw("(None)");
         attroff(A_DIM);
@@ -169,18 +163,21 @@ void Player::show_details() const
 
     // Armor
     mvprintw(row + 1, statX, "Armor:  ");
-    if (inventory.equippedArmor) {
+    if (inventory.equippedArmor)
+    {
         printw("%s", inventory.equippedArmor->get_item_name().c_str());
-    } else {
+    }
+    else
+    {
         attron(A_DIM);
         printw("(None)");
         attroff(A_DIM);
     }
-    
+
     attroff(COLOR_PAIR(5));
 }
 
-void Player::special_move(Character& enemy) 
+void Player::special_move(Character &enemy)
 {
     std::shared_ptr<Weapon> current_weapon = this->inventory.equippedWeapon;
 
@@ -197,6 +194,7 @@ void Player::special_move(Character& enemy)
         }
     }
 }
+
 int Player::get_x()
 {
     return this->coord_x;
@@ -323,7 +321,7 @@ double Player::getSpecialAttackInterval() const
     return this->specialAttackInterval;
 }
 
-std::string Player::move(int x, int y, Map& map) 
+std::string Player::move(int x, int y, Map &map)
 {
     return "Moved to position (" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
@@ -362,7 +360,7 @@ Player &Player::operator=(const Player &other)
     Character::operator=(other);
 
     this->type = other.type;
-    this->inventory = other.inventory; 
+    this->inventory = other.inventory;
 
     this->max_mana = other.max_mana;
     this->mana = other.mana;

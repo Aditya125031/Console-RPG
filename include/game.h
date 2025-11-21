@@ -44,7 +44,6 @@ class Game
         void display_dashboard(Player& player, Map& map); // New render function
         void show_full_map(Map& map);
         void move_character(Character&, int, int, Map&, vector<bool>&, AudioManager& audio,Player& player);
-        void runItemActionMenu(DisplayItem, Player&, Game&);
         void runInventoryMenu(Player&, Game&);
         void show_dialogue_message(const std::string& message); // <-- CORRECT
         void clear_dialogue_message();

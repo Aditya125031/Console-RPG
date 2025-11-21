@@ -119,7 +119,6 @@ void Combat::endWin()
     flushinp();
 }
 
-
 void Combat::endFlee()
 {
     clearScreen();
@@ -150,7 +149,7 @@ void Combat::endFlee()
     flushinp();
 }
 
-int Combat::fight(Player &p, Enemy &e, Game &world)
+int Combat::fight(Player &p, Enemy &e, Game &world, AudioManager &audio)
 {
     start();
 
@@ -295,7 +294,7 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
     {
         auto now = steady_clock::now();
         int ch = getch();
-        MEVENT event; 
+        MEVENT event;
         if (ch == ' ')
         {
             drawCombatState(p.get_name() + " retreats!");
@@ -312,7 +311,7 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
             nodelay(stdscr, TRUE);
             noecho();
             curs_set(0);
-            mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL); 
+            mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
             if (!p.isAlive())
                 break;
             continue;
@@ -324,6 +323,18 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
             auto sinceNormal = duration_cast<milliseconds>(now - lastPlayerNormal).count();
             if (sinceNormal >= playerNormalInterval)
             {
+                if (p.get_type_string() == "Swordsman")
+                {
+                    audio.playSFX("../data/audio/sword-normal.mp3");
+                }
+                else if (p.get_type_string() == "Archer")
+                {
+                    audio.playSFX("../data/audio/archer-normal.mp3");
+                }
+                else
+                {
+                    audio.playSFX("../data/audio/mage-normal.mp3");
+                }
                 e.take_damage(p.getAttackPower());
                 lastPlayerNormal = now;
 
@@ -353,6 +364,19 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
                     drawCombatState(std::string(msg1));
                     this_thread::sleep_for(milliseconds(1000));
 
+                    if (p.get_type_string() == "Swordsman")
+                    {
+                        audio.playSFX("../data/audio/sword-special.mp3");
+                    }
+                    else if (p.get_type_string() == "Archer")
+                    {
+                        audio.playSFX("../data/audio/archer-special.mp3");
+                    }
+                    else
+                    {
+                        audio.playSFX("../data/audio/mage-special.mp3");
+                    }
+
                     p.special_move(e);
                     lastPlayerSpecial = now;
 
@@ -376,7 +400,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
             }
         }
 
-
         // === MOUSE INPUT HANDLING ===
         if (ch == KEY_MOUSE)
         {
@@ -388,13 +411,24 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
                     auto sinceNormal = duration_cast<milliseconds>(now - lastPlayerNormal).count();
                     if (sinceNormal >= playerNormalInterval)
                     {
+                        if (p.get_type_string() == "Swordsman")
+                        {
+                            audio.playSFX("../data/audio/sword-normal.mp3");
+                        }
+                        else if (p.get_type_string() == "Archer")
+                        {
+                            audio.playSFX("../data/audio/archer-normal.mp3");
+                        }
+                        else
+                        {
+                            audio.playSFX("../data/audio/mage-normal.mp3");
+                        }
                         e.take_damage(p.getAttackPower());
                         lastPlayerNormal = now;
 
                         char msg[100];
                         snprintf(msg, sizeof(msg), "%s strikes %s!", p.get_name().c_str(), e.get_name().c_str());
                         drawCombatState(std::string(msg));
-
                     }
                     else
                     {
@@ -415,6 +449,19 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
                             snprintf(msg1, sizeof(msg1), "%s accumulates POWER!", p.get_name().c_str());
                             drawCombatState(std::string(msg1));
                             this_thread::sleep_for(milliseconds(1000));
+
+                            if (p.get_type_string() == "Swordsman")
+                            {
+                                audio.playSFX("../data/audio/sword-special.mp3");
+                            }
+                            else if (p.get_type_string() == "Archer")
+                            {
+                                audio.playSFX("../data/audio/archer-special.mp3");
+                            }
+                            else
+                            {
+                                audio.playSFX("../data/audio/mage-special.mp3");
+                            }
 
                             p.special_move(e);
                             lastPlayerSpecial = now;

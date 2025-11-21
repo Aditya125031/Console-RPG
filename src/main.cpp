@@ -8,8 +8,9 @@
 #include <limits>
 #include <thread>
 #include <chrono>
-#include <cstdlib> 
-#include "../extern/pdcurses/curses.h"
+#include <cstdlib> // Required for std::system
+// #include <windows.h> // Not needed with curses
+#include "../extern/pdcurses/curses.h" // Include the curses header
 #include "../include/tile.h"
 #include "../include/map.h"
 #include "../include/character.h"
@@ -19,6 +20,7 @@
 #include "../include/enemy.h"
 #include "../include/inventory.hpp"
 
+// Note: I'm assuming 'PlayerType' is an enum defined in one of your headers.
 
 void draw_box(int y, int x, int w, int h)
 {
@@ -42,49 +44,99 @@ void mvprintw_center(int y, const std::string &text)
 Player create_player(Game &game_world)
 {
     clear();
-    curs_set(0); // Hide cursor for menu
+    curs_set(0); // Show cursor for input
 
     int midY = LINES / 2;
     int midX = COLS / 2;
 
-    // --- Title ---
-    attron(COLOR_PAIR(1) | A_BOLD); // Cyan
-    mvprintw_center(midY - 8, "|| C R E A T E   Y O U R   H E R O ||");
-    attroff(COLOR_PAIR(1) | A_BOLD);
+    // --- Phase 1: Name Input (Custom Loop) ---
+    std::string playerName = "";
+    bool nameEntered = false;
 
-    // --- Phase 1: Name Input ---
-    draw_box(midY - 5, midX - 25, 50, 4);                       // Box is from y=midY-5 to y=midY-1
-    mvprintw(midY - 4, midX - 23, "What is your hero's name?"); // Moved up
+    // Enable keypad to detect resize events and special keys
+    keypad(stdscr, TRUE);
+    noecho(); // We will manually print characters
 
-    // Draw the input field
-    attron(COLOR_PAIR(5)); // Yellow
-    // This line is moved up to midY - 2
-    mvprintw(midY - 2, midX - 23, "Name: [");
-    mvprintw(midY - 2, midX + 21, "]");
-    attroff(COLOR_PAIR(5));
-    refresh();
+    while (!nameEntered)
+    {
+        // 1. Check for Resize
+        if (is_termresized())
+        {
+            resize_term(0, 0);
+            midY = LINES / 2;
+            midX = COLS / 2;
+            clear();
+            // Note: We don't 'continue' here because we want to fall through
+            // to the drawing logic immediately to update the UI.
+        }
 
-    // Temporarily show cursor and echo for name input
-    echo();
-    curs_set(1);
-    // This line is moved up to midY - 2
-    move(midY - 2, midX - 15); // Move cursor into the box
+        // 2. Draw UI (Redraws every frame)
 
-    std::string playerName;
-    char nameBuffer[40]; // Reduced size to fit the box
-    getnstr(nameBuffer, sizeof(nameBuffer) - 1);
-    playerName = nameBuffer;
+        // Title
+        attron(COLOR_PAIR(1) | A_BOLD); // Cyan
+        mvprintw_center(midY - 8, "|| C R E A T E   Y O U R   H E R O ||");
+        attroff(COLOR_PAIR(1) | A_BOLD);
 
-    // Restore game state
-    noecho();
+        // Box
+        draw_box(midY - 5, midX - 25, 50, 4);
+        mvprintw(midY - 4, midX - 23, "What is your hero's name?");
+
+        // Input Field styling
+        attron(COLOR_PAIR(5)); // Yellow
+        mvprintw(midY - 2, midX - 23, "Name: [");
+        mvprintw(midY - 2, midX + 21, "]");
+        attroff(COLOR_PAIR(5));
+
+        // Print the current Name buffer
+        // (We clear the space first to prevent artifacts on backspace)
+        mvprintw(midY - 2, midX - 15, "                              ");
+        mvprintw(midY - 2, midX - 15, "%s", playerName.c_str());
+
+        // Move cursor to the end of the typed name
+        move(midY - 2, midX - 15 + playerName.length());
+
+        refresh();
+
+        // 3. Get Input
+        int ch = getch();
+
+        // Handle Resize Key (Some systems send this code)
+        if (ch == KEY_RESIZE)
+        {
+            continue; // Loop back to top to handle is_termresized
+        }
+
+        // Handle Enter (Confirm)
+        if (ch == 10 || ch == '\n' || ch == KEY_ENTER)
+        {
+            if (!playerName.empty())
+            {
+                nameEntered = true;
+            }
+        }
+        // Handle Backspace (Delete)
+        else if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b')
+        {
+            if (!playerName.empty())
+            {
+                playerName.pop_back();
+            }
+        }
+        // Handle Regular Characters (Limit length to fit box)
+        else if (isprint(ch) && playerName.length() < 35)
+        {
+            playerName += (char)ch;
+        }
+    }
+
+    // Restore cursor state
     curs_set(0);
 
     // --- Phase 2: Class Selection ---
     PlayerType playerType;
-    int choice = 0; // 0 = Swordsman, 1 = Archer, 2 = Mage
+    int choice = 0;
     bool classSelected = false;
 
-    // Class details
     const std::vector<std::string> classes = {"Swordsman", "Archer", "Mage"};
     const std::vector<std::string> descriptions = {
         "A balanced warrior of strength and defense.",
@@ -93,9 +145,23 @@ Player create_player(Game &game_world)
 
     while (!classSelected)
     {
-        clear(); // Redraw everything for the menu
+        // --- RESIZE HANDLING (Phase 2) ---
+        if (is_termresized())
+        {
+            resize_term(0, 0);
+            midY = LINES / 2;
+            midX = COLS / 2;
+            clear();
+            // Fall through to drawing logic
+        }
+        else
+        {
+            // Only clear if we didn't just resize (to avoid flickering)
+            // Actually, for a menu loop, explicit clearing usually helps artifacts
+            clear();
+        }
 
-        // --- Redraw Title and Name ---
+        // Title
         attron(COLOR_PAIR(1) | A_BOLD);
         mvprintw_center(midY - 10, "|| C R E A T E   Y O U R   H E R O ||");
         attroff(COLOR_PAIR(1) | A_BOLD);
@@ -106,7 +172,7 @@ Player create_player(Game &game_world)
 
         mvprintw_center(midY - 6, "Select your class (Use UP/DOWN, Enter to select):");
 
-        // --- Draw Class Options ---
+        // Draw Class Options
         for (int i = 0; i < classes.size(); ++i)
         {
             int boxY = midY - 4 + (i * 4);
@@ -116,20 +182,17 @@ Player create_player(Game &game_world)
 
             if (i == choice)
             {
-                // Highlighted box
                 attron(COLOR_PAIR(5) | A_BOLD); // Yellow
                 draw_box(boxY, boxX, boxW, boxH);
                 mvprintw(boxY + 1, boxX + 2, ">> %s <<", classes[i].c_str());
                 attroff(COLOR_PAIR(5) | A_BOLD);
 
-                // Print description for the highlighted class
                 attron(COLOR_PAIR(6)); // White
                 mvprintw_center(boxY + 2, descriptions[i].c_str());
                 attroff(COLOR_PAIR(6));
             }
             else
             {
-                // Non-highlighted box
                 attron(COLOR_PAIR(6)); // White
                 draw_box(boxY, boxX, boxW, boxH);
                 mvprintw(boxY + 1, boxX + 2, "%s", classes[i].c_str());
@@ -138,7 +201,6 @@ Player create_player(Game &game_world)
         }
         refresh();
 
-        // --- Get Input for Menu ---
         int ch = getch();
         switch (ch)
         {
@@ -160,7 +222,7 @@ Player create_player(Game &game_world)
         }
     }
 
-    // --- Final Selection Logic ---
+    // --- Final Selection ---
     switch (choice)
     {
     case 0:
@@ -174,15 +236,43 @@ Player create_player(Game &game_world)
         break;
     }
 
-    // --- Confirmation ---
+    // Loop for 1.5 seconds (1500ms), checking for resize every 50ms
+    int totalDuration = 1500;
+    int interval = 50;
+    int elapsed = 0;
+
+    // Initial Draw
     clear();
+    // Recalculate mid just in case resize happened immediately before this block
+    midY = LINES / 2;
+
     attron(COLOR_PAIR(2) | A_BOLD); // Green
     mvprintw_center(midY - 1, ("Welcome, " + playerName + " the " + classes[choice] + "!").c_str());
     mvprintw_center(midY + 1, "Your adventure begins...");
     attroff(COLOR_PAIR(2) | A_BOLD);
     refresh();
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    while (elapsed < totalDuration)
+    {
+        
+        if (is_termresized())
+        {
+            resize_term(0, 0);
+            midY = LINES / 2;
+            midX = COLS / 2; // <--- Added this
+            clear();
+
+            // Redraw at new center
+            attron(COLOR_PAIR(2) | A_BOLD);
+            mvprintw_center(midY - 1, ("Welcome, " + playerName + " the " + classes[choice] + "!").c_str());
+            mvprintw_center(midY + 1, "Your adventure begins...");
+            attroff(COLOR_PAIR(2) | A_BOLD);
+            refresh();
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+        elapsed += interval;
+    }
     flushinp();
 
     return Player(game_world, playerName, playerType);
@@ -191,17 +281,20 @@ Player create_player(Game &game_world)
 // This function should be called once, before starting the game loop
 void setup_curses()
 {
-void setup_curses() {
     initscr();
-    
-    cbreak();   
-    noecho(); 
-    keypad(stdscr, TRUE); 
-    
-    if (has_colors()) {
-        start_color(); 
 
-        init_pair(1, COLOR_CYAN, COLOR_BLACK); 
+    // --- Standard Game Terminal Setup ---
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+
+    // --- Color Setup ---
+    if (has_colors())
+    {
+        start_color(); // Starts the color system
+
+        // Initialize the color pairs using your defined constants
+        init_pair(1, COLOR_CYAN, COLOR_BLACK);
         init_pair(2, COLOR_GREEN, COLOR_BLACK);
         init_pair(3, COLOR_BLUE, COLOR_BLACK);
         init_pair(4, COLOR_RED, COLOR_BLACK);
@@ -211,7 +304,10 @@ void setup_curses() {
         init_pair(8, COLOR_WHITE, COLOR_WHITE);
         init_pair(9, COLOR_RED, COLOR_RED);
     }
-    
+
+    // The timeout below is optional, but often useful for game loops
+    // sets the waiting period for getch() in milliseconds.
+    // timeout(100);
 }
 
 void show_welcome_screen()
@@ -302,18 +398,15 @@ int main()
     hero.inventory.addItem(make_shared<Mana_Potion>(), 2, hero, world);
     if (hero.get_type_string() == "Swordsman")
     {
-        hero.inventory.addItem(make_shared<Shinketsu_Sword>(), 1, hero, world);
-        hero.inventory.addItem(make_shared<Runeforged_Armor>(), 1, hero, world);
+        hero.inventory.addItem(make_shared<Iron_Sword>(), 1, hero, world);
     }
     else if (hero.get_type_string() == "Archer")
     {
-        hero.inventory.addItem(make_shared<Silent_Death>(), 1, hero, world);
-        hero.inventory.addItem(make_shared<Lunar_Veil>(), 1, hero, world);
+        hero.inventory.addItem(make_shared<Wooden_Bow>(), 1, hero, world);
     }
     else
     {
         hero.inventory.addItem(make_shared<Novice_Wand>(), 1, hero, world);
-        hero.inventory.addItem(make_shared<Mystic_Veil>(), 1, hero, world);
     }
     world.game_loop(hero, audio);
     endwin();

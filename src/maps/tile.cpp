@@ -177,7 +177,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_colorPairMiniMap = 5; 
             Character* lichlord = new LichLord(player);
             m_characterOnTile = lichlord;
-            requiredQuestCompleted = 0;
+            requiredQuestCompleted = 4;
             m_isWalkable = false;
             doQuest=5;
         }

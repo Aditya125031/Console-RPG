@@ -8,9 +8,12 @@
 #include <chrono>
 #include <sstream>
 #include "../extern/pdcurses/curses.h"
+// REMOVE: #include <iostream>
+// REMOVE: #include <windows.h>
 
 using namespace std;
 
+// Your project headers (kept for completeness)
 #include "../include/combat.hpp"
 #include "../include/inventory.hpp"
 #include "../include/game.h"
@@ -22,13 +25,16 @@ using namespace std;
 #include "../include/goblin.h"
 #include "../include/npc.h"
 
-class AudioManager; 
-struct CreditLine {
+class AudioManager; // Forward declaration
+
+struct CreditLine
+{
     std::string text;
-    int color_pair; 
+    int color_pair;
     bool bold;
 };
-void Game::run_credits() {
+void Game::run_credits()
+{
     clear();
     int term_height, term_width;
     getmaxyx(stdscr, term_height, term_width);
@@ -39,7 +45,7 @@ void Game::run_credits() {
         {"      THE DEFEATED      ", 2, true},
         {"==================================", 1, true},
         {"", 0, false},
-        
+
         {"--- GAME DESIGN ---", 3, true},
         {"[ Team 7 ]", 4, false},
         {"", 0, false},
@@ -69,44 +75,52 @@ void Game::run_credits() {
         {"StackOverflow", 5, false},
         {"Gemini", 5, false},
         {"", 0, false},
-        
+
         {"==================================", 1, true},
         {"THANKS FOR PLAYING!", 2, true},
         {"==================================", 1, true},
-        {"", 0, false}
-    };
+        {"", 0, false}};
 
     curs_set(0);
-    nodelay(stdscr, TRUE); 
+    nodelay(stdscr, TRUE);
 
     int total_lines = credits.size();
-    int start_row = term_height; 
+    int start_row = term_height;
 
-    for (int offset = 0; offset < term_height + total_lines; ++offset) {
+    for (int offset = 0; offset < term_height + total_lines; ++offset)
+    {
         clear();
 
-        for (int i = 0; i < total_lines; ++i) {
+        for (int i = 0; i < total_lines; ++i)
+        {
             int row = start_row + i - offset;
 
-            if (row >= 0 && row < term_height) {
+            if (row >= 0 && row < term_height)
+            {
                 std::string text = credits[i].text;
                 int col = (term_width - text.length()) / 2;
-                if (col < 0) col = 0;
+                if (col < 0)
+                    col = 0;
 
-                if (credits[i].bold) attron(A_BOLD);
-                if (credits[i].color_pair > 0) attron(COLOR_PAIR(credits[i].color_pair));
+                if (credits[i].bold)
+                    attron(A_BOLD);
+                if (credits[i].color_pair > 0)
+                    attron(COLOR_PAIR(credits[i].color_pair));
 
                 mvprintw(row, col, "%s", text.c_str());
 
-                if (credits[i].bold) attroff(A_BOLD);
-                if (credits[i].color_pair > 0) attroff(COLOR_PAIR(credits[i].color_pair));
+                if (credits[i].bold)
+                    attroff(A_BOLD);
+                if (credits[i].color_pair > 0)
+                    attroff(COLOR_PAIR(credits[i].color_pair));
             }
         }
 
         refresh();
 
         int ch = getch();
-        if (ch != ERR) break; 
+        if (ch != ERR)
+            break;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(180));
     }
@@ -120,16 +134,16 @@ void Game::run_credits() {
     std::string prompt = "[ Press any key to continue ]";
     mvprintw(rows - 2, (cols - prompt.length()) / 2, "%s", prompt.c_str());
     refresh();
-    getch(); 
+    getch();
     curs_set(1);
 }
 void Game::play_cinematic_dialogue(const std::vector<std::string> &lines)
 {
-    clear(); 
+    clear();
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
-    int max_width = cols - 10; 
+    int max_width = cols - 10;
     std::vector<std::string> wrapped_lines;
     for (const std::string &line : lines)
     {
@@ -143,11 +157,11 @@ void Game::play_cinematic_dialogue(const std::vector<std::string> &lines)
     for (int i = 0; i < wrapped_lines.size(); ++i)
     {
         int text_len = wrapped_lines[i].length();
-        int start_x = (cols - text_len) / 2; 
+        int start_x = (cols - text_len) / 2;
         mvprintw(start_y + i, start_x, "%s", wrapped_lines[i].c_str());
-        if(getch())
+        if (getch())
         {
-            continue; 
+            continue;
         }
     }
     attroff(A_BOLD);
@@ -156,12 +170,14 @@ void Game::play_cinematic_dialogue(const std::vector<std::string> &lines)
     mvprintw(rows - 2, (cols - prompt.length()) / 2, "%s", prompt.c_str());
 
     refresh();
-    
+
     nodelay(stdscr, FALSE);
     getch();
 }
+
 void Game::show_dialogue_message(const std::string &message)
 {
+    // This function just sets the message that will be drawn by the dashboard
     int term_width, term_height;
     getmaxyx(stdscr, term_height, term_width);
     int dialogue_width = term_width - 10;
@@ -169,6 +185,7 @@ void Game::show_dialogue_message(const std::string &message)
         dialogue_width = 20;
     std::vector<std::string> wrapped_lines = wrap_text(message, dialogue_width);
 
+    // 2. Add the wrapped lines to the CORRECT vector
     current_dialogue_lines.insert(current_dialogue_lines.end(), wrapped_lines.begin(), wrapped_lines.end());
 }
 
@@ -184,6 +201,8 @@ void Game::add_log_message(std::string message)
 std::vector<DisplayItem> Game::buildPlayerItemList(Player &player)
 {
     std::vector<DisplayItem> itemMap;
+
+    // Add Equipment
     if (player.inventory.equippedWeapon)
     {
         itemMap.push_back({player.inventory.equippedWeapon->get_item_name() + " (Equipped)",
@@ -195,6 +214,7 @@ std::vector<DisplayItem> Game::buildPlayerItemList(Player &player)
                            "EQUIPPED_ARMOR", "ARMOR", player.inventory.equippedArmor->get_item_description() + " \nExtra Health : " + to_string(player.inventory.equippedArmor->get_armor_health()) + "\nExtra Mana : " + to_string(player.inventory.equippedArmor->get_armor_mana()) + "\n"});
     }
 
+    // 2. Add Bag Items (using public members)
     if (player.inventory.inventoryWeapon)
     {
         itemMap.push_back({player.inventory.inventoryWeapon->get_item_name() + " (Bag)",
@@ -289,7 +309,7 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                                            vector<shared_ptr<Item>> &lootBox)
 {
     bool inLootMenu = true;
-    Game &world = *this; 
+    Game &world = *this; // For inventory functions
 
     // --- State Management ---
     enum class LootFocus
@@ -464,7 +484,11 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
         if (currentFocus == LootFocus::LOOT_BOX && !lootBox.empty())
         {
             attron(COLOR_PAIR(2) | A_BOLD); // Green for Loot
+
+            // Display both Space and Enter options
+            mvprintw(actionY, startX + 40, "[SPACE] Loot All");
             mvprintw(actionY, startX + 60, "[ENTER] Loot");
+
             attroff(COLOR_PAIR(2) | A_BOLD);
         }
         else if (currentFocus == LootFocus::INVENTORY && !playerItems.empty())
@@ -592,13 +616,55 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                 }
             }
             break;
-        } 
-        } 
-    } 
+
+        // --- NEW: LOOT ALL (Spacebar) ---
+        case ' ':
+            // CHECK: Only allow if focused on Loot Box
+            if (currentFocus == LootFocus::LOOT_BOX && !lootBox.empty())
+            {
+                // Try to pick up everything
+                for (size_t i = 0; i < lootBox.size();)
+                {
+                    auto itemToTake = lootBox[i];
+                    bool success = player.inventory.addItem(itemToTake, 1, player, world);
+
+                    if (success)
+                    {
+                        lootBox.erase(lootBox.begin() + i);
+                        // Do not increment i, as elements shifted left
+                    }
+                    else
+                    {
+                        // Inventory full? Stop trying.
+                        // Show full message
+                        int popW = 30;
+                        int popH = 4;
+                        int popY = (LINES - popH) / 2; // Center Y
+                        int popX = (COLS - popW) / 2;  // Center X
+
+                        attron(COLOR_PAIR(4) | A_BOLD); // Red + Bold
+                        draw_box(popY, popX, popW, popH);
+                        mvprintw(popY + 1, popX + (popW - 19) / 2, "Inventory is full!");
+                        attroff(COLOR_PAIR(4) | A_BOLD);
+
+                        attron(A_DIM);
+                        mvprintw(popY + 2, popX + (popW - 18) / 2, "Press any key...");
+                        attroff(A_DIM);
+
+                        refresh();
+                        getch(); // Pause
+                        break;   // Exit the loop, can't pick up more
+                    }
+                }
+                // Reset loot index just in case
+                loot_index = 0;
+            }
+            break;
+        } // end switch
+    } // end while
 
     return lootBox;
 }
-
 
 void Game::clear_dialogue_message()
 {
@@ -607,9 +673,10 @@ void Game::clear_dialogue_message()
 
 bool Game::showGameOverScreen(AudioManager &audio)
 {
-    audio.playMusic("../data/audio/game_end.mp3");
+    audio.playMusic("../data/audio/game-over.mp3");
     nodelay(stdscr, FALSE);
-    curs_set(0); 
+    curs_set(0);
+
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
     const std::vector<std::string> title = {
@@ -632,8 +699,7 @@ bool Game::showGameOverScreen(AudioManager &audio)
     while (true)
     {
         clear();
-
-        attron(COLOR_PAIR(4)); 
+        attron(COLOR_PAIR(4));
         for (int x = 0; x < cols; x++)
         {
             mvaddch(0, x, ACS_CKBOARD);
@@ -690,10 +756,9 @@ bool Game::showGameOverScreen(AudioManager &audio)
             if (choice > 1)
                 choice = 0;
             break;
-        case 10: 
-        case ' ':
+        case 10:
             if (choice == 0)
-                return true; 
+                return true;
             else
                 return false;
             break;
@@ -716,8 +781,9 @@ void Game::display_dashboard(Player &player, Map &map)
     int left_padding = max(0, (term_width - full_len) / 2);
     int row = 0;
 
+    // Print the title centered at row 0
     mvprintw(row, left_padding, "%s", title_prefix.c_str());
-    attron(COLOR_PAIR(4) | A_BOLD); 
+    attron(COLOR_PAIR(4) | A_BOLD); // Red for "DEFEATED"
     printw("%s", title_red.c_str());
     attroff(COLOR_PAIR(4) | A_BOLD);
     printw("%s", title_suffix.c_str());
@@ -744,8 +810,10 @@ void Game::display_dashboard(Player &player, Map &map)
     attroff(COLOR_PAIR(2));
     row++;
 
+    // 4. Mana
     mvprintw(row, 0, " Mana: ");
     attron(COLOR_PAIR(1));
+    // Note: Assuming get_mana() is current and you might need a get_max_mana() later
     printw("%d/%d", player.get_mana(), player.get_max_mana());
     attroff(COLOR_PAIR(1));
     row++;
@@ -779,6 +847,7 @@ void Game::display_dashboard(Player &player, Map &map)
     int i = 0;
     for (const std::string &line : current_dialogue_lines)
     {
+        // Center each line individually
         int start_x = (term_width - line.length()) / 2;
         if (start_x < 0)
         {
@@ -798,6 +867,7 @@ std::vector<std::string> Game::wrap_text(const std::string &text, int max_width)
 
     while (ss >> word)
     {
+        // Check if the new word fits on the current line
         if (current_line.empty() || current_line.length() + word.length() + 1 <= max_width)
         {
             if (!current_line.empty())
@@ -808,10 +878,12 @@ std::vector<std::string> Game::wrap_text(const std::string &text, int max_width)
         }
         else
         {
+            // Word doesn't fit, so push the current line and start a new one
             lines.push_back(current_line);
             current_line = word;
         }
     }
+    // Add the last line
     if (!current_line.empty())
     {
         lines.push_back(current_line);
@@ -839,6 +911,7 @@ void Game::play_dialogue(const std::vector<std::string> &lines, Player &player, 
         current_dialogue_lines.push_back(line);
         display_dashboard(player, map);
         getch();
+        // --- END OF NEW LOGIC ---
     }
 }
 
@@ -873,76 +946,6 @@ void Game::show_full_map(Map &map)
 
     clear();
 }
-
-// void Game::runItemActionMenu(DisplayItem selectedItem, Player &player, Game &world)
-// {
-//     clear();
-//     printw("Selected: %s\n Item Description: %s", selectedItem.displayName.c_str(), selectedItem.description.c_str());
-//     printw("------------------\n");
-
-//     // "Use" text changes based on item type
-//     if (selectedItem.type == "WEAPON" || selectedItem.type == "ARMOR")
-//     {
-//         printw("(e or u) Equip / Swap\n");
-//     }
-//     else if (selectedItem.type == "POTION")
-//     {
-//         printw("(e or u) Use\n");
-//     }
-
-//     printw("(d) Drop\n");
-//     printw("(c) Cancel\n");
-//     refresh();
-
-//     char ch = getch();
-//     switch (ch)
-//     {
-//     case 'e': // Equip/Swap
-//     case 'u': // Use
-//         if (selectedItem.type == "WEAPON")
-//         {
-//             player.inventory.swapWeapon(player, world);
-//         }
-//         else if (selectedItem.type == "ARMOR")
-//         {
-//             player.inventory.swapArmor(player, world);
-//         }
-//         else if (selectedItem.type == "POTION")
-//         {
-//             // We use the itemID, which holds the potion's name
-//             player.inventory.usePotion(selectedItem.itemID, player, world);
-//         }
-//         break;
-
-//     case 'd': // Drop
-//         if (selectedItem.itemID == "EQUIPPED_WEAPON")
-//         {
-//             player.inventory.dropEquippedWeapon(world, player);
-//         }
-//         else if (selectedItem.itemID == "INVENTORY_WEAPON")
-//         {
-//             player.inventory.dropInventoryWeapon(world);
-//         }
-//         else if (selectedItem.itemID == "EQUIPPED_ARMOR")
-//         {
-//             player.inventory.dropEquippedArmor(world, player);
-//         }
-//         else if (selectedItem.itemID == "INVENTORY_ARMOR")
-//         {
-//             player.inventory.dropInventoryArmor(world);
-//         }
-//         else if (selectedItem.type == "POTION")
-//         {
-//             // We use the itemID, which holds the potion's name
-//             player.inventory.dropPotion(selectedItem.itemID, world);
-//         }
-//         break;
-
-//     case 'c': // Cancel
-//     default:
-//         break;
-//     }
-// }
 
 void Game::runInventoryMenu(Player &player, Game &world)
 {
@@ -1133,110 +1136,117 @@ void Game::runInventoryMenu(Player &player, Game &world)
 
         // --- Primary Action: ENTER ---
         case 10: // Enter key
+        {
+            if (itemMap.empty())
+                break;
+
+            // We already have 'selectedItem' from the drawing phase
+
+            // --- Equip/Swap (IMMEDIATE ACTION) ---
+            if (selectedItem.type == "WEAPON" || selectedItem.type == "ARMOR")
             {
-                if (itemMap.empty())
-                    break;
-                
-                // We already have 'selectedItem' from the drawing phase
-
-                // --- Equip/Swap (IMMEDIATE ACTION) ---
-                if (selectedItem.type == "WEAPON" || selectedItem.type == "ARMOR")
+                if (selectedItem.type == "WEAPON")
                 {
-                    if (selectedItem.type == "WEAPON")
-                    {
-                        player.inventory.swapWeapon(player, world);
-                    }
-                    else if (selectedItem.type == "ARMOR")
-                    {
-                        player.inventory.swapArmor(player, world);
-                    }
+                    player.inventory.swapWeapon(player, world);
                 }
-                // --- Use Potion (REQUIRES CONFIRMATION) ---
-                else if (selectedItem.type == "POTION")
+                else if (selectedItem.type == "ARMOR")
                 {
-                    // --- NEW: INTERACTIVE "USE" CONFIRMATION ---
-                    bool inConfirmation = true;
-                    bool didConfirm = false;
-                    int confirm_choice = 1; // 0 = Yes, 1 = No (Default to No)
-
-                    int popW = 40;
-                    int popH = 6;
-                    int popY = (LINES - popH) / 2;
-                    int popX = (COLS - popW) / 2;
-
-                    while (inConfirmation)
-                    {
-                        // Draw the confirmation box
-                        clear(); // Clear the screen for the pop-up
-                        attron(COLOR_PAIR(2) | A_BOLD); // Green border
-                        draw_box(popY, popX, popW, popH);
-                        attroff(COLOR_PAIR(2) | A_BOLD);
-
-                        // Title
-                        std::string use_prompt = "Use " + selectedItem.displayName + "?";
-                        mvprintw(popY + 1, popX + (popW - use_prompt.length()) / 2, "%s", use_prompt.c_str());
-                        
-                        // Description (dimmed)
-                        attron(A_DIM);
-                        std::string desc_line = "(This will consume the item)";
-                        mvprintw(popY + 2, popX + (popW - desc_line.length()) / 2, "%s", desc_line.c_str());
-                        attroff(A_DIM);
-
-                        // --- Draw Options ---
-                        if (confirm_choice == 0) { // YES
-                            attron(COLOR_PAIR(6) | A_REVERSE);
-                            mvprintw(popY + 4, popX + 8, "[ YES ]");
-                            attroff(COLOR_PAIR(6) | A_REVERSE);
-                            
-                            mvprintw(popY + 4, popX + 26, "  NO  ");
-                        } else { // NO
-                            mvprintw(popY + 4, popX + 8, "  YES  ");
-                            
-                            attron(COLOR_PAIR(6) | A_REVERSE);
-                            mvprintw(popY + 4, popX + 26, "[ NO ]");
-                            attroff(COLOR_PAIR(6) | A_REVERSE);
-                        }
-                        
-                        refresh();
-
-                        // --- Handle Confirmation Input ---
-                        int ch_confirm = getch();
-                        switch (ch_confirm)
-                        {
-                            case KEY_LEFT: case 'a':
-                                confirm_choice = 0; // YES
-                                break;
-                            case KEY_RIGHT: case 'd':
-                                confirm_choice = 1; // NO
-                                break;
-                            case 10: // Enter
-                                if (confirm_choice == 0) {
-                                    didConfirm = true;
-                                }
-                                inConfirmation = false;
-                                break;
-                            case 'q': case 'c': // Quit/Cancel
-                                inConfirmation = false;
-                                break;
-                        }
-                    }
-                    // --- END CONFIRMATION ---
-
-                    if (didConfirm)
-                    {
-                        player.inventory.usePotion(selectedItem.itemID, player, world);
-                    }
-                    // If !didConfirm, the loop just continues
+                    player.inventory.swapArmor(player, world);
                 }
-
-                // Refresh list and clamp index (runs after equip OR use)
-                itemMap = buildPlayerItemList(player); // Re-fetch
-                if (selected_index >= itemMap.size())
-                    selected_index = itemMap.size() - 1;
-                if (selected_index < 0)
-                    selected_index = 0;
             }
-            break;
+            // --- Use Potion (REQUIRES CONFIRMATION) ---
+            else if (selectedItem.type == "POTION")
+            {
+                // --- NEW: INTERACTIVE "USE" CONFIRMATION ---
+                bool inConfirmation = true;
+                bool didConfirm = false;
+                int confirm_choice = 1; // 0 = Yes, 1 = No (Default to No)
+
+                int popW = 40;
+                int popH = 6;
+                int popY = (LINES - popH) / 2;
+                int popX = (COLS - popW) / 2;
+
+                while (inConfirmation)
+                {
+                    // Draw the confirmation box
+                    clear();                        // Clear the screen for the pop-up
+                    attron(COLOR_PAIR(2) | A_BOLD); // Green border
+                    draw_box(popY, popX, popW, popH);
+                    attroff(COLOR_PAIR(2) | A_BOLD);
+
+                    // Title
+                    std::string use_prompt = "Use " + selectedItem.displayName + "?";
+                    mvprintw(popY + 1, popX + (popW - use_prompt.length()) / 2, "%s", use_prompt.c_str());
+
+                    // Description (dimmed)
+                    attron(A_DIM);
+                    std::string desc_line = "(This will consume the item)";
+                    mvprintw(popY + 2, popX + (popW - desc_line.length()) / 2, "%s", desc_line.c_str());
+                    attroff(A_DIM);
+
+                    // --- Draw Options ---
+                    if (confirm_choice == 0)
+                    { // YES
+                        attron(COLOR_PAIR(6) | A_REVERSE);
+                        mvprintw(popY + 4, popX + 8, "[ YES ]");
+                        attroff(COLOR_PAIR(6) | A_REVERSE);
+
+                        mvprintw(popY + 4, popX + 26, "  NO  ");
+                    }
+                    else
+                    { // NO
+                        mvprintw(popY + 4, popX + 8, "  YES  ");
+
+                        attron(COLOR_PAIR(6) | A_REVERSE);
+                        mvprintw(popY + 4, popX + 26, "[ NO ]");
+                        attroff(COLOR_PAIR(6) | A_REVERSE);
+                    }
+
+                    refresh();
+
+                    // --- Handle Confirmation Input ---
+                    int ch_confirm = getch();
+                    switch (ch_confirm)
+                    {
+                    case KEY_LEFT:
+                    case 'a':
+                        confirm_choice = 0; // YES
+                        break;
+                    case KEY_RIGHT:
+                    case 'd':
+                        confirm_choice = 1; // NO
+                        break;
+                    case 10: // Enter
+                        if (confirm_choice == 0)
+                        {
+                            didConfirm = true;
+                        }
+                        inConfirmation = false;
+                        break;
+                    case 'q':
+                    case 'c': // Quit/Cancel
+                        inConfirmation = false;
+                        break;
+                    }
+                }
+                // --- END CONFIRMATION ---
+
+                if (didConfirm)
+                {
+                    player.inventory.usePotion(selectedItem.itemID, player, world);
+                }
+                // If !didConfirm, the loop just continues
+            }
+
+            // Refresh list and clamp index (runs after equip OR use)
+            itemMap = buildPlayerItemList(player); // Re-fetch
+            if (selected_index >= itemMap.size())
+                selected_index = itemMap.size() - 1;
+            if (selected_index < 0)
+                selected_index = 0;
+        }
+        break;
 
         // --- Secondary Action: DROP ---
         case 'd':
@@ -1357,7 +1367,9 @@ void Game::runInventoryMenu(Player &player, Game &world)
         }
         break;
         }
-    }
+    } // end while(inInventory)
+
+    // --- 2. NEW: CLOSING MESSAGE ---
     clear();
     curs_set(0);
     midY = LINES / 2;
@@ -1379,6 +1391,7 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
 {
     add_log_message("You entered the forest.");
 
+    // 1. Start in Non-Blocking Mode (Real-time)
     nodelay(stdscr, TRUE);
 
     lastHpRegenTime = std::chrono::steady_clock::now();
@@ -1389,8 +1402,10 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
     {
         auto now = std::chrono::steady_clock::now();
 
+        // --- HP REGEN LOGIC ---
         auto elapsedHpSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - lastHpRegenTime).count();
-        int hpInterval = player.getHPRegenTime();
+        int hpInterval = player.getHPRegenTime(); // Assuming this returns seconds
+
         if (elapsedHpSeconds >= hpInterval && hpInterval > 0)
         {
             int healAmount = 1;
@@ -1402,6 +1417,7 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
             lastHpRegenTime = now;
         }
 
+        // --- MANA REGEN LOGIC ---
         auto elapsedManaSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - lastManaRegenTime).count();
         int manaInterval = player.getManaRegenTime();
 
@@ -1430,9 +1446,10 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
 
         if (input == ERR)
         {
-            napms(50);
+            napms(50); 
             continue;
         }
+
         nodelay(stdscr, FALSE);
 
         switch (input)
@@ -1473,12 +1490,16 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
         default:
             break;
         }
+
         if (inForest)
         {
             nodelay(stdscr, TRUE);
         }
+        this_thread::sleep_for(std::chrono::milliseconds(100));
+        flushinp();
     }
 
+    // Cleanup: Ensure blocking is ON when leaving the function
     nodelay(stdscr, FALSE);
 }
 
@@ -1508,13 +1529,36 @@ void Game::game_loop(Player &player, AudioManager &audio)
     vector<bool> quest(6, false);
     Map stage1(player, quest, 153, 37, "../data/map/map.txt");
 
-    // Welcome message (only shows once)
+    // --- RESIZE-AWARE WELCOME MESSAGE ---
+    // instead of one big sleep, we loop small sleeps to check for resize
+    int totalDuration = 1500; // 1.5 seconds
+    int interval = 50;        // Check every 50ms
+    int elapsed = 0;
+
+    // Initial Draw
     attron(COLOR_PAIR(6)); // White
     mvprintw_center(LINES / 2, "You find your way to a nearby village to rest.");
     attroff(COLOR_PAIR(6));
     refresh();
-    this_thread::sleep_for(chrono::milliseconds(1500));
+
+    while (elapsed < totalDuration)
+    {
+        if (is_termresized())
+        {
+            resize_term(0, 0);
+            clear();
+            // Redraw at new center
+            attron(COLOR_PAIR(6));
+            mvprintw_center(LINES / 2, "You find your way to a nearby village to rest.");
+            attroff(COLOR_PAIR(6));
+            refresh();
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+        elapsed += interval;
+    }
     flushinp();
+    // ------------------------------------
 
     bool isGameRunning = true;
     int choice = 0; // 0 = Stats, 1 = Venture, 2 = Exit
@@ -1638,6 +1682,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
     Tile *newTile = map.getTileAt(newx, newy);
     Tile *oldTile = map.getTileAt(entity.get_x(), entity.get_y());
     clear_dialogue_message();
+    // --- 1. Check for Character on New Tile ---
     if (newTile->getCharacter() != nullptr)
     {
         clear_dialogue_message();
@@ -1661,11 +1706,11 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
                 dialogue_lines = hattori_ptr->give_quest_infernal_imp();
             }
             else if (!quest[3])
-            { 
+            { // <-- FIXED
                 dialogue_lines = hattori_ptr->give_quest_golem();
             }
             else if (!quest[4])
-            { 
+            { // <-- FIXED
                 dialogue_lines = hattori_ptr->give_quest_necromancer();
             }
             else if (quest[3] && quest[4])
@@ -1679,7 +1724,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
 
             play_dialogue(dialogue_lines, player, map);
 
-            return; 
+            return; // Stop the move
         }
         if (!newTile->getQuestStatus(quest))
         {
@@ -1708,7 +1753,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
                 show_dialogue_message("You are not powerful enough! Meet Oracle at (46,13)."); // <-- FIXED
                 break;
             }
-            return;
+            return; // Stop the move
         }
         else
         {
@@ -1719,11 +1764,12 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
             Enemy &target = static_cast<Enemy &>(*target_ptr);
             add_log_message("Combat Triggered!");
             audio.playMusic("../data/audio/battle-bgm.mp3");
-            int k = c.fight(player, target, *this);
+            int k = c.fight(player, target, *this, audio);
             audio.playMusic("../data/audio/sacred-garden-10377.mp3");
 
             if (k == 0)
             {
+                // Show the bloody screen
                 bool retry = showGameOverScreen(audio);
                 audio.playMusic("../data/audio/sacred-garden-10377.mp3");
                 if (retry)
@@ -1739,11 +1785,12 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
                 }
                 else
                 {
+                    // === OPTION 2: EXIT ===
                     clear();
                     mvprintw(rows / 2, (cols - 20) / 2, "Farewell, fallen hero...");
                     refresh();
-                    napms(2000); 
-                    exit(0);    
+                    napms(2000); // Wait 2 seconds
+                    exit(0);     // Close the program
                 }
             }
             else if (k == 1)
@@ -1832,8 +1879,11 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
                         audio.playMusic("../data/audio/game_end.mp3");
                         play_cinematic_dialogue(complete_lines);
                         run_credits();
-                        exit(0); 
+                        exit(0);
                         return;
+                        break;
+                    default:
+                        complete_lines = this->hattori.complete_quest_final_boss();
                         break;
                     }
                     play_dialogue(complete_lines, player, map);

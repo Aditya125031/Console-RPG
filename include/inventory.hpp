@@ -31,7 +31,6 @@ public:
 
     std::map<std::string, PotionSlot> potionStorage;
 
-    // --- Constructor ---
     Inventory() {
         m["Health Potion"]=5;
         m["Angel's Blessings"]=3;

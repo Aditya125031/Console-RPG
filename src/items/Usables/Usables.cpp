@@ -6,15 +6,6 @@
 
 using namespace std;
 
-// string Usables::get_usable_name()
-// {
-//     return usable_name;
-// }
-
-// string Usables::get_usable_description()
-// {
-//     return usable_description;
-// }
 
 int Usables::get_usable_health()
 {

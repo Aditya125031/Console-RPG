@@ -127,7 +127,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             Character* gk = new Gate_Keeper(player);
             m_characterOnTile = gk;
             m_isWalkable = false;
-            requiredQuestCompleted = 4;
+            requiredQuestCompleted = 0;
         }
         else if(displayChar=="QGW1"){
             m_mapDisplayChar = "."; 
@@ -181,7 +181,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_characterOnTile =necm;
             requiredQuestCompleted = 3;
             m_isWalkable = false;
-            doQuest=4;
+            doQuest=0;
         }
         else if(displayChar=="QFB"){
             m_mapDisplayChar = "."; 

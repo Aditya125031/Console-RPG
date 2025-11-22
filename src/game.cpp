@@ -38,7 +38,15 @@ void Game::run_credits()
     clear();
     int term_height, term_width;
     getmaxyx(stdscr, term_height, term_width);
-
+    std::string exit_msg = "F A R E W E L L   T H E   U N D E F E A T E D.";
+    mvprintw(term_height / 2, (term_width - exit_msg.length()) / 2, "%s", exit_msg.c_str());
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    std::string prompt = "[ Press any key to continue ]";
+    mvprintw(rows - 2, (cols - prompt.length()) / 2, "%s", prompt.c_str());
+    refresh();
+    getch();
+    clear();
     std::vector<CreditLine> credits = {
         {"", 0, false},
         {"==================================", 1, true},
@@ -71,9 +79,8 @@ void Game::run_credits()
         {"", 0, false},
 
         {"--- SPECIAL THANKS ---", 3, true},
-        {"PDCurses Team", 5, false},
-        {"StackOverflow", 5, false},
-        {"Gemini", 5, false},
+        {"pixabay - Sound", 5, false},
+        {"Gemini - PDcurses", 5, false},
         {"", 0, false},
 
         {"==================================", 1, true},
@@ -127,14 +134,6 @@ void Game::run_credits()
 
     nodelay(stdscr, FALSE);
     clear();
-    std::string exit_msg = "F A R E W E L L   R O S E N    H E R O.";
-    mvprintw(term_height / 2, (term_width - exit_msg.length()) / 2, "%s", exit_msg.c_str());
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-    std::string prompt = "[ Press any key to continue ]";
-    mvprintw(rows - 2, (cols - prompt.length()) / 2, "%s", prompt.c_str());
-    refresh();
-    getch();
     curs_set(1);
 }
 void Game::play_cinematic_dialogue(const std::vector<std::string> &lines)
@@ -202,7 +201,6 @@ std::vector<DisplayItem> Game::buildPlayerItemList(Player &player)
 {
     std::vector<DisplayItem> itemMap;
 
-    // Add Equipment
     if (player.inventory.equippedWeapon)
     {
         itemMap.push_back({player.inventory.equippedWeapon->get_item_name() + " (Equipped)",
@@ -226,7 +224,6 @@ std::vector<DisplayItem> Game::buildPlayerItemList(Player &player)
                            "INVENTORY_ARMOR", "ARMOR", player.inventory.inventoryArmor->get_item_description() + " \nExtra Health : " + to_string(player.inventory.inventoryArmor->get_armor_health()) + "\nExtra Mana : " + to_string(player.inventory.inventoryArmor->get_armor_mana()) + "\n"});
     }
 
-    // 3. Add Potions
     for (const auto &pair : player.inventory.potionStorage)
     {
         if (pair.second.quantity > 0)
@@ -243,39 +240,28 @@ std::vector<std::string> Game::wrap_text_v2(const std::string &text, int max_wid
     std::stringstream text_stream(text);
     std::string segment;
 
-    // This tracks if we're on the first line, to avoid
-    // adding padding before the text starts.
     bool first_segment = true;
 
-    // 1. Split the text by the explicit newline character '\n'
     while (std::getline(text_stream, segment, '\n'))
     {
-
-        // If segment is empty, it's an intentional newline (e.g., from \n\n)
         if (segment.empty())
         {
-            // This was an intentional newline, add two blank lines
             final_lines.push_back("");
             final_lines.push_back("");
             continue;
         }
 
-        // If this is NOT the first segment, the \n that split
-        // this segment from the previous one should add two blank lines.
         if (!first_segment)
         {
             final_lines.push_back("");
-            // final_lines.push_back("");
         }
 
-        // 2. Now, apply word-wrapping logic to this non-empty segment
         std::stringstream word_stream(segment);
         std::string word;
         std::string current_line;
 
         while (word_stream >> word)
         {
-            // Check if the new word fits on the current line
             if (current_line.empty() || current_line.length() + word.length() + 1 <= max_width)
             {
                 if (!current_line.empty())
@@ -286,19 +272,16 @@ std::vector<std::string> Game::wrap_text_v2(const std::string &text, int max_wid
             }
             else
             {
-                // Word doesn't fit, so push the current line and start a new one
                 final_lines.push_back(current_line);
                 current_line = word;
             }
         }
 
-        // 3. Add the last line of the segment
         if (!current_line.empty())
         {
             final_lines.push_back(current_line);
         }
 
-        // We are no longer on the first segment
         first_segment = false;
     }
 
@@ -309,20 +292,18 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                                            vector<shared_ptr<Item>> &lootBox)
 {
     bool inLootMenu = true;
-    Game &world = *this; // For inventory functions
+    Game &world = *this;
 
-    // --- State Management ---
     enum class LootFocus
     {
         LOOT_BOX,
         INVENTORY
     };
-    LootFocus currentFocus = LootFocus::LOOT_BOX; // Start focused on loot
+    LootFocus currentFocus = LootFocus::LOOT_BOX;
 
     int loot_index = 0;
     int inventory_index = 0;
 
-    // --- OPENING MESSAGE ---
     clear();
     curs_set(0);
     int midY_anim = LINES / 2;
@@ -333,48 +314,40 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
     attroff(COLOR_PAIR(5));
     refresh();
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    // --- END OPENING ---
 
     while (inLootMenu)
     {
         clear();
         curs_set(0);
 
-        // --- Get Player Items (for inventory pane) ---
         vector<DisplayItem> playerItems = buildPlayerItemList(player);
 
-        // --- Define Layout (MODIFIED) ---
         int rows, cols;
         getmaxyx(stdscr, rows, cols);
 
-        int topH = 15;  // Height of top panes
-        int descH = 12; // *** CHANGED: Height of description pane (was 9)
-        // Recalculate startY based on new total height
-        int totalUIHeight = topH + descH + 4; // 4 = action bar + separators
+        int topH = 15; 
+        int descH = 12; 
+        int totalUIHeight = topH + descH + 4;
         int startY = (rows - totalUIHeight) / 2;
-        int startX = (cols - 80) / 2; // Total width 80
-        int w1 = 39;                  // Left pane width
-        int w2 = 39;                  // Right pane width
+        int startX = (cols - 80) / 2; 
+        int w1 = 39;                
+        int w2 = 39;                
 
-        // --- Safety Clamping (Moved after list creation for .size()) ---
         if (loot_index < 0)
-            loot_index = lootBox.empty() ? 0 : lootBox.size() - 1; // Wrap
+            loot_index = lootBox.empty() ? 0 : lootBox.size() - 1; 
         if (loot_index >= lootBox.size())
-            loot_index = 0; // Wrap
-
+            loot_index = 0; 
         if (inventory_index < 0)
-            inventory_index = playerItems.empty() ? 0 : playerItems.size() - 1; // Wrap
+            inventory_index = playerItems.empty() ? 0 : playerItems.size() - 1;
         if (inventory_index >= playerItems.size())
-            inventory_index = 0; // Wrap
+            inventory_index = 0; 
 
-        // --- 1. Draw Panes ---
-        attron(COLOR_PAIR(6));                                   // White border
-        draw_box(startY, startX, w1, topH);                      // Loot Box
-        draw_box(startY, startX + w1 + 1, w2, topH);             // Inventory
-        draw_box(startY + topH + 1, startX, w1 + w2 + 1, descH); // Description
+        attron(COLOR_PAIR(6));                                   
+        draw_box(startY, startX, w1, topH);                     
+        draw_box(startY, startX + w1 + 1, w2, topH);            
+        draw_box(startY + topH + 1, startX, w1 + w2 + 1, descH);
         attroff(COLOR_PAIR(6));
 
-        // --- 2. Draw Pane Titles (Highlighting focus) ---
         if (currentFocus == LootFocus::LOOT_BOX)
         {
             attron(COLOR_PAIR(1) | A_REVERSE);
@@ -394,12 +367,9 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
             attroff(COLOR_PAIR(1) | A_REVERSE);
         }
 
-        // --- 3. Draw Item Lists ---
-        // (Scrolling logic can be added here later if lists grow)
         int itemY = startY + 2;
-        int listMaxHeight = topH - 3; // Max items to show in pane
+        int listMaxHeight = topH - 3;
 
-        // Loot Box List
         int itemX = startX + 2;
         if (lootBox.empty())
         {
@@ -424,7 +394,6 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
             }
         }
 
-        // Inventory List
         itemX = startX + w1 + 3;
         if (playerItems.empty())
         {
@@ -449,7 +418,6 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
             }
         }
 
-        // --- 4. Draw Description Pane (MODIFIED) ---
         int descY = startY + topH + 2;
         int descX = startX + 2;
         int descWidth = w1 + w2 - 2;
@@ -470,22 +438,19 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
 
         std::vector<std::string> wrapped_lines = wrap_text_v2(desc_text, descWidth);
         attron(COLOR_PAIR(6));
-        // *** CHANGED: Using new descH-2 (allows 10 lines)
         for (int i = 0; i < wrapped_lines.size() && i < (descH - 2); ++i)
         {
             mvprintw(descY + 1 + i, descX, "%s", wrapped_lines[i].c_str());
         }
         attroff(COLOR_PAIR(6));
 
-        // --- 5. Draw Action Bar ---
         int actionY = startY + topH + descH + 3;
         mvprintw(actionY, startX, "[ARROWS/WASD] Navigate | [q] Quit");
 
         if (currentFocus == LootFocus::LOOT_BOX && !lootBox.empty())
         {
-            attron(COLOR_PAIR(2) | A_BOLD); // Green for Loot
+            attron(COLOR_PAIR(2) | A_BOLD); 
 
-            // Display both Space and Enter options
             mvprintw(actionY, startX + 40, "[SPACE] Loot All");
             mvprintw(actionY, startX + 60, "[ENTER] Loot");
 
@@ -493,7 +458,7 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
         }
         else if (currentFocus == LootFocus::INVENTORY && !playerItems.empty())
         {
-            attron(COLOR_PAIR(4) | A_BOLD); // Red for Drop
+            attron(COLOR_PAIR(4) | A_BOLD); 
             mvprintw(actionY, startX + 60, "[ENTER] Drop");
             attroff(COLOR_PAIR(4) | A_BOLD);
         }
@@ -514,7 +479,6 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
             if (currentFocus == LootFocus::LOOT_BOX)
             {
                 loot_index--;
-                // (Clamping is now handled at the top of the loop)
             }
             else
             {
@@ -536,22 +500,17 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
 
         case KEY_LEFT:
         case 'a':
-            // Wrap around: Inventory -> Loot Box, or Loot Box -> Inventory
             currentFocus = (currentFocus == LootFocus::LOOT_BOX) ? LootFocus::INVENTORY : LootFocus::LOOT_BOX;
             break;
 
         case KEY_RIGHT:
         case 'd':
-            // Wrap around: Loot Box -> Inventory, or Inventory -> Loot Box
             currentFocus = (currentFocus == LootFocus::LOOT_BOX) ? LootFocus::INVENTORY : LootFocus::LOOT_BOX;
             break;
 
-        // --- CONSOLIDATED ACTION ---
-        // --- CONSOLIDATED ACTION ---
-        case 10: // Enter key
+        case 10: 
             if (currentFocus == LootFocus::LOOT_BOX && !lootBox.empty())
             {
-                // --- LOOT ACTION ---
                 auto itemToTake = lootBox[loot_index];
                 bool success = player.inventory.addItem(itemToTake, 1, player, world);
 
@@ -561,28 +520,23 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                 }
                 else
                 {
-                    // --- INVENTORY FULL POP-UP ---
                     int popW = 30;
                     int popH = 4;
-                    int popY = (LINES - popH) / 2; // Center Y
-                    int popX = (COLS - popW) / 2;  // Center X
+                    int popY = (LINES - popH) / 2;
+                    int popX = (COLS - popW) / 2;
 
-                    attron(COLOR_PAIR(4) | A_BOLD); // Red + Bold
+                    attron(COLOR_PAIR(4) | A_BOLD); 
                     mvprintw(popY + 20, popX + (popW - 19) / 2, "Inventory is full!");
                     attroff(COLOR_PAIR(4) | A_BOLD);
 
                     refresh();
-                    getch(); // Pause
+                    getch(); 
                 }
             }
             else if (currentFocus == LootFocus::INVENTORY && !playerItems.empty())
             {
-                // --- DROP ACTION (IMMEDIATE) ---
-
-                // 1. Get the item to drop
                 DisplayItem itemToDrop = playerItems[inventory_index];
 
-                // 2. Perform the drop logic immediately (no confirmation)
                 shared_ptr<Item> droppedItem = nullptr;
                 if (itemToDrop.itemID == "EQUIPPED_WEAPON")
                 {
@@ -609,7 +563,6 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                     droppedItem = player.inventory.removePotionForLoot(itemToDrop.itemID, world);
                 }
 
-                // 3. Add the item to the loot box on the ground
                 if (droppedItem != nullptr)
                 {
                     lootBox.push_back(droppedItem);
@@ -617,12 +570,9 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
             }
             break;
 
-        // --- NEW: LOOT ALL (Spacebar) ---
         case ' ':
-            // CHECK: Only allow if focused on Loot Box
             if (currentFocus == LootFocus::LOOT_BOX && !lootBox.empty())
             {
-                // Try to pick up everything
                 for (size_t i = 0; i < lootBox.size();)
                 {
                     auto itemToTake = lootBox[i];
@@ -631,18 +581,15 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                     if (success)
                     {
                         lootBox.erase(lootBox.begin() + i);
-                        // Do not increment i, as elements shifted left
                     }
                     else
                     {
-                        // Inventory full? Stop trying.
-                        // Show full message
                         int popW = 30;
                         int popH = 4;
-                        int popY = (LINES - popH) / 2; // Center Y
-                        int popX = (COLS - popW) / 2;  // Center X
+                        int popY = (LINES - popH) / 2; 
+                        int popX = (COLS - popW) / 2;  
 
-                        attron(COLOR_PAIR(4) | A_BOLD); // Red + Bold
+                        attron(COLOR_PAIR(4) | A_BOLD);
                         draw_box(popY, popX, popW, popH);
                         mvprintw(popY + 1, popX + (popW - 19) / 2, "Inventory is full!");
                         attroff(COLOR_PAIR(4) | A_BOLD);
@@ -652,16 +599,15 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
                         attroff(A_DIM);
 
                         refresh();
-                        getch(); // Pause
-                        break;   // Exit the loop, can't pick up more
+                        getch(); 
+                        break;  
                     }
                 }
-                // Reset loot index just in case
                 loot_index = 0;
             }
             break;
-        } // end switch
-    } // end while
+        } 
+    } 
 
     return lootBox;
 }
@@ -813,7 +759,7 @@ void Game::display_dashboard(Player &player, Map &map)
     // 4. Mana
     mvprintw(row, 0, " Mana: ");
     attron(COLOR_PAIR(1));
-    // Note: Assuming get_mana() is current and you might need a get_max_mana() later
+ 
     printw("%d/%d", player.get_mana(), player.get_max_mana());
     attroff(COLOR_PAIR(1));
     row++;
@@ -956,7 +902,6 @@ void Game::runInventoryMenu(Player &player, Game &world)
     int boxW = 28;
     int boxH = 2;
 
-    // Draw the "Opening" box (e.g., Yellow)
     attron(COLOR_PAIR(5));
     draw_box(midY - 1, midX - (boxW / 2), boxW, boxH);
     mvprintw(midY, midX - 10, "Opening Inventory...");
@@ -966,33 +911,29 @@ void Game::runInventoryMenu(Player &player, Game &world)
     std::this_thread::sleep_for(std::chrono::milliseconds(400));
 
     bool inInventory = true;
-    int selected_index = 0; // Tracks the highlighted item
+    int selected_index = 0;
 
     while (inInventory)
     {
         clear();
-        curs_set(0); // Hide cursor
+        curs_set(0);
 
-        // --- Get Screen Dimensions ---
         int rows, cols;
         getmaxyx(stdscr, rows, cols);
 
-        // --- Define Box Dimensions ---
-        int boxW = 70;                      // Total width
-        int boxH = 18;                      // **REDUCED HEIGHT** to make space for action bar
-        int startY = (rows - boxH) / 2 - 2; // Moved up slightly
+        int boxW = 70;                    
+        int boxH = 18;                   
+        int startY = (rows - boxH) / 2 - 2; 
         int startX = (cols - boxW) / 2;
 
-        // --- Draw Main Box & Title ---
-        attron(COLOR_PAIR(6)); // White border
+        attron(COLOR_PAIR(6)); 
         draw_box(startY, startX, boxW, boxH);
         attroff(COLOR_PAIR(6));
 
-        attron(COLOR_PAIR(1) | A_BOLD); // Cyan Title
+        attron(COLOR_PAIR(1) | A_BOLD);
         mvprintw(startY - 1, startX - 3 + (boxW - 13) / 2, "--- INVENTORY ---");
         attroff(COLOR_PAIR(1) | A_BOLD);
 
-        // --- Define Splitter ---
         int splitX = startX + (boxW / 2) - 2;
         attron(COLOR_PAIR(6));
         mvaddch(startY, splitX, ACS_TTEE);
@@ -1000,12 +941,11 @@ void Game::runInventoryMenu(Player &player, Game &world)
         mvvline(startY + 1, splitX, ACS_VLINE, boxH - 1);
         attroff(COLOR_PAIR(6));
 
-        // --- 1. Draw Item List (Left Pane) ---
         vector<DisplayItem> itemMap = buildPlayerItemList(player);
         int itemY = startY + 2;
         int itemX = startX + 2;
 
-        DisplayItem selectedItem; // We'll store the selected item here
+        DisplayItem selectedItem; 
 
         if (itemMap.empty())
         {
@@ -1015,13 +955,11 @@ void Game::runInventoryMenu(Player &player, Game &world)
         }
         else
         {
-            // Ensure selected_index is valid
             if (selected_index < 0)
                 selected_index = 0;
             if (selected_index >= itemMap.size())
                 selected_index = itemMap.size() - 1;
 
-            // Get the item for later use
             selectedItem = itemMap[selected_index];
 
             for (int i = 0; i < itemMap.size(); ++i)
@@ -1046,21 +984,20 @@ void Game::runInventoryMenu(Player &player, Game &world)
             }
         }
 
-        // --- 2. Draw Description (Right Pane) ---
         int descY = startY + 2;
         int descX = splitX + 2;
         int descWidth = (startX + boxW) - descX - 2;
 
         if (!itemMap.empty())
         {
-            attron(COLOR_PAIR(3) | A_BOLD); // Blue
+            attron(COLOR_PAIR(3) | A_BOLD);
             mvprintw(descY, descX, "Item Description:");
             attroff(COLOR_PAIR(3) | A_BOLD);
 
             std::string desc_text = selectedItem.description;
             std::vector<std::string> wrapped_lines = wrap_text_v2(desc_text, descWidth);
 
-            attron(COLOR_PAIR(6)); // White
+            attron(COLOR_PAIR(6));
             for (int i = 0; i < wrapped_lines.size() && i < (boxH - 4); ++i)
             {
                 mvprintw(descY + 2 + i, descX, "%s", wrapped_lines[i].c_str());
@@ -1072,19 +1009,15 @@ void Game::runInventoryMenu(Player &player, Game &world)
             mvprintw(descY, descX, "Your bag is empty.");
         }
 
-        // --- 3. Draw Controls & Action Bar (NEW SECTION) ---
-        int actionY = startY + boxH + 1; // Below the main box
+        int actionY = startY + boxH + 1;
 
-        // Static controls
         mvprintw(actionY, startX, "[UP/DOWN] Navigate");
         mvprintw(actionY + 1, startX, "[q] Quit");
 
-        // Dynamic controls (in the middle)
         if (!itemMap.empty())
         {
-            attron(COLOR_PAIR(5) | A_BOLD); // Yellow
+            attron(COLOR_PAIR(5) | A_BOLD);
 
-            // Primary Action (Enter)
             if (selectedItem.type == "WEAPON" || selectedItem.type == "ARMOR")
             {
                 mvprintw(actionY, startX + 25, "[ENTER] Equip/Swap");
@@ -1094,15 +1027,13 @@ void Game::runInventoryMenu(Player &player, Game &world)
                 mvprintw(actionY, startX + 25, "[ENTER] Use");
             }
 
-            // Secondary Action (d)
             mvprintw(actionY + 1, startX + 25, "[d] Drop %s", selectedItem.displayName.c_str());
 
             attroff(COLOR_PAIR(5) | A_BOLD);
         }
 
-        actionY += 2; // Move down for the text
+        actionY += 2; 
 
-        // Draw a separator line
         attron(COLOR_PAIR(6));
         mvaddch(actionY, startX, ACS_LTEE);
         mvhline(actionY, startX + 1, ACS_HLINE, boxW - 2);
@@ -1111,7 +1042,6 @@ void Game::runInventoryMenu(Player &player, Game &world)
 
         refresh();
 
-        // --- 4. Get User Input (Updated) ---
         int ch = getch();
         switch (ch)
         {
@@ -1134,15 +1064,11 @@ void Game::runInventoryMenu(Player &player, Game &world)
                 selected_index = 0;
             break;
 
-        // --- Primary Action: ENTER ---
-        case 10: // Enter key
+        case 10:
         {
             if (itemMap.empty())
                 break;
 
-            // We already have 'selectedItem' from the drawing phase
-
-            // --- Equip/Swap (IMMEDIATE ACTION) ---
             if (selectedItem.type == "WEAPON" || selectedItem.type == "ARMOR")
             {
                 if (selectedItem.type == "WEAPON")
@@ -1154,13 +1080,11 @@ void Game::runInventoryMenu(Player &player, Game &world)
                     player.inventory.swapArmor(player, world);
                 }
             }
-            // --- Use Potion (REQUIRES CONFIRMATION) ---
             else if (selectedItem.type == "POTION")
             {
-                // --- NEW: INTERACTIVE "USE" CONFIRMATION ---
                 bool inConfirmation = true;
                 bool didConfirm = false;
-                int confirm_choice = 1; // 0 = Yes, 1 = No (Default to No)
+                int confirm_choice = 1;
 
                 int popW = 40;
                 int popH = 6;
@@ -1169,25 +1093,22 @@ void Game::runInventoryMenu(Player &player, Game &world)
 
                 while (inConfirmation)
                 {
-                    // Draw the confirmation box
-                    clear();                        // Clear the screen for the pop-up
-                    attron(COLOR_PAIR(2) | A_BOLD); // Green border
+                
+                    clear();                  
+                    attron(COLOR_PAIR(2) | A_BOLD);
                     draw_box(popY, popX, popW, popH);
                     attroff(COLOR_PAIR(2) | A_BOLD);
 
-                    // Title
                     std::string use_prompt = "Use " + selectedItem.displayName + "?";
                     mvprintw(popY + 1, popX + (popW - use_prompt.length()) / 2, "%s", use_prompt.c_str());
 
-                    // Description (dimmed)
                     attron(A_DIM);
                     std::string desc_line = "(This will consume the item)";
                     mvprintw(popY + 2, popX + (popW - desc_line.length()) / 2, "%s", desc_line.c_str());
                     attroff(A_DIM);
 
-                    // --- Draw Options ---
                     if (confirm_choice == 0)
-                    { // YES
+                    {
                         attron(COLOR_PAIR(6) | A_REVERSE);
                         mvprintw(popY + 4, popX + 8, "[ YES ]");
                         attroff(COLOR_PAIR(6) | A_REVERSE);
@@ -1195,7 +1116,7 @@ void Game::runInventoryMenu(Player &player, Game &world)
                         mvprintw(popY + 4, popX + 26, "  NO  ");
                     }
                     else
-                    { // NO
+                    { 
                         mvprintw(popY + 4, popX + 8, "  YES  ");
 
                         attron(COLOR_PAIR(6) | A_REVERSE);
@@ -1205,19 +1126,18 @@ void Game::runInventoryMenu(Player &player, Game &world)
 
                     refresh();
 
-                    // --- Handle Confirmation Input ---
                     int ch_confirm = getch();
                     switch (ch_confirm)
                     {
                     case KEY_LEFT:
                     case 'a':
-                        confirm_choice = 0; // YES
+                        confirm_choice = 0; 
                         break;
                     case KEY_RIGHT:
                     case 'd':
-                        confirm_choice = 1; // NO
+                        confirm_choice = 1;
                         break;
-                    case 10: // Enter
+                    case 10: 
                         if (confirm_choice == 0)
                         {
                             didConfirm = true;
@@ -1225,22 +1145,19 @@ void Game::runInventoryMenu(Player &player, Game &world)
                         inConfirmation = false;
                         break;
                     case 'q':
-                    case 'c': // Quit/Cancel
+                    case 'c': 
                         inConfirmation = false;
                         break;
                     }
                 }
-                // --- END CONFIRMATION ---
 
                 if (didConfirm)
                 {
                     player.inventory.usePotion(selectedItem.itemID, player, world);
                 }
-                // If !didConfirm, the loop just continues
             }
 
-            // Refresh list and clamp index (runs after equip OR use)
-            itemMap = buildPlayerItemList(player); // Re-fetch
+            itemMap = buildPlayerItemList(player);
             if (selected_index >= itemMap.size())
                 selected_index = itemMap.size() - 1;
             if (selected_index < 0)
@@ -1248,19 +1165,15 @@ void Game::runInventoryMenu(Player &player, Game &world)
         }
         break;
 
-        // --- Secondary Action: DROP ---
         case 'd':
         case 'D':
         {
             if (itemMap.empty())
-                break; // Nothing to drop
+                break; 
 
-            // We already have 'selectedItem' from the drawing phase
-
-            // --- NEW: INTERACTIVE CONFIRMATION ---
             bool inConfirmation = true;
             bool didConfirm = false;
-            int confirm_choice = 1; // 0 = Yes, 1 = No (Default to No)
+            int confirm_choice = 1; 
 
             int popW = 40;
             int popH = 6;
@@ -1269,25 +1182,21 @@ void Game::runInventoryMenu(Player &player, Game &world)
 
             while (inConfirmation)
             {
-                // Draw the confirmation box
-                clear();                        // Clear the screen for the pop-up
-                attron(COLOR_PAIR(4) | A_BOLD); // Red border
+                clear();                     
+                attron(COLOR_PAIR(4) | A_BOLD); 
                 draw_box(popY, popX, popW, popH);
                 attroff(COLOR_PAIR(4) | A_BOLD);
 
-                // Title
                 std::string drop_prompt = "Drop 1 " + selectedItem.displayName + "?";
                 mvprintw(popY + 1, popX + (popW - drop_prompt.length()) / 2, "%s", drop_prompt.c_str());
 
-                // Description (dimmed)
                 attron(A_DIM);
                 std::string desc_line = "(This action is permanent)";
                 mvprintw(popY + 2, popX + (popW - desc_line.length()) / 2, "%s", desc_line.c_str());
                 attroff(A_DIM);
 
-                // --- Draw Options ---
                 if (confirm_choice == 0)
-                { // YES
+                {
                     attron(COLOR_PAIR(6) | A_REVERSE);
                     mvprintw(popY + 4, popX + 8, "[ YES ]");
                     attroff(COLOR_PAIR(6) | A_REVERSE);
@@ -1295,7 +1204,7 @@ void Game::runInventoryMenu(Player &player, Game &world)
                     mvprintw(popY + 4, popX + 26, "  NO  ");
                 }
                 else
-                { // NO
+                {
                     mvprintw(popY + 4, popX + 8, "  YES  ");
 
                     attron(COLOR_PAIR(6) | A_REVERSE);
@@ -1305,19 +1214,18 @@ void Game::runInventoryMenu(Player &player, Game &world)
 
                 refresh();
 
-                // --- Handle Confirmation Input ---
                 int ch_confirm = getch();
                 switch (ch_confirm)
                 {
                 case KEY_LEFT:
                 case 'a':
-                    confirm_choice = 0; // YES
+                    confirm_choice = 0;
                     break;
                 case KEY_RIGHT:
                 case 'd':
-                    confirm_choice = 1; // NO
+                    confirm_choice = 1;
                     break;
-                case 10: // Enter
+                case 10:
                     if (confirm_choice == 0)
                     {
                         didConfirm = true;
@@ -1325,14 +1233,12 @@ void Game::runInventoryMenu(Player &player, Game &world)
                     inConfirmation = false;
                     break;
                 case 'q':
-                case 'c': // Quit/Cancel
+                case 'c':
                     inConfirmation = false;
                     break;
                 }
             }
-            // --- END CONFIRMATION ---
 
-            // --- Execute Drop (if confirmed) ---
             if (didConfirm)
             {
                 if (selectedItem.itemID == "EQUIPPED_WEAPON")
@@ -1356,20 +1262,16 @@ void Game::runInventoryMenu(Player &player, Game &world)
                     player.inventory.dropPotion(selectedItem.itemID, world);
                 }
 
-                // Refresh list and clamp index
-                itemMap = buildPlayerItemList(player); // Re-fetch
+                itemMap = buildPlayerItemList(player); 
                 if (selected_index >= itemMap.size())
                     selected_index = itemMap.size() - 1;
                 if (selected_index < 0)
                     selected_index = 0;
             }
-            // If !didConfirm, the loop just continues, redrawing the inventory
         }
         break;
         }
-    } // end while(inInventory)
-
-    // --- 2. NEW: CLOSING MESSAGE ---
+    } 
     clear();
     curs_set(0);
     midY = LINES / 2;
@@ -1377,7 +1279,6 @@ void Game::runInventoryMenu(Player &player, Game &world)
     boxW = 22;
     boxH = 2;
 
-    // Draw the "Closed" box (Dim White)
     attron(COLOR_PAIR(6) | A_DIM);
     draw_box(midY - 1, midX - (boxW / 2), boxW, boxH);
     mvprintw(midY, midX - 8, "Inventory Closed");
@@ -1404,7 +1305,7 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
 
         // --- HP REGEN LOGIC ---
         auto elapsedHpSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - lastHpRegenTime).count();
-        int hpInterval = player.getHPRegenTime(); // Assuming this returns seconds
+        int hpInterval = player.getHPRegenTime(); 
 
         if (elapsedHpSeconds >= hpInterval && hpInterval > 0)
         {
@@ -1521,7 +1422,6 @@ void Game::mvprintw_center(int y, const std::string &text)
     mvprintw(y, x, "%s", text.c_str());
 }
 
-// --- Redesigned Game Loop ---
 
 void Game::game_loop(Player &player, AudioManager &audio)
 {
@@ -1529,14 +1429,11 @@ void Game::game_loop(Player &player, AudioManager &audio)
     vector<bool> quest(6, false);
     Map stage1(player, quest, 153, 37, "../data/map/map.txt");
 
-    // --- RESIZE-AWARE WELCOME MESSAGE ---
-    // instead of one big sleep, we loop small sleeps to check for resize
-    int totalDuration = 1500; // 1.5 seconds
-    int interval = 50;        // Check every 50ms
+    int totalDuration = 1500; 
+    int interval = 50;      
     int elapsed = 0;
 
-    // Initial Draw
-    attron(COLOR_PAIR(6)); // White
+    attron(COLOR_PAIR(6)); 
     mvprintw_center(LINES / 2, "You find your way to a nearby village to rest.");
     attroff(COLOR_PAIR(6));
     refresh();
@@ -1547,7 +1444,6 @@ void Game::game_loop(Player &player, AudioManager &audio)
         {
             resize_term(0, 0);
             clear();
-            // Redraw at new center
             attron(COLOR_PAIR(6));
             mvprintw_center(LINES / 2, "You find your way to a nearby village to rest.");
             attroff(COLOR_PAIR(6));
@@ -1558,10 +1454,9 @@ void Game::game_loop(Player &player, AudioManager &audio)
         elapsed += interval;
     }
     flushinp();
-    // ------------------------------------
 
     bool isGameRunning = true;
-    int choice = 0; // 0 = Stats, 1 = Venture, 2 = Exit
+    int choice = 0; 
     const std::vector<std::string> options = {
         "Show My Stats",
         "Venture into the forest",
@@ -1570,14 +1465,12 @@ void Game::game_loop(Player &player, AudioManager &audio)
     while (isGameRunning)
     {
         clear();
-        curs_set(0); // Hide cursor
+        curs_set(0);
 
-        // --- Title ---
-        attron(COLOR_PAIR(5) | A_BOLD); // Yellow
+        attron(COLOR_PAIR(5) | A_BOLD); 
         mvprintw_center(LINES / 2 - 8, "~~~ THE VILLAGE OF RESPITE ~~~");
         attroff(COLOR_PAIR(5) | A_BOLD);
 
-        // --- Draw Menu Options ---
         for (int i = 0; i < options.size(); ++i)
         {
             int boxY = (LINES / 2) - 4 + (i * 3);
@@ -1585,16 +1478,14 @@ void Game::game_loop(Player &player, AudioManager &audio)
 
             if (i == choice)
             {
-                // Highlighted
-                attron(COLOR_PAIR(1) | A_BOLD); // Cyan
+                attron(COLOR_PAIR(1) | A_BOLD);
                 draw_box(boxY - 1, boxX - 2, 44, 2);
                 mvprintw(boxY, boxX, ">> %s <<", options[i].c_str());
                 attroff(COLOR_PAIR(1) | A_BOLD);
             }
             else
             {
-                // Not highlighted
-                attron(COLOR_PAIR(6)); // White
+                attron(COLOR_PAIR(6)); 
                 mvprintw(boxY, boxX, "   %s   ", options[i].c_str());
                 attroff(COLOR_PAIR(6));
             }
@@ -1627,33 +1518,26 @@ void Game::game_loop(Player &player, AudioManager &audio)
                 choice = 0;
             break;
 
-        case 10: // Enter key
-        {
-            // --- Map choice to original logic ---
-
-            // Choice 0: Show Stats
+        case 10: 
+         
             if (choice == 0)
             {
                 clear();
-                curs_set(1); // Show cursor for stats page (if it scrolls)
+                curs_set(1);
                 player.show_details();
                 mvprintw(getmaxy(stdscr) - 2, 0, "Press any key to return...");
                 refresh();
-                getch(); // Wait for key
+                getch();
                 flushinp();
             }
-            // Choice 1: Venture into forest
             else if (choice == 1)
             {
                 explore_forest(player, stage1, quest, audio);
                 if (!player.isAlive())
                 {
-                    // If player died, the game over screen handled it
-                    // We just need to exit the loop
                     isGameRunning = false;
                 }
             }
-            // Choice 2: Exit Game
             else if (choice == 2)
             {
                 attron(COLOR_PAIR(6));
@@ -1665,7 +1549,6 @@ void Game::game_loop(Player &player, AudioManager &audio)
                 isGameRunning = false;
             }
             break;
-        } // End Enter key
 
         default:
             break;
@@ -1753,7 +1636,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
                 show_dialogue_message("You are not powerful enough! Meet Oracle at (46,13)."); // <-- FIXED
                 break;
             }
-            return; // Stop the move
+            return; 
         }
         else
         {

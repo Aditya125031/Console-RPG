@@ -6,7 +6,6 @@
 #include "player.h"
 #include "../extern/pdcurses/curses.h"
 
-// Enemy types
 #include "goblin.h"
 #include "golem.h"
 #include "giant.h"
@@ -27,7 +26,7 @@ public:
     void start();
     void endWin();
     void endFlee();
-    void clearScreen();   // declared as member
+    void clearScreen();  
 };
 
 #endif 

@@ -18,8 +18,8 @@ Player::Player(Game &game_world, std::string name, PlayerType type)
     {
 
     case PlayerType::Swordsman:
-        this->health = 120;
-        this->attackPower = 15;
+        this->health = 500;
+        this->attackPower = 150;
         this->mana = 20;
         this->regen_hp_time = 5;
         this->regen_mana_time = 10;

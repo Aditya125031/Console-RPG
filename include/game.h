@@ -1,6 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
-#define SDL_MAIN_HANDLED // <--- ADD THIS LINE FIRST
+#define SDL_MAIN_HANDLED 
 #include "../include/audiomanager.h"
 #include <iostream>
 #include <string>
@@ -9,19 +9,17 @@
 #include<cmath>
 #include <limits>
 #include <chrono>
-#include <cstdlib> // Required for std::system
+#include <cstdlib> 
 #include "player.h" 
 #include "map.h"
 #include "NPC.h"
 #include "inventory.hpp"
 
-//class AudioManager; // Forward declaration
-
 using namespace std;
 struct DisplayItem {
-    string displayName; // "Old Sword (Equipped)"
-    string itemID;      // "EQUIPPED_WEAPON" or "Small Health Potion"
-    string type;        // "WEAPON", "ARMOR", "POTION"
+    string displayName; 
+    string itemID;  
+    string type;    
     string description;
 };
 class Game

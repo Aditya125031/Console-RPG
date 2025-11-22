@@ -19,9 +19,6 @@ void Inventory::reapplyAllEquipStats(Player& player, Game& world)
     }
 }
 
-// --- Core Functions (addItem, swapWeapon, swapArmor, usePotion) ---
-// (These are the same as the previous version)
-
 bool Inventory::addItem(std::shared_ptr<Item> item, int quantity, Player& player, Game& world)
 {
     shared_ptr<Weapon> weapon = dynamic_pointer_cast<Weapon>(item);
@@ -45,7 +42,6 @@ bool Inventory::addItem(std::shared_ptr<Item> item, int quantity, Player& player
         }
     }
 
-    // --- 2. Try to cast to Armor ---
     shared_ptr<Armor> armor=dynamic_pointer_cast<Armor>(item);
     if (armor)
     {
@@ -71,35 +67,26 @@ if (potion)
 {
     string name = potion->get_item_name();
 
-    // Check if this potion type is tracked in the max quantity map 'm'
     if (m.count(name) == 0) {
         world.add_log_message("Error: Potion '" + name + "' has no max stack size.");
         return false;
-        // We will add it anyway, but you should add it to your 'm' map
-        // in the Inventory.h constructor.
     }
     
-    // If this is the first time, store its prototype
     if (potionStorage.count(name) == 0) {
         potionStorage[name].itemPrototype = potion;
     }
-    
-    // Get current and max quantities
-    // We'll default to 5 if not in the map
+
     int maxQuantity = m.count(name) ? m[name] : 5; 
     int currentQuantity = potionStorage[name].quantity;
     
     if (currentQuantity >= maxQuantity) {
         world.add_log_message(name + " stack is full!");
-        return false; // Not an error, just can't add more
+        return false; 
     }
-    
-    // Calculate how many we can actually add
     int roomLeft = maxQuantity - currentQuantity;
     int amountToAdd = std::min(quantity, roomLeft);
     int leftover = quantity - amountToAdd;
     
-    // --- THIS IS THE LINE THAT FIXES THE BUG ---
     potionStorage[name].quantity += amountToAdd;
     
     world.add_log_message("Added " + to_string(amountToAdd) + " " + name + ".");
@@ -154,8 +141,8 @@ void Inventory::dropEquippedWeapon(Game& world, Player& player)
     if (equippedWeapon) {
         world.add_log_message("Dropped " + equippedWeapon->get_item_name());
         equippedWeapon->unequip();
-        equippedWeapon = nullptr; // Set the public pointer to null
-        reapplyAllEquipStats(player, world); // Re-calc stats
+        equippedWeapon = nullptr; 
+        reapplyAllEquipStats(player, world); 
     }
 }
 void Inventory::dropInventoryWeapon(Game& world)
@@ -202,16 +189,12 @@ std::map<std::string, int> Inventory::getUsablePotions() const
 }
 std::shared_ptr<Usables> Inventory::removePotionForLoot(const std::string& potionName, Game& world)
 {
-    // Check if we have any
     if (potionStorage.count(potionName) && potionStorage[potionName].quantity > 0)
     {
-        // 1. Decrement the count (just like your void dropPotion)
         potionStorage[potionName].quantity--;
         world.add_log_message("Moved 1 " + potionName + " to loot box.");
         
-        // 2. Return the prototype pointer (this is the new part)
         return potionStorage[potionName].itemPrototype;
     }
-    // No potion to remove
     return nullptr; 
 }

@@ -16,36 +16,32 @@ using namespace std::chrono;
 
 void Combat::start()
 {
-    clearScreen(); // clear() and refresh()
-    curs_set(0);   // Hide the cursor
+    clearScreen(); 
+    curs_set(0);
 
     int rows, cols;
-    getmaxyx(stdscr, rows, cols); // Get screen dimensions
+    getmaxyx(stdscr, rows, cols); 
     int midY = rows / 2;
     int midX = cols / 2;
 
-    // --- Define the text and border ---
     std::string text = " FIGHT! ";
-    std::string horizontal_border = "===================="; // Adjust length as needed
-    std::string vertical_text = "||    FIGHT!    ||";       // Ensure this matches border length
+    std::string horizontal_border = "===================="; 
+    std::string vertical_text = "||    FIGHT!    ||";      
 
-    // Adjust length of border to match the text line
     horizontal_border.resize(vertical_text.length(), '=');
 
     int startX = midX - (vertical_text.length() / 2);
 
-    // --- Draw the Box (Red) ---
-    attron(COLOR_PAIR(4) | A_BOLD); // Red + Bold
+    attron(COLOR_PAIR(4) | A_BOLD); 
     mvprintw(midY - 1, startX, "%s", horizontal_border.c_str());
     mvprintw(midY, startX, "%s", vertical_text.c_str());
     mvprintw(midY + 1, startX, "%s", horizontal_border.c_str());
     attroff(COLOR_PAIR(4) | A_BOLD);
 
     refresh();
-    std::this_thread::sleep_for(std::chrono::milliseconds(400)); // Hold
+    std::this_thread::sleep_for(std::chrono::milliseconds(400)); 
 
-    // --- Quick Flash (White) ---
-    attron(COLOR_PAIR(6) | A_BOLD); // White + Bold
+    attron(COLOR_PAIR(6) | A_BOLD); 
     mvprintw(midY - 1, startX, "%s", horizontal_border.c_str());
     mvprintw(midY, startX, "%s", vertical_text.c_str());
     mvprintw(midY + 1, startX, "%s", horizontal_border.c_str());
@@ -54,17 +50,16 @@ void Combat::start()
     refresh();
     std::this_thread::sleep_for(std::chrono::milliseconds(150));
 
-    // --- Hold Final (Red) ---
-    attron(COLOR_PAIR(4) | A_BOLD); // Red + Bold
+    attron(COLOR_PAIR(4) | A_BOLD); 
     mvprintw(midY - 1, startX, "%s", horizontal_border.c_str());
     mvprintw(midY, startX, "%s", vertical_text.c_str());
     mvprintw(midY + 1, startX, "%s", horizontal_border.c_str());
     attroff(COLOR_PAIR(4) | A_BOLD);
 
     refresh();
-    std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Hold
+    std::this_thread::sleep_for(std::chrono::milliseconds(500)); 
 
-    flushinp(); // Clear any accidental key presses
+    flushinp(); 
 }
 
 void Combat::endWin()
@@ -77,7 +72,6 @@ void Combat::endWin()
     int midY = rows / 2;
     int midX = cols / 2;
 
-    // --- Define the text and border ---
     std::string text_line = "|  Enemy Defeated!  |";
     std::string border_line = "+===================+";
     border_line.resize(text_line.length(), '=');
@@ -86,8 +80,7 @@ void Combat::endWin()
 
     int startX = midX - (text_line.length() / 2);
 
-    // --- Draw Box (Green) ---
-    attron(COLOR_PAIR(2) | A_BOLD); // Green + Bold
+    attron(COLOR_PAIR(2) | A_BOLD); 
     mvprintw(midY - 1, startX, "%s", border_line.c_str());
     mvprintw(midY, startX, "%s", text_line.c_str());
     mvprintw(midY + 1, startX, "%s", border_line.c_str());
@@ -96,8 +89,7 @@ void Combat::endWin()
     refresh();
     std::this_thread::sleep_for(std::chrono::milliseconds(400));
 
-    // --- Quick Flash (White) ---
-    attron(COLOR_PAIR(6) | A_BOLD); // White + Bold
+    attron(COLOR_PAIR(6) | A_BOLD); 
     mvprintw(midY - 1, startX, "%s", border_line.c_str());
     mvprintw(midY, startX, "%s", text_line.c_str());
     mvprintw(midY + 1, startX, "%s", border_line.c_str());
@@ -106,15 +98,14 @@ void Combat::endWin()
     refresh();
     std::this_thread::sleep_for(std::chrono::milliseconds(150));
 
-    // --- Hold Final (Green) ---
-    attron(COLOR_PAIR(2) | A_BOLD); // Green + Bold
+    attron(COLOR_PAIR(2) | A_BOLD); 
     mvprintw(midY - 1, startX, "%s", border_line.c_str());
     mvprintw(midY, startX, "%s", text_line.c_str());
     mvprintw(midY + 1, startX, "%s", border_line.c_str());
     attroff(COLOR_PAIR(2) | A_BOLD);
 
     refresh();
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // Hold
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000)); \
 
     flushinp();
 }
@@ -129,15 +120,13 @@ void Combat::endFlee()
     int midY = rows / 2;
     int midX = cols / 2;
 
-    // --- Define the text and border ---
     std::string text_line = "   You Retreated   ";
     std::string border_line = "-------------------";
     border_line.resize(text_line.length(), '-');
 
     int startX = midX - (text_line.length() / 2);
 
-    // --- Draw Box (Yellow) ---
-    attron(COLOR_PAIR(5)); // Yellow, no bold
+    attron(COLOR_PAIR(5)); 
     mvprintw(midY - 1, startX, "%s", border_line.c_str());
     mvprintw(midY, startX, "%s", text_line.c_str());
     mvprintw(midY + 1, startX, "%s", border_line.c_str());
@@ -252,8 +241,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world, AudioManager &audio)
         attroff(COLOR_PAIR(4));
         printw(" %d/%d", e.get_health(), e.get_max_health());
 
-        // === LOG ===
-        // ... (no changes to log)
         int startRow = msgRow - 2;
         int lineLen = 40;
         int startCol = (maxW - lineLen) / 2;
@@ -317,7 +304,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world, AudioManager &audio)
             continue;
         }
 
-        // --- NEW: KEYBOARD NORMAL ATTACK ---
         if (ch == 'j' || ch == 'J')
         {
             auto sinceNormal = duration_cast<milliseconds>(now - lastPlayerNormal).count();
@@ -351,7 +337,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world, AudioManager &audio)
             }
         }
 
-        // --- NEW: KEYBOARD SPECIAL ATTACK ---
         if (ch == 'l' || ch == 'L')
         {
             if (p.inventory.equippedWeapon->special)
@@ -400,7 +385,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world, AudioManager &audio)
             }
         }
 
-        // === MOUSE INPUT HANDLING ===
         if (ch == KEY_MOUSE)
         {
             if (nc_getmouse(&event) == OK)
@@ -531,7 +515,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world, AudioManager &audio)
 
     if (fled)
     {
-        // ... (no changes to end phase)
         result = 2;
         drawCombatState(endMsg);
         this_thread::sleep_for(milliseconds(1000));

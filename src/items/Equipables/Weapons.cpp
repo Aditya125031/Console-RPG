@@ -6,16 +6,6 @@
 
 using namespace std;
 
-// string Weapon::get_weapon_name()
-// {
-//     return weapon_name;
-// }
-
-// string Weapon::get_weapon_description()
-// {
-//     return weapon_description;
-// }
-
 double Weapon::cool()
 {
     return weapon_cooldown;

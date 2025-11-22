@@ -5,14 +5,14 @@
 #include <cstdlib>
 
 BoneGolem::BoneGolem()
-    : Enemy("Bone Golem", 350, 35) 
+    : Enemy("Bone Golem", 300, 30) 
 {
     
     dialogue.push_back("*CLACK... CLACK... RATTLE*");
     dialogue.push_back("*A hollow moan...*");
 }
 BoneGolem::BoneGolem(Player& player)
-    : Enemy("Bone Golem", 350, 20) 
+    : Enemy("Bone Golem", 300, 30) 
 {
      std::string playerType = player.get_type_string();
 
@@ -44,11 +44,11 @@ void BoneGolem::specialAbility(Character& target) {
     std::cout << get_name() << " uses 'Grave Harvest'!" << std::endl;
     std::cout << "It launches jagged bones at you and pulls in dark energy!\n";
 
-    int damage_amount = 55;
+    int damage_amount = 35;
     std::cout << get_name() << " strikes you for " << damage_amount << " damage!\n";
     target.take_damage(damage_amount);
 
-    int heal_amount = 140;
+    int heal_amount = 30;
     
     if (this->health < this->maxHealth) 
     {

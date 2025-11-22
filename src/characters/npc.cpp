@@ -14,7 +14,7 @@ std::vector<std::string> NPC::give_quest_orc_raider() {
     std::string prefix = getName() + ": ";
     return {
         prefix + "Orc Raiders are plundering the trade road to the south west. Find their hidden camp in the foothills and dispense justice.",
-        prefix + "It's time we cleared them out.'",
+        prefix + "It's time we cleared them out.",
     };
 }
 

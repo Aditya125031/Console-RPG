@@ -10,22 +10,135 @@
 using namespace std;
 using namespace std::chrono;
 
+#include <string>
+#include <thread>
+#include <chrono>
+
 void Combat::start()
 {
-    clearScreen();
-    mvprintw(0, 0, "=== Combat Started! ===");
+    clearScreen(); 
+    curs_set(0);
+
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols); 
+    int midY = rows / 2;
+    int midX = cols / 2;
+
+    std::string text = " FIGHT! ";
+    std::string horizontal_border = "===================="; 
+    std::string vertical_text = "||    FIGHT!    ||";      
+
+    horizontal_border.resize(vertical_text.length(), '=');
+
+    int startX = midX - (vertical_text.length() / 2);
+
+    attron(COLOR_PAIR(4) | A_BOLD); 
+    mvprintw(midY - 1, startX, "%s", horizontal_border.c_str());
+    mvprintw(midY, startX, "%s", vertical_text.c_str());
+    mvprintw(midY + 1, startX, "%s", horizontal_border.c_str());
+    attroff(COLOR_PAIR(4) | A_BOLD);
+
     refresh();
-    this_thread::sleep_for(milliseconds(700));
+    std::this_thread::sleep_for(std::chrono::milliseconds(400)); 
+
+    attron(COLOR_PAIR(6) | A_BOLD); 
+    mvprintw(midY - 1, startX, "%s", horizontal_border.c_str());
+    mvprintw(midY, startX, "%s", vertical_text.c_str());
+    mvprintw(midY + 1, startX, "%s", horizontal_border.c_str());
+    attroff(COLOR_PAIR(6) | A_BOLD);
+
+    refresh();
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+
+    attron(COLOR_PAIR(4) | A_BOLD); 
+    mvprintw(midY - 1, startX, "%s", horizontal_border.c_str());
+    mvprintw(midY, startX, "%s", vertical_text.c_str());
+    mvprintw(midY + 1, startX, "%s", horizontal_border.c_str());
+    attroff(COLOR_PAIR(4) | A_BOLD);
+
+    refresh();
+    std::this_thread::sleep_for(std::chrono::milliseconds(500)); 
+
+    flushinp(); 
+}
+
+void Combat::endWin()
+{
+    clearScreen();
+    curs_set(0);
+
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    int midY = rows / 2;
+    int midX = cols / 2;
+
+    std::string text_line = "|  Enemy Defeated!  |";
+    std::string border_line = "+===================+";
+    border_line.resize(text_line.length(), '=');
+    border_line[0] = '+';
+    border_line[border_line.length() - 1] = '+';
+
+    int startX = midX - (text_line.length() / 2);
+
+    attron(COLOR_PAIR(2) | A_BOLD); 
+    mvprintw(midY - 1, startX, "%s", border_line.c_str());
+    mvprintw(midY, startX, "%s", text_line.c_str());
+    mvprintw(midY + 1, startX, "%s", border_line.c_str());
+    attroff(COLOR_PAIR(2) | A_BOLD);
+
+    refresh();
+    std::this_thread::sleep_for(std::chrono::milliseconds(400));
+
+    attron(COLOR_PAIR(6) | A_BOLD); 
+    mvprintw(midY - 1, startX, "%s", border_line.c_str());
+    mvprintw(midY, startX, "%s", text_line.c_str());
+    mvprintw(midY + 1, startX, "%s", border_line.c_str());
+    attroff(COLOR_PAIR(6) | A_BOLD);
+
+    refresh();
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+
+    attron(COLOR_PAIR(2) | A_BOLD); 
+    mvprintw(midY - 1, startX, "%s", border_line.c_str());
+    mvprintw(midY, startX, "%s", text_line.c_str());
+    mvprintw(midY + 1, startX, "%s", border_line.c_str());
+    attroff(COLOR_PAIR(2) | A_BOLD);
+
+    refresh();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000)); \
+
     flushinp();
 }
 
-void Combat::end()
+void Combat::endFlee()
 {
-    mvprintw(2, 0, "\n=== Combat Ended! ===");
+    clearScreen();
+    curs_set(0);
+
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    int midY = rows / 2;
+    int midX = cols / 2;
+
+    std::string text_line = "   You Retreated   ";
+    std::string border_line = "-------------------";
+    border_line.resize(text_line.length(), '-');
+
+    int startX = midX - (text_line.length() / 2);
+
+    attron(COLOR_PAIR(5)); 
+    mvprintw(midY - 1, startX, "%s", border_line.c_str());
+    mvprintw(midY, startX, "%s", text_line.c_str());
+    mvprintw(midY + 1, startX, "%s", border_line.c_str());
+    attroff(COLOR_PAIR(5));
+
     refresh();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1200)); // Hold
+
+    flushinp();
 }
 
-int Combat::fight(Player &p, Enemy &e, Game &world)
+int Combat::fight(Player &p, Enemy &e, Game &world, AudioManager &audio)
 {
     start();
 
@@ -73,6 +186,7 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
         int msgRow = maxH / 2;
 
         // === PLAYER ===
+        // ... (no changes to player stats)
         mvprintw(2, leftCenter - 10, "=== PLAYER ===");
         mvprintw(3, leftCenter - 10, "%s", p.get_name().c_str());
 
@@ -104,6 +218,7 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
         mvprintw(7, leftCenter - 10, "Special CD: %.1fs", sCD);
 
         // === ENEMY ===
+        // ... (no changes to enemy stats)
         attron(COLOR_PAIR(4));
         mvprintw(2, rightCenter - 10, "=== ENEMY ===");
         mvprintw(3, rightCenter - 10, "%s", e.get_name().c_str());
@@ -126,7 +241,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
         attroff(COLOR_PAIR(4));
         printw(" %d/%d", e.get_health(), e.get_max_health());
 
-        // === LOG ===
         int startRow = msgRow - 2;
         int lineLen = 40;
         int startCol = (maxW - lineLen) / 2;
@@ -154,8 +268,8 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
         mvprintw(startRow + 4, startCol, "----------------------------------------");
 
         mvprintw(maxH - 5, 2, "[ CONTROLS ]");
-        mvprintw(maxH - 4, 2, "[L-CLICK] Normal Attack");
-        mvprintw(maxH - 3, 2, "[R-CLICK] Special Attack");
+        mvprintw(maxH - 4, 2, "[L-CLICK] / [J] Normal Attack");
+        mvprintw(maxH - 3, 2, "[R-CLICK] / [L] Special Attack");
         mvprintw(maxH - 2, 2, "[SPACE]   Flee Battle");
         mvprintw(maxH - 1, 2, "[I]       Inventory");
 
@@ -166,10 +280,10 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
     {
         auto now = steady_clock::now();
         int ch = getch();
-        MEVENT event; 
+        MEVENT event;
         if (ch == ' ')
         {
-            drawCombatState(p.get_name() + " flees from battle!");
+            drawCombatState(p.get_name() + " retreats!");
             this_thread::sleep_for(milliseconds(1000));
             flushinp();
             fled = true;
@@ -183,11 +297,93 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
             nodelay(stdscr, TRUE);
             noecho();
             curs_set(0);
-            mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL); 
+            mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
             if (!p.isAlive())
                 break;
             continue;
         }
+
+        if (ch == 'j' || ch == 'J')
+        {
+            auto sinceNormal = duration_cast<milliseconds>(now - lastPlayerNormal).count();
+            if (sinceNormal >= playerNormalInterval)
+            {
+                if (p.get_type_string() == "Swordsman")
+                {
+                    audio.playSFX("../data/audio/sword-normal.mp3");
+                }
+                else if (p.get_type_string() == "Archer")
+                {
+                    audio.playSFX("../data/audio/archer-normal.mp3");
+                }
+                else
+                {
+                    audio.playSFX("../data/audio/mage-normal.mp3");
+                }
+                e.take_damage(p.getAttackPower());
+                lastPlayerNormal = now;
+
+                char msg[100];
+                snprintf(msg, sizeof(msg), "%s strikes %s!", p.get_name().c_str(), e.get_name().c_str());
+                drawCombatState(std::string(msg));
+            }
+            else
+            {
+                char msg[100];
+                double left = (playerNormalInterval - sinceNormal) / 1000.0;
+                snprintf(msg, sizeof(msg), "Normal not ready! (%.1fs)", left);
+                drawCombatState(std::string(msg));
+            }
+        }
+
+        if (ch == 'l' || ch == 'L')
+        {
+            if (p.inventory.equippedWeapon->special)
+            {
+                auto sinceSpecial = duration_cast<milliseconds>(now - lastPlayerSpecial).count();
+                if (sinceSpecial >= playerSpecialInterval)
+                {
+                    char msg1[100];
+                    snprintf(msg1, sizeof(msg1), "%s accumulates POWER!", p.get_name().c_str());
+                    drawCombatState(std::string(msg1));
+                    this_thread::sleep_for(milliseconds(1000));
+
+                    if (p.get_type_string() == "Swordsman")
+                    {
+                        audio.playSFX("../data/audio/sword-special.mp3");
+                    }
+                    else if (p.get_type_string() == "Archer")
+                    {
+                        audio.playSFX("../data/audio/archer-special.mp3");
+                    }
+                    else
+                    {
+                        audio.playSFX("../data/audio/mage-special.mp3");
+                    }
+
+                    p.special_move(e);
+                    lastPlayerSpecial = now;
+
+                    char msg[100];
+                    snprintf(msg, sizeof(msg), "%s uses SPECIAL!", p.get_name().c_str());
+                    drawCombatState(std::string(msg));
+                }
+                else
+                {
+                    char msg[100];
+                    double left = (playerSpecialInterval - sinceSpecial) / 1000.0;
+                    snprintf(msg, sizeof(msg), "Special recharging! (%.1fs)", left);
+                    drawCombatState(std::string(msg));
+                }
+            }
+            else
+            {
+                char msg[100];
+                snprintf(msg, sizeof(msg), "No Special Attack!");
+                drawCombatState(std::string(msg));
+            }
+        }
+
         if (ch == KEY_MOUSE)
         {
             if (nc_getmouse(&event) == OK)
@@ -198,13 +394,24 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
                     auto sinceNormal = duration_cast<milliseconds>(now - lastPlayerNormal).count();
                     if (sinceNormal >= playerNormalInterval)
                     {
+                        if (p.get_type_string() == "Swordsman")
+                        {
+                            audio.playSFX("../data/audio/sword-normal.mp3");
+                        }
+                        else if (p.get_type_string() == "Archer")
+                        {
+                            audio.playSFX("../data/audio/archer-normal.mp3");
+                        }
+                        else
+                        {
+                            audio.playSFX("../data/audio/mage-normal.mp3");
+                        }
                         e.take_damage(p.getAttackPower());
                         lastPlayerNormal = now;
 
                         char msg[100];
                         snprintf(msg, sizeof(msg), "%s strikes %s!", p.get_name().c_str(), e.get_name().c_str());
                         drawCombatState(std::string(msg));
-
                     }
                     else
                     {
@@ -221,6 +428,24 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
                         auto sinceSpecial = duration_cast<milliseconds>(now - lastPlayerSpecial).count();
                         if (sinceSpecial >= playerSpecialInterval)
                         {
+                            char msg1[100];
+                            snprintf(msg1, sizeof(msg1), "%s accumulates POWER!", p.get_name().c_str());
+                            drawCombatState(std::string(msg1));
+                            this_thread::sleep_for(milliseconds(1000));
+
+                            if (p.get_type_string() == "Swordsman")
+                            {
+                                audio.playSFX("../data/audio/sword-special.mp3");
+                            }
+                            else if (p.get_type_string() == "Archer")
+                            {
+                                audio.playSFX("../data/audio/archer-special.mp3");
+                            }
+                            else
+                            {
+                                audio.playSFX("../data/audio/mage-special.mp3");
+                            }
+
                             p.special_move(e);
                             lastPlayerSpecial = now;
 
@@ -236,10 +461,11 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
                             drawCombatState(std::string(msg));
                         }
                     }
-                    else{
+                    else
+                    {
                         char msg[100];
-                            snprintf(msg, sizeof(msg), "No Special Attack!");
-                            drawCombatState(std::string(msg));
+                        snprintf(msg, sizeof(msg), "No Special Attack!");
+                        drawCombatState(std::string(msg));
                     }
                 }
             }
@@ -256,7 +482,7 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
             if (isSpecialEnemy && enemyTurnCount % 3 == 0)
             {
                 drawCombatState(e.get_name() + " gathers power...");
-                this_thread::sleep_for(milliseconds(600));
+                this_thread::sleep_for(milliseconds(1000));
 
                 e.specialAbility(p);
 
@@ -283,26 +509,33 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
         drawCombatState("");
     }
     int result = 0;
-    std::string endMsg;
+    std::string endMsg = "";
 
     if (fled)
     {
-        endMsg = p.get_name() + " fled successfully!";
         result = 2;
+        drawCombatState(endMsg);
+        this_thread::sleep_for(milliseconds(1000));
+        flushinp();
+        endFlee();
     }
     else if (p.isAlive())
     {
         endMsg = p.get_name() + " defeats " + e.get_name() + "!";
+        drawCombatState(endMsg);
+        this_thread::sleep_for(milliseconds(1000));
+        flushinp();
         result = 1;
+        endWin();
     }
     else
     {
         endMsg = p.get_name() + " has fallen in battle...";
+        drawCombatState(endMsg);
+        this_thread::sleep_for(milliseconds(2000));
+        flushinp();
         result = 0;
     }
-
-    drawCombatState(endMsg);
-    end();
 
     nodelay(stdscr, FALSE);
     echo();
@@ -310,7 +543,6 @@ int Combat::fight(Player &p, Enemy &e, Game &world)
 
     return result;
 }
-
 void Combat::clearScreen()
 {
     clear();

@@ -21,6 +21,7 @@
 #include "../include/stoneimp.h"
 #include "../include/final_boss.h"
 #include "../include/npc.h"
+#include "../include/gatekeeper.h"
 using namespace std;
 
 
@@ -116,11 +117,23 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_characterOnTile = simp;
             m_isWalkable = false;
         }
+        else if(displayChar=="GK"){
+            m_mapDisplayChar = "."; 
+            m_miniMapDisplayChar = "⛨"; 
+            
+            m_colorPairMap = 6;
+            m_colorPairMiniMap = 5; 
+
+            Character* gk = new Gate_Keeper(player);
+            m_characterOnTile = gk;
+            m_isWalkable = false;
+            requiredQuestCompleted = 0;
+        }
         else if(displayChar=="QGW1"){
             m_mapDisplayChar = "."; 
             m_miniMapDisplayChar = "Ö";
             m_colorPairMap = 6;
-            m_colorPairMiniMap = 4; 
+            m_colorPairMiniMap = 5; 
             Character* warchief = new GoblinWarChief(player);
             m_characterOnTile = warchief;
             m_isWalkable = false;
@@ -130,7 +143,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_mapDisplayChar = "."; 
             m_miniMapDisplayChar = "Ö";
             m_colorPairMap = 6;
-            m_colorPairMiniMap = 4; 
+            m_colorPairMiniMap = 5; 
             Character* orc = new OrcRaider(player);
             m_characterOnTile = orc;
             requiredQuestCompleted = 0;
@@ -168,7 +181,7 @@ Tile::Tile(Player& player, vector<bool>& quest, string displayChar, int x, int y
             m_characterOnTile =necm;
             requiredQuestCompleted = 3;
             m_isWalkable = false;
-            doQuest=4;
+            doQuest=0;
         }
         else if(displayChar=="QFB"){
             m_mapDisplayChar = "."; 
@@ -280,6 +293,7 @@ void Tile::set_doQuest(int a){
 bool Tile::get_isNPC(){
     return isNPC;
 }
+
 
 vector<std::shared_ptr<Item>>* Tile::getLootOnTile(){
     return m_lootOnTile;

@@ -9,7 +9,6 @@ LichLord::LichLord()
   
 }
 LichLord::LichLord(Player& player)
-    // Final Boss stats
     : Enemy("Lich Lord", 300, 30) 
 {
     std::string playerType = player.get_type_string();

@@ -16,6 +16,6 @@ void Enemy::setNormalAttackInterval(double sec) {
     return;
 }
 void Enemy::setNormalAttackCooldown(float seconds) {
-    this->normal_attack_ready = std::chrono::steady_clock::now() +  // Assign to the variable
-        std::chrono::microseconds(static_cast<int>(seconds * 2000000)); // 1.0 second
+    this->normal_attack_ready = std::chrono::steady_clock::now() + 
+        std::chrono::microseconds(static_cast<int>(seconds * 2000000)); 
 }

@@ -1,6 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
-#define SDL_MAIN_HANDLED // <--- ADD THIS LINE FIRST
+#define SDL_MAIN_HANDLED 
 #include "../include/audiomanager.h"
 #include <iostream>
 #include <string>
@@ -9,29 +9,28 @@
 #include<cmath>
 #include <limits>
 #include <chrono>
-#include <cstdlib> // Required for std::system
+#include <cstdlib> 
 #include "player.h" 
 #include "map.h"
 #include "NPC.h"
 #include "inventory.hpp"
 
-//class AudioManager; // Forward declaration
-
 using namespace std;
 struct DisplayItem {
-    string displayName; // "Old Sword (Equipped)"
-    string itemID;      // "EQUIPPED_WEAPON" or "Small Health Potion"
-    string type;        // "WEAPON", "ARMOR", "POTION"
+    string displayName; 
+    string itemID;  
+    string type;    
     string description;
 };
 class Game
 {
     private:
         std::deque<std::string> event_log;
-        const size_t MAX_LOG_LINES = 10;
+        const size_t MAX_LOG_LINES = 15;
         std::string current_dialogue_message = "";
         std::vector<std::string> current_dialogue_lines;
         std::vector<std::string> wrap_text(const std::string& text, int max_width);
+        std::vector<std::string> wrap_text_v2(const std::string& text, int max_width);
         std::chrono::steady_clock::time_point lastHpRegenTime;
         std::chrono::steady_clock::time_point lastManaRegenTime;
     public:
@@ -43,7 +42,6 @@ class Game
         void display_dashboard(Player& player, Map& map); // New render function
         void show_full_map(Map& map);
         void move_character(Character&, int, int, Map&, vector<bool>&, AudioManager& audio,Player& player);
-        void runItemActionMenu(DisplayItem, Player&, Game&);
         void runInventoryMenu(Player&, Game&);
         void show_dialogue_message(const std::string& message); // <-- CORRECT
         void clear_dialogue_message();
@@ -53,6 +51,8 @@ class Game
         NPC hattori;
         std::vector<std::shared_ptr<Item>>runLootMenu(Player& player, std::vector<std::shared_ptr<Item>>& lootBox);
         bool showGameOverScreen(AudioManager &audio);
+        void draw_box(int y, int x, int w, int h);
+        void mvprintw_center(int y, const std::string &text);
 };
 
 

@@ -8,9 +8,12 @@
 #include <chrono>
 #include <sstream>
 #include "../extern/pdcurses/curses.h"
+// REMOVE: #include <iostream>
+// REMOVE: #include <windows.h>
 
 using namespace std;
 
+// Your project headers (kept for completeness)
 #include "../include/combat.hpp"
 #include "../include/inventory.hpp"
 #include "../include/game.h"
@@ -22,7 +25,7 @@ using namespace std;
 #include "../include/goblin.h"
 #include "../include/npc.h"
 
-class AudioManager; 
+class AudioManager; // Forward declaration
 
 struct CreditLine
 {
@@ -173,6 +176,7 @@ void Game::play_cinematic_dialogue(const std::vector<std::string> &lines)
 
 void Game::show_dialogue_message(const std::string &message)
 {
+    // This function just sets the message that will be drawn by the dashboard
     int term_width, term_height;
     getmaxyx(stdscr, term_height, term_width);
     int dialogue_width = term_width - 10;
@@ -180,6 +184,7 @@ void Game::show_dialogue_message(const std::string &message)
         dialogue_width = 20;
     std::vector<std::string> wrapped_lines = wrap_text(message, dialogue_width);
 
+    // 2. Add the wrapped lines to the CORRECT vector
     current_dialogue_lines.insert(current_dialogue_lines.end(), wrapped_lines.begin(), wrapped_lines.end());
 }
 
@@ -207,6 +212,7 @@ std::vector<DisplayItem> Game::buildPlayerItemList(Player &player)
                            "EQUIPPED_ARMOR", "ARMOR", player.inventory.equippedArmor->get_item_description() + " \nExtra Health : " + to_string(player.inventory.equippedArmor->get_armor_health()) + "\nExtra Mana : " + to_string(player.inventory.equippedArmor->get_armor_mana()) + "\n"});
     }
 
+    // 2. Add Bag Items (using public members)
     if (player.inventory.inventoryWeapon)
     {
         itemMap.push_back({player.inventory.inventoryWeapon->get_item_name() + " (Bag)",
@@ -459,6 +465,7 @@ vector<shared_ptr<Item>> Game::runLootMenu(Player &player,
 
         refresh();
 
+        // --- 6. Handle Input (MODIFIED with WRAPPING) ---
         int ch = getch();
         switch (ch)
         {
@@ -720,8 +727,9 @@ void Game::display_dashboard(Player &player, Map &map)
     int left_padding = max(0, (term_width - full_len) / 2);
     int row = 0;
 
+    // Print the title centered at row 0
     mvprintw(row, left_padding, "%s", title_prefix.c_str());
-    attron(COLOR_PAIR(4) | A_BOLD); 
+    attron(COLOR_PAIR(4) | A_BOLD); // Red for "DEFEATED"
     printw("%s", title_red.c_str());
     attroff(COLOR_PAIR(4) | A_BOLD);
     printw("%s", title_suffix.c_str());
@@ -748,6 +756,7 @@ void Game::display_dashboard(Player &player, Map &map)
     attroff(COLOR_PAIR(2));
     row++;
 
+    // 4. Mana
     mvprintw(row, 0, " Mana: ");
     attron(COLOR_PAIR(1));
  
@@ -784,6 +793,7 @@ void Game::display_dashboard(Player &player, Map &map)
     int i = 0;
     for (const std::string &line : current_dialogue_lines)
     {
+        // Center each line individually
         int start_x = (term_width - line.length()) / 2;
         if (start_x < 0)
         {
@@ -803,6 +813,7 @@ std::vector<std::string> Game::wrap_text(const std::string &text, int max_width)
 
     while (ss >> word)
     {
+        // Check if the new word fits on the current line
         if (current_line.empty() || current_line.length() + word.length() + 1 <= max_width)
         {
             if (!current_line.empty())
@@ -813,10 +824,12 @@ std::vector<std::string> Game::wrap_text(const std::string &text, int max_width)
         }
         else
         {
+            // Word doesn't fit, so push the current line and start a new one
             lines.push_back(current_line);
             current_line = word;
         }
     }
+    // Add the last line
     if (!current_line.empty())
     {
         lines.push_back(current_line);
@@ -844,6 +857,7 @@ void Game::play_dialogue(const std::vector<std::string> &lines, Player &player, 
         current_dialogue_lines.push_back(line);
         display_dashboard(player, map);
         getch();
+        // --- END OF NEW LOGIC ---
     }
 }
 
@@ -1278,6 +1292,7 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
 {
     add_log_message("You entered the forest.");
 
+    // 1. Start in Non-Blocking Mode (Real-time)
     nodelay(stdscr, TRUE);
 
     lastHpRegenTime = std::chrono::steady_clock::now();
@@ -1288,6 +1303,7 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
     {
         auto now = std::chrono::steady_clock::now();
 
+        // --- HP REGEN LOGIC ---
         auto elapsedHpSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - lastHpRegenTime).count();
         int hpInterval = player.getHPRegenTime(); 
 
@@ -1302,6 +1318,7 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
             lastHpRegenTime = now;
         }
 
+        // --- MANA REGEN LOGIC ---
         auto elapsedManaSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - lastManaRegenTime).count();
         int manaInterval = player.getManaRegenTime();
 
@@ -1383,6 +1400,7 @@ void Game::explore_forest(Player &player, Map &map, vector<bool> &quest, AudioMa
         flushinp();
     }
 
+    // Cleanup: Ensure blocking is ON when leaving the function
     nodelay(stdscr, FALSE);
 }
 
@@ -1589,7 +1607,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
 
             play_dialogue(dialogue_lines, player, map);
 
-            return; 
+            return; // Stop the move
         }
         if (!newTile->getQuestStatus(quest))
         {
@@ -1634,6 +1652,7 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
 
             if (k == 0)
             {
+                // Show the bloody screen
                 bool retry = showGameOverScreen(audio);
                 audio.playMusic("../data/audio/sacred-garden-10377.mp3");
                 if (retry)
@@ -1649,11 +1668,12 @@ void Game::move_character(Character &entity, int x, int y, Map &map, vector<bool
                 }
                 else
                 {
+                    // === OPTION 2: EXIT ===
                     clear();
                     mvprintw(rows / 2, (cols - 20) / 2, "Farewell, fallen hero...");
                     refresh();
-                    napms(2000); 
-                    exit(0);    
+                    napms(2000); // Wait 2 seconds
+                    exit(0);     // Close the program
                 }
             }
             else if (k == 1)

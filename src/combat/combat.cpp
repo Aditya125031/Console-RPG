@@ -272,6 +272,7 @@ int Combat::fight(Player &p, Enemy &e, Game &world, AudioManager &audio)
         mvprintw(maxH - 3, 2, "[R-CLICK] / [L] Special Attack");
         mvprintw(maxH - 2, 2, "[SPACE]   Flee Battle");
         mvprintw(maxH - 1, 2, "[I]       Inventory");
+        // --- END MODIFICATION ---
 
         refresh();
     };
@@ -473,6 +474,7 @@ int Combat::fight(Player &p, Enemy &e, Game &world, AudioManager &audio)
         auto sinceEnemy = duration_cast<milliseconds>(now - lastEnemyAction).count();
         if (sinceEnemy >= enemyIntervalMs && e.isAlive())
         {
+            // ... (no changes to enemy logic)
             enemyTurnCount++;
             bool isSpecialEnemy =
                 (typeid(e) == typeid(BoneGolem) ||
@@ -521,6 +523,7 @@ int Combat::fight(Player &p, Enemy &e, Game &world, AudioManager &audio)
     }
     else if (p.isAlive())
     {
+        // ... (no changes to end phase)
         endMsg = p.get_name() + " defeats " + e.get_name() + "!";
         drawCombatState(endMsg);
         this_thread::sleep_for(milliseconds(1000));
@@ -530,6 +533,7 @@ int Combat::fight(Player &p, Enemy &e, Game &world, AudioManager &audio)
     }
     else
     {
+        // ... (no changes to end phase)
         endMsg = p.get_name() + " has fallen in battle...";
         drawCombatState(endMsg);
         this_thread::sleep_for(milliseconds(2000));

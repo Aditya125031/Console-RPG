@@ -107,6 +107,7 @@ Player create_player(Game &game_world)
 
     curs_set(0);
 
+    // --- Phase 2: Class Selection ---
     PlayerType playerType;
     int choice = 0;
     bool classSelected = false;
